@@ -82,7 +82,7 @@ cd code-review-tester-app
 yarn test
 ```
 
-**Note**: Currently, there are no tests implemented yet. Test infrastructure will be added as the project develops.
+**Note**: No tests are implemented yet. Test infrastructure will be added as the project develops.
 
 ## Contributing
 
@@ -106,7 +106,7 @@ We welcome contributions to the Code Review Tester project! Here's how you can h
 - Follow standard C# naming conventions
 - Use meaningful variable and method names
 - Write XML documentation for public APIs
-- Follow SOLID principles
+- Follow [SOLID principles](https://en.wikipedia.org/wiki/SOLID)
 - Use dependency injection where appropriate
 
 #### Frontend (React/TypeScript)
