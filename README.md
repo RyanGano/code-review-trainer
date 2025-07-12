@@ -47,7 +47,7 @@ This repository contains both the backend service and frontend application for t
 3. Set up the frontend application:
    ```bash
    cd ../code-review-tester-app
-   npm install
+   yarn install
    ```
 
 ### Running the Application
@@ -63,7 +63,7 @@ The API will be available at `http://localhost:5000` (or as configured).
 #### Frontend Application
 ```bash
 cd code-review-tester-app
-npm start
+yarn start
 ```
 
 The application will be available at `http://localhost:3000` (or as configured).
@@ -79,7 +79,7 @@ dotnet test
 ### Frontend Tests
 ```bash
 cd code-review-tester-app
-npm test
+yarn test
 ```
 
 **Note**: Currently, there are no tests implemented yet. Test infrastructure will be added as the project develops.
