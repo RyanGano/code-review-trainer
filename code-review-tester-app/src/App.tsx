@@ -28,8 +28,8 @@ function App() {
             </div>
             
             <div className="feature">
-              <h3>📈 Get Expert Feedback</h3>
-              <p>Receive detailed evaluation of your reviews with tips for improvement and insights you may have missed.</p>
+              <h3>📈 Get AI Feedback</h3>
+              <p>Receive detailed AI-powered evaluation of your reviews with tips for improvement and insights you may have missed.</p>
             </div>
           </div>
           
