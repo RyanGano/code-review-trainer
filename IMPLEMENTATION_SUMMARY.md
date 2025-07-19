@@ -7,8 +7,8 @@ This implementation adds secure Microsoft Authentication Library (MSAL) authenti
 ## Key Features
 
 ### 🔐 Authentication & Security
-- **Azure AD Integration**: Uses Microsoft's MSAL libraries for secure authentication
-- **JWT Bearer Authentication**: Backend validates JWT tokens from Azure AD
+- **Microsoft Entra ID Integration**: Uses Microsoft's MSAL libraries for secure authentication
+- **JWT Bearer Authentication**: Backend validates JWT tokens from Microsoft Entra ID
 - **No Hardcoded Secrets**: All sensitive configuration uses environment variables
 - **Azure Key Vault Ready**: Production configuration supports Key Vault integration
 - **CORS Protection**: Properly configured CORS between frontend and backend
@@ -23,7 +23,7 @@ This implementation adds secure Microsoft Authentication Library (MSAL) authenti
 - **Environment Variables**: Clear configuration through .env files
 - **Type Safety**: Full TypeScript support with proper type definitions
 - **Linting**: Code passes all ESLint checks
-- **Documentation**: Comprehensive setup guide for Azure AD configuration
+- **Documentation**: Comprehensive setup guide for Microsoft Entra ID configuration
 
 ## Backend Implementation
 
@@ -33,7 +33,7 @@ This implementation adds secure Microsoft Authentication Library (MSAL) authenti
 
 ### Key Changes
 - **Program.cs**: Added JWT Bearer authentication and CORS configuration
-- **appsettings.json**: Azure AD configuration structure
+- **appsettings.json**: Microsoft Entra ID configuration structure
 - **Endpoints**: 
   - `/` - Protected endpoint (requires authentication)
   - `/user` - Returns authenticated user information and claims
@@ -82,7 +82,7 @@ This implementation adds secure Microsoft Authentication Library (MSAL) authenti
 
 ## Next Steps for Production
 
-1. **Azure AD Setup**: Follow `AZURE_AD_SETUP.md` to configure Azure AD application
+1. **Microsoft Entra ID Setup**: Follow `AZURE_AD_SETUP.md` to configure Microsoft Entra ID application
 2. **Environment Configuration**: Set up production environment variables
 3. **Key Vault Integration**: Configure Azure Key Vault for production secrets
 4. **Domain Configuration**: Update redirect URIs for production domains

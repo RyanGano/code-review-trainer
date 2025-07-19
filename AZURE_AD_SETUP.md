@@ -1,15 +1,15 @@
-# Azure AD Authentication Setup Guide
+# Microsoft Entra ID Authentication Setup Guide
 
-This application uses Microsoft Authentication Library (MSAL) to provide secure authentication through Azure Active Directory (Azure AD). This guide will help you configure Azure AD and integrate Azure Key Vault for secure credential management.
+This application uses Microsoft Authentication Library (MSAL) to provide secure authentication through Microsoft Entra ID (formerly Azure Active Directory). This guide will help you configure Microsoft Entra ID and integrate Azure Key Vault for secure credential management.
 
 ## Prerequisites
 
 - Azure subscription
-- Azure AD tenant
-- Application registration in Azure AD
+- Microsoft Entra ID tenant
+- Application registration in Microsoft Entra ID
 - Azure Key Vault (for production environments)
 
-## Step 1: Azure AD Application Registration
+## Step 1: Microsoft Entra ID Application Registration
 
 1. Navigate to the [Azure Portal](https://portal.azure.com/)
 2. Go to **Azure Active Directory** > **App registrations**
@@ -64,7 +64,7 @@ After registration, note down:
 ### Development Environment
 
 1. Copy `.env.example` to `.env.local` in the frontend directory
-2. Fill in your Azure AD details:
+2. Fill in your Microsoft Entra ID details:
 
 ```bash
 VITE_AZURE_TENANT_ID=your-tenant-id
@@ -140,7 +140,7 @@ For production, use Key Vault references in your `appsettings.json`:
 
 3. Navigate to `http://localhost:5173`
 4. You should see the authentication prompt
-5. Sign in with your Azure AD account
+5. Sign in with your Microsoft Entra ID account
 6. After successful authentication, you should see user information and be able to call the protected API
 
 ### Verification Steps
@@ -154,16 +154,16 @@ For production, use Key Vault references in your `appsettings.json`:
 
 1. **Never commit secrets**: Always use environment variables or Key Vault
 2. **Use HTTPS in production**: Ensure all URLs use HTTPS in production
-3. **Validate tokens**: The backend validates JWT tokens from Azure AD
+3. **Validate tokens**: The backend validates JWT tokens from Microsoft Entra ID
 4. **Minimal permissions**: Only request the permissions your application needs
 5. **Regular rotation**: Regularly rotate secrets and certificates
-6. **Monitor access**: Use Azure AD logs to monitor authentication attempts
+6. **Monitor access**: Use Microsoft Entra ID logs to monitor authentication attempts
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Redirect URI mismatch**: Ensure redirect URIs in Azure AD match your application URLs
+1. **Redirect URI mismatch**: Ensure redirect URIs in Microsoft Entra ID match your application URLs
 2. **CORS errors**: Check CORS configuration in the backend
 3. **Token validation errors**: Verify tenant ID and client ID configuration
 4. **Popup blocked**: Users may need to allow popups for authentication
@@ -171,5 +171,5 @@ For production, use Key Vault references in your `appsettings.json`:
 ### Useful Resources
 
 - [MSAL.js Documentation](https://docs.microsoft.com/en-us/azure/active-directory/develop/msal-overview)
-- [Azure AD App Registration Guide](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app)
+- [Microsoft Entra ID App Registration Guide](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app)
 - [Azure Key Vault Integration](https://docs.microsoft.com/en-us/azure/key-vault/general/overview)
