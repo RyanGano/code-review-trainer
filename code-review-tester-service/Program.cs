@@ -5,28 +5,15 @@ var app = builder.Build();
 
 app.MapGet("/", () => "I'm ALIVE!");
 
-app.MapGet("/tests/", (string? level) => 
+app.MapGet("/tests/", (DifficultyLevel? level) => 
 {
     // If no level is provided, return all available levels
-    if (string.IsNullOrEmpty(level))
+    if (level == null)
     {
-        return Results.Ok(new[] { "Easy", "Medium", "Hard", "Extra Hard" });
+        return Results.Ok(Enum.GetNames<DifficultyLevel>());
     }
 
-    // Validate the level parameter
-    if (!Enum.TryParse<DifficultyLevel>(level.Replace(" ", ""), true, out var parsedLevel))
-    {
-        return Results.BadRequest($"Invalid level '{level}'. Valid levels are: Easy, Medium, Hard, Extra Hard");
-    }
-
-    // Convert enum back to display format
-    string displayLevel = parsedLevel switch
-    {
-        DifficultyLevel.ExtraHard => "Extra Hard",
-        _ => parsedLevel.ToString()
-    };
-
-    return Results.Ok($"Test level: {displayLevel}");
+    return Results.Ok($"Test level: {level}");
 })
 .WithName("GetTests");
 
