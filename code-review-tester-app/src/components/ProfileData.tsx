@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useMsal } from "@azure/msal-react";
 import { apiConfig } from "../authConfig";
 
@@ -14,7 +14,7 @@ const ProfileData = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const fetchUserInfo = async () => {
+    const fetchUserInfo = useCallback(async () => {
         if (accounts.length === 0) {
             return;
         }
@@ -48,13 +48,13 @@ const ProfileData = () => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [instance, accounts]);
 
     useEffect(() => {
         if (accounts.length > 0) {
             fetchUserInfo();
         }
-    }, [accounts]);
+    }, [accounts, fetchUserInfo]);
 
     if (accounts.length === 0) {
         return <div>No user signed in</div>;

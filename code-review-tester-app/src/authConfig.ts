@@ -42,5 +42,5 @@ export const graphConfig = {
  */
 export const apiConfig = {
     b2cScopes: [`api://${import.meta.env.VITE_AZURE_CLIENT_ID || "YOUR_CLIENT_ID"}/access_as_user`],
-    webApi: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000"
+    webApi: import.meta.env.VITE_API_BASE_URL || "http://localhost:5137"
 };
