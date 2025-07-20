@@ -65,7 +65,7 @@ return (price*d).ToString();
         Console.WriteLine(i);
         i++;
         break;
-        Console.WriteLine(""This will never print"");
+        Console.WriteLine($""New value: {i}"");
     }
 }",
 
