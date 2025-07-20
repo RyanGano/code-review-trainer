@@ -7,16 +7,18 @@ An AI-assisted tool for improving code review skills. This tool allows people to
 This repository contains both the backend service and frontend application for the Code Review Tester tool:
 
 - **Backend (code-review-tester-service)**: Built with C# using minimal API
-- **Frontend (code-review-tester-app)**: Built with React and TypeScript
+- **Frontend (code-review-trainer-app)**: Built with React and TypeScript
 
 ## Technology Stack
 
 ### Backend
+
 - **Language**: C#
 - **Framework**: .NET with minimal API
 - **Architecture**: RESTful API service
 
 ### Frontend
+
 - **Language**: TypeScript
 - **Framework**: React
 - **Build Tool**: Modern React tooling
@@ -32,12 +34,14 @@ This repository contains both the backend service and frontend application for t
 ### Installation
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/RyanGano/code-review-tester.git
    cd code-review-tester
    ```
 
 2. Set up the backend service:
+
    ```bash
    cd code-review-tester-service
    dotnet restore
@@ -46,13 +50,14 @@ This repository contains both the backend service and frontend application for t
 
 3. Set up the frontend application:
    ```bash
-   cd ../code-review-tester-app
+   cd ../code-review-trainer-app
    yarn install
    ```
 
 ### Running the Application
 
 #### Backend Service
+
 ```bash
 cd code-review-tester-service
 dotnet run
@@ -61,9 +66,10 @@ dotnet run
 The API will be available at `http://localhost:5000` (or as configured).
 
 #### Frontend Application
+
 ```bash
-cd code-review-tester-app
-yarn start
+cd code-review-trainer-app
+yarn dev [--host]
 ```
 
 The application will be available at `http://localhost:3000` (or as configured).
@@ -71,14 +77,16 @@ The application will be available at `http://localhost:3000` (or as configured).
 ## Testing
 
 ### Backend Tests
+
 ```bash
 cd code-review-tester-service
 dotnet test
 ```
 
 ### Frontend Tests
+
 ```bash
-cd code-review-tester-app
+cd code-review-trainer-app
 yarn test
 ```
 
@@ -103,6 +111,7 @@ We welcome contributions to the Code Review Tester project! Here's how you can h
 ### Coding Standards
 
 #### Backend (C#)
+
 - Follow standard C# naming conventions
 - Use meaningful variable and method names
 - Write XML documentation for public APIs
@@ -110,6 +119,7 @@ We welcome contributions to the Code Review Tester project! Here's how you can h
 - Use dependency injection where appropriate
 
 #### Frontend (React/TypeScript)
+
 - Use TypeScript for all new code
 - Follow React best practices and hooks patterns
 - Use meaningful component and variable names
