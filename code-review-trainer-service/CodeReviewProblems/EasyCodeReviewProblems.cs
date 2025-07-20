@@ -44,7 +44,7 @@ Console.WriteLine(""Invalid order"");
     int x = 18;
     if (age > x)
     {
-        return false; // Should return true for adults
+        return false;
     }
     return true;
 }",
@@ -77,7 +77,7 @@ if(arr[i]>max){
 max=arr[i];
 }
 }
-return max; // Will throw exception if array is null or empty
+return max;
 }",
 
         // Problem 7: Confusing logic + bad variable names
@@ -88,7 +88,7 @@ return max; // Will throw exception if array is null or empty
     {
         x = true;
     }
-    return x; // Logic is reversed
+    return x;
 }",
 
         // Problem 8: Bad variable names + bad formatting
@@ -110,14 +110,14 @@ Console.WriteLine(t);
     {
         return x - y;
     }
-    return 0; // Unreachable
+    return 0;
 }",
 
         // Problem 10: Bad variable names + failing logic
         @"public double CalculateArea(double r)
 {
     double pi = 3.14;
-    double a = pi * r; // Missing r squared
+    double a = pi * r;
     return a;
 }",
 
@@ -146,7 +146,7 @@ return pwd.Length>=8&&pwd.Length<=20?true:false;
         @"public string FormatName(string firstName,string lastName){
 if(firstName==null)firstName="""";
 if(lastName==null)lastName="""";
-return firstName+"" ""+lastName; // Extra space when firstName is empty
+return firstName+"" ""+lastName;
 }",
 
         // Problem 14: Confusing logic + bad variable names
@@ -157,7 +157,7 @@ return firstName+"" ""+lastName; // Extra space when firstName is empty
     {
         if (i != null)
         {
-            c--;  // Should be increment
+            c--;
         }
     }
     return c;
@@ -180,7 +180,7 @@ SaveRecord(r);
         throw new DivideByZeroException();
         Console.WriteLine(""Division by zero attempted"");
     }
-    return x / y; // Still can throw if y is 0 and exception is caught
+    return x / y;
 }",
 
         // Problem 17: Bad variable names + confusing logic
@@ -195,13 +195,13 @@ SaveRecord(r);
     {
         r = true;
     }
-    return !r; // Confusing double negation
+    return !r;
 }",
 
         // Problem 18: Bad formatting + failing logic
         @"public List<int>GetEvenNumbers(int[]numbers){
 List<int>result=new List<int>();
-for(int i=0;i<=numbers.Length;i++){ // Off by one error
+for(int i=0;i<=numbers.Length;i++){
 result.Add(numbers[i]);
 }
 return result;
@@ -216,7 +216,7 @@ return result;
     else if (score >= 60) return ""D"";
     else return ""F"";
     
-    Console.WriteLine(""Grade calculated""); // Unreachable
+    Console.WriteLine(""Grade calculated"");
 }",
 
         // Problem 20: Bad variable names + bad formatting
@@ -228,7 +228,7 @@ return t>0?t:0;
         // Problem 21: Failing logic + confusing logic
         @"public bool IsPrime(int number)
 {
-    if (number <= 1) return true; // Should be false
+    if (number <= 1) return true;
     for (int i = 2; i < number; i++)
     {
         if (number % i == 0)
@@ -257,7 +257,7 @@ return t>0?t:0;
 if(num<0){
 return num*-1;
 }else{
-return num>0?num:1; // Returns 1 for 0 instead of 0
+return num>0?num:1;
 }
 }",
 
@@ -265,7 +265,7 @@ return num>0?num:1; // Returns 1 for 0 instead of 0
         @"public string ReverseString(string str)
 {
     string r = """";
-    for (int i = str.Length; i >= 0; i--) // Off by one error
+    for (int i = str.Length; i >= 0; i--)
     {
         r += str[i];
     }
@@ -277,7 +277,7 @@ return num>0?num:1; // Returns 1 for 0 instead of 0
 int n=a.Length;
 for(int i=0;i<n-1;i++){
 for(int j=0;j<n-i-1;j++){
-if(a[j]<a[j+1]){ // Wrong comparison for ascending sort
+if(a[j]<a[j+1]){
 int temp=a[j];
 a[j]=a[j+1];a[j+1]=temp;
 }
