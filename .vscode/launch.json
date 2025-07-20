@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": ".NET Debug code-review-tester-service",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/code-review-tester-service/bin/Debug/net8.0/code-review-tester-service.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/code-review-tester-service",
+      "stopAtEntry": false,
+      "console": "internalConsole",
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      }
+    }
+  ]
+}

@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Identity.Web;
 
@@ -32,8 +31,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // Endpoints
-app.MapGet("/", () => "I'm ALIVE!")
-    .RequireAuthorization();
+app.MapGet("/", () => "I'm ALIVE!");
 
 app.MapGet("/user", (HttpContext context) =>
 {
