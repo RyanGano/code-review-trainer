@@ -283,6 +283,119 @@ a[j]=a[j+1];a[j+1]=temp;
 }
 }
 }
+}",
+
+        // === GOOD CODE EXAMPLES (no issues to fix) ===
+        
+        // Good Example 1: Well-written calculator with proper naming and formatting
+        @"public class Calculator
+{
+    public double Add(double firstNumber, double secondNumber)
+    {
+        return firstNumber + secondNumber;
+    }
+    
+    public double Multiply(double firstNumber, double secondNumber)
+    {
+        return firstNumber * secondNumber;
+    }
+}",
+
+        // Good Example 2: Clean string validation with proper error handling
+        @"public bool IsValidEmail(string email)
+{
+    if (string.IsNullOrWhiteSpace(email))
+    {
+        return false;
+    }
+    
+    return email.Contains(""@"") && email.Contains(""."");
+}",
+
+        // Good Example 3: Well-formatted loop with descriptive variable names
+        @"public void PrintNumbers(int count)
+{
+    for (int currentNumber = 1; currentNumber <= count; currentNumber++)
+    {
+        Console.WriteLine($""Number: {currentNumber}"");
+    }
+}",
+
+        // Good Example 4: Clean data processing method
+        @"public List<string> FilterActiveUsers(List<User> users)
+{
+    var activeUsers = new List<string>();
+    
+    foreach (var user in users)
+    {
+        if (user.IsActive)
+        {
+            activeUsers.Add(user.Name);
+        }
+    }
+    
+    return activeUsers;
+}",
+
+        // Good Example 5: Proper null checking and formatting
+        @"public string FormatFullName(string firstName, string lastName)
+{
+    if (string.IsNullOrEmpty(firstName))
+    {
+        firstName = ""Unknown"";
+    }
+    
+    if (string.IsNullOrEmpty(lastName))
+    {
+        lastName = ""User"";
+    }
+    
+    return $""{firstName} {lastName}"";
+}",
+
+        // Good Example 6: Simple and clean conditional logic
+        @"public string GetAgeCategory(int age)
+{
+    if (age < 13)
+    {
+        return ""Child"";
+    }
+    else if (age < 20)
+    {
+        return ""Teenager"";
+    }
+    else if (age < 65)
+    {
+        return ""Adult"";
+    }
+    else
+    {
+        return ""Senior"";
+    }
+}",
+
+        // Good Example 7: Well-structured class with proper encapsulation
+        @"public class BankAccount
+{
+    private decimal balance;
+    
+    public BankAccount(decimal initialBalance)
+    {
+        balance = initialBalance;
+    }
+    
+    public void Deposit(decimal amount)
+    {
+        if (amount > 0)
+        {
+            balance += amount;
+        }
+    }
+    
+    public decimal GetBalance()
+    {
+        return balance;
+    }
 }"
     };
     
