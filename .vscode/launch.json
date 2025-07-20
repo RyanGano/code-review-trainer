@@ -2,13 +2,13 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": ".NET Debug code-review-tester-service",
+      "name": ".NET Debug code-review-trainer-service",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/code-review-tester-service/bin/Debug/net8.0/code-review-tester-service.dll",
+      "program": "${workspaceFolder}/code-review-trainer-service/bin/Debug/net8.0/code-review-trainer-service.dll",
       "args": [],
-      "cwd": "${workspaceFolder}/code-review-tester-service",
+      "cwd": "${workspaceFolder}/code-review-trainer-service",
       "stopAtEntry": false,
       "console": "internalConsole",
       "serverReadyAction": {

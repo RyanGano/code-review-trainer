@@ -1,12 +1,12 @@
-# Code Review Tester
+# Code Review Trainer
 
 An AI-assisted tool for improving code review skills. This tool allows people to test and improve their abilities at reviewing code written by AI and other developers.
 
 ## Architecture
 
-This repository contains both the backend service and frontend application for the Code Review Tester tool:
+This repository contains both the backend service and frontend application for the Code Review Trainer tool:
 
-- **Backend (code-review-tester-service)**: Built with C# using minimal API
+- **Backend (code-review-trainer-service)**: Built with C# using minimal API
 - **Frontend (code-review-trainer-app)**: Built with React and TypeScript
 
 ## Technology Stack
@@ -36,14 +36,14 @@ This repository contains both the backend service and frontend application for t
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/RyanGano/code-review-tester.git
-   cd code-review-tester
+   git clone https://github.com/RyanGano/code-review-trainer.git
+   cd code-review-trainer
    ```
 
 2. Set up the backend service:
 
    ```bash
-   cd code-review-tester-service
+   cd code-review-trainer-service
    dotnet restore
    dotnet build
    ```
@@ -59,7 +59,7 @@ This repository contains both the backend service and frontend application for t
 #### Backend Service
 
 ```bash
-cd code-review-tester-service
+cd code-review-trainer-service
 dotnet run
 ```
 
@@ -79,11 +79,11 @@ The application will be available at `http://localhost:3000` (or as configured).
 ### Backend Tests
 
 ```bash
-cd code-review-tester-service
+cd code-review-trainer-service
 dotnet test
 ```
 
-### Frontend Tests
+### Frontend TestsI mov
 
 ```bash
 cd code-review-trainer-app
@@ -94,7 +94,7 @@ yarn test
 
 ## Contributing
 
-We welcome contributions to the Code Review Tester project! Here's how you can help:
+We welcome contributions to the Code Review Trainer project! Here's how you can help:
 
 ### Getting Started with Contributing
 

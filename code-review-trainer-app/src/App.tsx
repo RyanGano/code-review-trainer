@@ -14,7 +14,7 @@ function App() {
   return (
     <>
       <header className="hero">
-        <h1>Code Review Tester</h1>
+        <h1>Code Review Trainer</h1>
         <p className="tagline">Master the art of code review in the AI era</p>
       </header>
 
@@ -24,8 +24,8 @@ function App() {
             In an environment where coding is increasingly done by AI models
             rather than humans, the ability to{" "}
             <strong>review code effectively</strong> has become more critical
-            than ever. Code Review Tester is your training ground for developing
-            sharp, efficient code review skills.
+            than ever. Code Review Trainer is your training ground for
+            developing sharp, efficient code review skills.
           </p>
 
           <div className="features">

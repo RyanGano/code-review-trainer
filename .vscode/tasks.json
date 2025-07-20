@@ -4,7 +4,7 @@
     {
       "label": "build",
       "type": "shell",
-      "command": "dotnet build code-review-tester-service/code-review-tester-service.csproj",
+      "command": "dotnet build code-review-trainer-service/code-review-trainer-service.csproj",
       "group": "build",
       "problemMatcher": ["$msCompile"]
     }

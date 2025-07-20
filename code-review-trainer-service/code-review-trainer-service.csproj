@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>code_review_tester_service</RootNamespace>
+    <RootNamespace>code_review_trainer_service</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
