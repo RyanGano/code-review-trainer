@@ -1,23 +1,53 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Identity.Web;
 using code_review_trainer_service.CodeReviewProblems;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+    .AddJwtBearer(options =>
+    {
+        options.Authority = $"https://login.microsoftonline.com/{builder.Configuration["AzureAd:TenantId"]}";
+        options.Audience = builder.Configuration["AzureAd:Audience"];
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ClockSkew = TimeSpan.FromMinutes(5)
+        };
+    });
 
-// Add authorization
 builder.Services.AddAuthorization();
 
 // Add CORS
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
+    options.AddPolicy("AllowFrontend", policy =>
     {
-        var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? ["http://localhost:5173"];
-        policy.WithOrigins(allowedOrigins)
+        var allowedOrigins = new List<string>();
+
+        // Production origins
+        allowedOrigins.Add("https://zealous-ocean-029a8df1e.2.azurestaticapps.net");
+
+        // Development origins
+        if (builder.Environment.IsDevelopment())
+        {
+            allowedOrigins.Add("http://localhost:5173");
+            allowedOrigins.Add("http://localhost:3000");
+            allowedOrigins.Add("https://localhost:5173");
+        }
+
+        // Add configured origins from appsettings
+        var configuredOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+        if (configuredOrigins != null)
+        {
+            allowedOrigins.AddRange(configuredOrigins);
+        }
+
+        policy.WithOrigins(allowedOrigins.ToArray())
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -26,8 +56,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Configure middleware pipeline
-app.UseCors();
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -47,7 +76,6 @@ app.MapGet("/user", (HttpContext context) =>
 
 app.MapGet("/tests/", (DifficultyLevel? level) =>
 {
-    // If no level is provided, return all available levels
     if (level == null)
     {
         return Results.Ok(Enum.GetNames<DifficultyLevel>());
