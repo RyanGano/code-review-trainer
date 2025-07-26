@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useMsal } from "@azure/msal-react";
 import { apiConfig } from "../authConfig";
 import CodeMirror from "@uiw/react-codemirror";
-import { javascript } from "@codemirror/lang-javascript";
+import { csharp } from "@replit/codemirror-lang-csharp";
 
 import "./CodeReviewPractice.css";
 
@@ -112,7 +112,7 @@ const CodeReviewPractice = () => {
             <div className="code-viewer-container">
               <CodeMirror
                 value={currentTest.problem}
-                extensions={[javascript()]}
+                extensions={[csharp()]}
                 editable={false}
                 basicSetup={{
                   lineNumbers: true,
