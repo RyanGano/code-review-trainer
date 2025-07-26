@@ -101,7 +101,7 @@ const CodeReviewPractice = () => {
 
       {isLoading && (
         <div className="loading-message">
-          Loading code sample...
+          Loading code sample…
         </div>
       )}
 
