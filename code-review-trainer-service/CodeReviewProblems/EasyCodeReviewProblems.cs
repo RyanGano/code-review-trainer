@@ -1,5 +1,12 @@
 namespace code_review_trainer_service.CodeReviewProblems;
 
+// Data structure to hold a code review problem with its unique identifier
+public class CodeReviewProblem
+{
+    public string Id { get; set; } = string.Empty;
+    public string Problem { get; set; } = string.Empty;
+}
+
 // Static class containing easy-level code review problems
 public static class EasyCodeReviewProblems
 {
@@ -403,5 +410,15 @@ a[j]=a[j+1];a[j+1]=temp;
     public static string GetRandomProblem()
     {
         return _problems[_random.Next(_problems.Length)];
+    }
+    
+    public static CodeReviewProblem GetRandomProblemWithId()
+    {
+        var index = _random.Next(_problems.Length);
+        return new CodeReviewProblem
+        {
+            Id = $"easy_{index + 1:D3}",
+            Problem = _problems[index]
+        };
     }
 }
