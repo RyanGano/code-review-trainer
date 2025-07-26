@@ -3,7 +3,7 @@ import { useMsal } from "@azure/msal-react";
 import { apiConfig } from "../authConfig";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
-import { oneDark } from "@codemirror/theme-one-dark";
+
 import "./CodeReviewPractice.css";
 
 interface CodeReviewTest {
@@ -113,7 +113,6 @@ const CodeReviewPractice = () => {
               <CodeMirror
                 value={currentTest.problem}
                 extensions={[javascript()]}
-                theme={oneDark}
                 editable={false}
                 basicSetup={{
                   lineNumbers: true,

@@ -20,7 +20,6 @@
     "@codemirror/language-data": "^6.5.1",
     "@codemirror/state": "^6.4.1",
     "@codemirror/view": "^6.36.1",
-    "@codemirror/theme-one-dark": "^6.1.2",
     "codemirror": "^6.0.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
