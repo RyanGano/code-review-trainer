@@ -35,7 +35,7 @@ const CodeReviewPractice = () => {
       });
 
       // Call API to get an Easy test
-      const testResponse = await fetch(`${apiConfig.webApi}/tests/?level=Easy`, {
+      const testResponse = await fetch(`${apiConfig.webApi}tests/?level=Easy`, {
         headers: {
           Authorization: `Bearer ${response.accessToken}`,
         },
@@ -60,7 +60,9 @@ const CodeReviewPractice = () => {
 
   const handleSubmitReview = () => {
     // For now, this button doesn't actually do anything as specified
-    alert("Review submitted! (This is just a placeholder - functionality will be added later)");
+    alert(
+      "Review submitted! (This is just a placeholder - functionality will be added later)"
+    );
   };
 
   const handleNewTest = () => {
@@ -76,17 +78,15 @@ const CodeReviewPractice = () => {
       <div className="practice-start">
         <h2>Ready to Practice Code Reviews?</h2>
         <p>Click the button below to get a code sample for review.</p>
-        <button 
-          className="start-button" 
+        <button
+          className="start-button"
           onClick={handleStartPracticing}
           disabled={accounts.length === 0}
         >
           Start Practicing
         </button>
         {accounts.length === 0 && (
-          <p className="signin-required">
-            Please sign in to start practicing
-          </p>
+          <p className="signin-required">Please sign in to start practicing</p>
         )}
       </div>
     );
@@ -101,17 +101,9 @@ const CodeReviewPractice = () => {
         </button>
       </div>
 
-      {isLoading && (
-        <div className="loading-message">
-          Loading code sample…
-        </div>
-      )}
+      {isLoading && <div className="loading-message">Loading code sample…</div>}
 
-      {error && (
-        <div className="error-message">
-          Error: {error}
-        </div>
-      )}
+      {error && <div className="error-message">Error: {error}</div>}
 
       {currentTest && (
         <div>
@@ -153,7 +145,9 @@ const CodeReviewPractice = () => {
             <button
               onClick={handleSubmitReview}
               disabled={!reviewComments.trim()}
-              className={`submit-button ${reviewComments.trim() ? 'enabled' : 'disabled'}`}
+              className={`submit-button ${
+                reviewComments.trim() ? "enabled" : "disabled"
+              }`}
             >
               Submit Review
             </button>
