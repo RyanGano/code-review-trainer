@@ -1,5 +1,6 @@
 import { useMsal } from "@azure/msal-react";
 import { loginRequest } from "../authConfig";
+import "./shared.less";
 
 const SignInButton = () => {
     const { instance } = useMsal();
@@ -17,7 +18,7 @@ const SignInButton = () => {
     }
 
     return (
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div className="button-group">
             <button onClick={() => handleLogin("popup")}>
                 Sign in using Popup
             </button>

@@ -4,7 +4,7 @@ import { apiConfig } from "../authConfig";
 import CodeMirror from "@uiw/react-codemirror";
 import { csharp } from "@replit/codemirror-lang-csharp";
 
-import "./CodeReviewPractice.css";
+import "./CodeReviewPractice.less";
 
 interface CodeReviewTest {
   level: string;
