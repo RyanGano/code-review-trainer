@@ -1,0 +1,78 @@
+.code-review-practice {
+  padding: 20px;
+}
+
+.practice-start {
+  text-align: center;
+  padding: 20px;
+}
+
+.practice-header {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.loading-message {
+  text-align: center;
+  padding: 20px;
+}
+
+.error-message {
+  color: red;
+  padding: 10px;
+  border: 1px solid red;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.signin-required {
+  color: red;
+  margin-top: 10px;
+}
+
+.code-section {
+  margin-bottom: 20px;
+}
+
+.code-viewer-container {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.review-section {
+  margin-bottom: 20px;
+}
+
+.review-textarea {
+  width: 100%;
+  min-height: 150px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.submit-section {
+  text-align: center;
+}
+
+.submit-button {
+  padding: 10px 20px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.submit-button.enabled {
+  background-color: #007bff;
+  cursor: pointer;
+}
+
+.submit-button.disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

@@ -82,7 +82,7 @@ const ProfileData = () => {
       </div>
 
       <h4>API User Information</h4>
-      {isLoading && <div>Loading user info from API...</div>}
+      {isLoading && <div>Loading user info from API…</div>}
       {error && <div style={{ color: "red" }}>Error: {error}</div>}
       {userInfo && (
         <div>

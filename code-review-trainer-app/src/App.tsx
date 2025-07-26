@@ -6,6 +6,7 @@ import {
 import SignInButton from "./components/SignInButton";
 import SignOutButton from "./components/SignOutButton";
 import ProfileData from "./components/ProfileData";
+import CodeReviewPractice from "./components/CodeReviewPractice";
 import "./App.css";
 
 function App() {
@@ -55,7 +56,7 @@ function App() {
           </div>
 
           <div className="cta">
-            <button className="start-button">Start Practicing</button>
+            <CodeReviewPractice />
           </div>
           <AuthenticatedTemplate>
             <div style={{ marginBottom: "20px" }}>
