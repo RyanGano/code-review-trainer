@@ -22,7 +22,7 @@ export const msalConfig: Configuration = {
   },
 };
 
-console.log("Tenant ID:", import.meta.env.VITE_AZURE_TENANT_ID);
+console.log("API Base URL:", import.meta.env.VITE_API_BASE_URL);
 
 /**
  * Scopes you add here will be prompted for user consent during sign-in.
