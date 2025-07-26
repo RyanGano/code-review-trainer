@@ -386,10 +386,11 @@ a[j]=a[j+1];a[j+1]=temp;
     
     public void Deposit(decimal amount)
     {
-        if (amount > 0)
+        if (amount <= 0)
         {
-            balance += amount;
+            throw new ArgumentException(""Amount must be greater than zero"", nameof(amount));
         }
+        balance += amount;
     }
     
     public decimal GetBalance()
