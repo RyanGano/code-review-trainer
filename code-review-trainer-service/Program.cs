@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using code_review_trainer_service.CodeReviewProblems;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -80,18 +81,16 @@ app.MapGet("/tests/", (DifficultyLevel? level) =>
         return Results.Ok(Enum.GetNames<DifficultyLevel>());
     }
 
+    // Return a random problem for Easy level
+    if (level == DifficultyLevel.Easy)
+    {
+        var randomProblem = EasyCodeReviewProblems.GetRandomProblem();
+        return Results.Ok(new { level = level.ToString(), problem = randomProblem });
+    }
+
     return Results.Ok($"Test level: {level}");
 })
 .WithName("GetTests")
 .RequireAuthorization();
 
 app.Run();
-
-// Enum for difficulty levels
-public enum DifficultyLevel
-{
-    Easy,
-    Medium,
-    Hard,
-    ExtraHard
-}
