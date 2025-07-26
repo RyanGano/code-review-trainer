@@ -1,7 +1,9 @@
 import { useState, useCallback } from "react";
 import { useMsal } from "@azure/msal-react";
 import { apiConfig } from "../authConfig";
-import ReactDiffViewer from "react-diff-viewer-continued";
+import CodeMirror from "@uiw/react-codemirror";
+import { javascript } from "@codemirror/lang-javascript";
+import { oneDark } from "@codemirror/theme-one-dark";
 import "./CodeReviewPractice.css";
 
 interface CodeReviewTest {
@@ -116,15 +118,23 @@ const CodeReviewPractice = () => {
           <div className="code-section">
             <h3>Code to Review:</h3>
             <div className="code-viewer-container">
-              <ReactDiffViewer
-                oldValue=""
-                newValue={currentTest.problem}
-                splitView={false}
-                showDiffOnly={false}
-                hideLineNumbers={false}
-                useDarkTheme={false}
-                leftTitle="Original"
-                rightTitle="Code for Review"
+              <CodeMirror
+                value={currentTest.problem}
+                extensions={[javascript()]}
+                theme={oneDark}
+                editable={false}
+                basicSetup={{
+                  lineNumbers: true,
+                  foldGutter: true,
+                  dropCursor: false,
+                  allowMultipleSelections: false,
+                  indentOnInput: false,
+                  bracketMatching: true,
+                  closeBrackets: false,
+                  autocompletion: false,
+                  highlightSelectionMatches: false,
+                  searchKeymap: false,
+                }}
               />
             </div>
           </div>
