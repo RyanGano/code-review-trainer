@@ -405,12 +405,3 @@ a[j]=a[j+1];a[j+1]=temp;
         return _problems[_random.Next(_problems.Length)];
     }
 }
-
-// Enum for difficulty levels
-public enum DifficultyLevel
-{
-    Easy,
-    Medium,
-    Hard,
-    ExtraHard
-}
