@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useMsal } from "@azure/msal-react";
 import { apiConfig } from "../authConfig";
+import "./shared.less";
 
 interface UserInfo {
   name?: string;
@@ -65,25 +66,18 @@ const ProfileData = () => {
   const account = accounts[0];
 
   return (
-    <div
-      style={{
-        padding: "20px",
-        border: "1px solid #ccc",
-        borderRadius: "8px",
-        margin: "10px 0",
-      }}
-    >
+    <div className="profile-container">
       <h3>User Profile</h3>
-      <div style={{ marginBottom: "15px" }}>
+      <div className="profile-field">
         <strong>Display Name:</strong> {account.name || "N/A"}
       </div>
-      <div style={{ marginBottom: "15px" }}>
+      <div className="profile-field">
         <strong>Username:</strong> {account.username || "N/A"}
       </div>
 
       <h4>API User Information</h4>
       {isLoading && <div>Loading user info from API…</div>}
-      {error && <div style={{ color: "red" }}>Error: {error}</div>}
+      {error && <div className="error-message">Error: {error}</div>}
       {userInfo && (
         <div>
           <div>
@@ -95,7 +89,7 @@ const ProfileData = () => {
           </div>
           <div>
             <strong>Claims:</strong>
-            <ul style={{ maxHeight: "200px", overflowY: "auto" }}>
+            <ul className="claims-list">
               {userInfo.claims.map((claim, index) => (
                 <li key={index}>
                   <strong>{claim.type}:</strong> {claim.value}

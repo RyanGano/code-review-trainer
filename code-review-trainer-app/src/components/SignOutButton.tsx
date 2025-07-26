@@ -1,4 +1,5 @@
 import { useMsal } from "@azure/msal-react";
+import "./shared.less";
 
 const SignOutButton = () => {
     const { instance } = useMsal();
@@ -17,7 +18,7 @@ const SignOutButton = () => {
     }
 
     return (
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div className="button-group">
             <button onClick={() => handleLogout("popup")}>
                 Sign out using Popup
             </button>

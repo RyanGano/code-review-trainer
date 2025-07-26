@@ -7,7 +7,7 @@ import SignInButton from "./components/SignInButton";
 import SignOutButton from "./components/SignOutButton";
 import ProfileData from "./components/ProfileData";
 import CodeReviewPractice from "./components/CodeReviewPractice";
-import "./App.css";
+import "./App.less";
 
 function App() {
   const { accounts } = useMsal();
@@ -59,7 +59,7 @@ function App() {
             <CodeReviewPractice />
           </div>
           <AuthenticatedTemplate>
-            <div style={{ marginBottom: "20px" }}>
+            <div className="auth-welcome">
               <h2>Welcome, {accounts[0]?.name || "User"}!</h2>
               <p>
                 You are successfully authenticated and can now access the
@@ -71,15 +71,7 @@ function App() {
           </AuthenticatedTemplate>
 
           <UnauthenticatedTemplate>
-            <div
-              style={{
-                marginBottom: "20px",
-                padding: "20px",
-                border: "2px solid #ffa500",
-                borderRadius: "8px",
-                backgroundColor: "#fff3cd",
-              }}
-            >
+            <div className="auth-warning">
               <h2>Authentication Required</h2>
               <p>
                 You must sign in to access this application. Please authenticate

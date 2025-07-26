@@ -8,15 +8,15 @@
 
 .hero {
   margin-bottom: 3rem;
-}
 
-.hero h1 {
-  font-size: 3rem;
-  margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, #646cff, #61dafb);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  h1 {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #646cff, #61dafb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 }
 
 .tagline {
@@ -32,12 +32,12 @@
 
 .description {
   text-align: left;
-}
 
-.description > p {
-  font-size: 1.1rem;
-  margin-bottom: 2rem;
-  text-align: center;
+  > p {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
 }
 
 .features {
@@ -53,22 +53,22 @@
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
 
-.feature:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
 
-.feature h3 {
-  margin-top: 0;
-  margin-bottom: 0.5rem;
-  font-size: 1.2rem;
-}
+  h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem;
+  }
 
-.feature p {
-  margin-bottom: 0;
-  color: #ccc;
+  p {
+    margin-bottom: 0;
+    color: #ccc;
+  }
 }
 
 .cta {
@@ -86,11 +86,11 @@
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   font-weight: 600;
-}
 
-.start-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(100, 108, 255, 0.4);
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(100, 108, 255, 0.4);
+  }
 }
 
 .disclaimer {
@@ -98,12 +98,25 @@
   margin-top: 3rem;
   padding-top: 2rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+  p {
+    color: #888;
+    font-size: 0.9rem;
+    margin: 0;
+  }
 }
 
-.disclaimer p {
-  color: #888;
-  font-size: 0.9rem;
-  margin: 0;
+// Auth-related styles
+.auth-welcome {
+  margin-bottom: 20px;
+}
+
+.auth-warning {
+  margin-bottom: 20px;
+  padding: 20px;
+  border: 2px solid #ffa500;
+  border-radius: 8px;
+  background-color: #fff3cd;
 }
 
 @media (max-width: 768px) {
