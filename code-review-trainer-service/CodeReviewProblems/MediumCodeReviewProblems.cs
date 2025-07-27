@@ -23,12 +23,12 @@ public static class MediumCodeReviewProblems
 {
     public string CalculatePercentage(int value, int total)
     {
-        if (total = 0)  // Assignment instead of comparison
+        if (total = 0)
         {
             return ""Cannot divide by zero"";
         }
         double percentage = (value / total) * 100;
-        return percentage;  // Return type mismatch
+        return percentage;
     }
 }",
 
@@ -36,7 +36,7 @@ public static class MediumCodeReviewProblems
         @"public List<string> GetSubstring(string text, int maxLenght)
 {
     var results = new List<string>();
-    for (int i = 0; i <= text.Length - maxLenght; i++)  // Off-by-one potential
+    for (int i = 0; i <= text.Length - maxLenght; i++)
     {
         results.Add(text.Substring(i, maxLenght));
     }
@@ -54,7 +54,7 @@ public static class MediumCodeReviewProblems
     // Check if input contains only letters
     foreach (char c in input)
     {
-        if (!char.IsLetter(ch))  // 'ch' is undefined
+        if (!char.IsLetter(ch))
         {
             return false;
         }
@@ -89,7 +89,7 @@ public static class MediumCodeReviewProblems
         @"public void PrintNumbers(int count)
 {
     int i = 0
-    while (i < count)  // Missing semicolon above
+    while (i < count)
     {
         Console.WriteLine(i);
     }
@@ -101,13 +101,13 @@ public static class MediumCodeReviewProblems
     DateTime birth = DateTime.Parse(birthDate);
     TimeSpan age = DateTime.Now - birth;
     Console.WriteLine(""User is approximatly "" + age.Days / 365 + "" years old"");
-    return age.Days / 365;  // Should return int but calculation is imprecise
+    return age.Days / 365;
 }",
 
         // Problem 9
         @"public Dictionary<string, int> CountWords(string text)
 {
-    var wordCount = new List<string, int>();  // Wrong collection type
+    var wordCount = new List<string, int>();
     string[] words = text.Split(' ');
     
     foreach (string word in words)
@@ -145,7 +145,7 @@ public static class MediumCodeReviewProblems
         // Problem 11
         @"public class StringUtils
 {
-    public ReverseString(string input)  // Missing return type
+    public ReverseString(string input)
     {
         if (input == null) return null;
         
@@ -182,7 +182,7 @@ public static class MediumCodeReviewProblems
     
     public void Increment()
     {
-        count++  // Missing semicolon
+        count++
     }
     
     public int GetCount()
@@ -216,7 +216,7 @@ public static class MediumCodeReviewProblems
     {
         DataChanged += (sender, e) => {
             Console.WriteLine($""Subscriber {subscriber} notified"");
-        }  // Missing semicolon
+        }
     }
 }",
 
@@ -235,7 +235,7 @@ public static class MediumCodeReviewProblems
         @"public string ConcatenateStrings(List<string> strings)
 {
     string result = """"
-    foreach (string str in strings)  // Missing semicolon above
+    foreach (string str in strings)
     {
         result += str;
     }
