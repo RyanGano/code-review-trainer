@@ -92,6 +92,17 @@ app.MapGet("/tests/", (DifficultyLevel? level) =>
         });
     }
 
+    // Return a random problem for Medium level
+    if (level == DifficultyLevel.Medium)
+    {
+        var randomProblem = MediumCodeReviewProblems.GetRandomProblemWithId();
+        return Results.Ok(new { 
+            level = level.ToString(), 
+            problem = randomProblem.Problem,
+            id = randomProblem.Id 
+        });
+    }
+
     return Results.Ok($"Test level: {level}");
 })
 .WithName("GetTests")
