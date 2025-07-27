@@ -84,8 +84,12 @@ app.MapGet("/tests/", (DifficultyLevel? level) =>
     // Return a random problem for Easy level
     if (level == DifficultyLevel.Easy)
     {
-        var randomProblem = EasyCodeReviewProblems.GetRandomProblem();
-        return Results.Ok(new { level = level.ToString(), problem = randomProblem });
+        var randomProblem = EasyCodeReviewProblems.GetRandomProblemWithId();
+        return Results.Ok(new { 
+            level = level.ToString(), 
+            problem = randomProblem.Problem,
+            id = randomProblem.Id 
+        });
     }
 
     return Results.Ok($"Test level: {level}");
