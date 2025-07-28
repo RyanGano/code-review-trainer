@@ -10,6 +10,47 @@
 .practice-header {
   margin-bottom: 20px;
   text-align: center;
+  
+  .header-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .test-info {
+    margin-top: 10px;
+    
+    .test-id {
+      background-color: #f0f0f0;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      color: #666;
+    }
+  }
+}
+
+.difficulty-selection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+  
+  label {
+    font-weight: bold;
+  }
+  
+  .difficulty-dropdown {
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+  }
 }
 
 .loading-message {

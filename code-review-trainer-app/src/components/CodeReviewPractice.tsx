@@ -9,6 +9,7 @@ import "./CodeReviewPractice.less";
 interface CodeReviewTest {
   level: string;
   problem: string;
+  id: string;
 }
 
 const CodeReviewPractice = () => {
@@ -17,6 +18,7 @@ const CodeReviewPractice = () => {
   const [reviewComments, setReviewComments] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>("Easy");
 
   const fetchCodeReviewTest = useCallback(async () => {
     if (accounts.length === 0) {
@@ -34,8 +36,8 @@ const CodeReviewPractice = () => {
         account: accounts[0],
       });
 
-      // Call API to get an Easy test
-      const testResponse = await fetch(`${apiConfig.webApi}tests/?level=Easy`, {
+      // Call API to get a test with the selected difficulty
+      const testResponse = await fetch(`${apiConfig.webApi}tests/?level=${selectedDifficulty}`, {
         headers: {
           Authorization: `Bearer ${response.accessToken}`,
         },
@@ -56,7 +58,7 @@ const CodeReviewPractice = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [instance, accounts]);
+  }, [instance, accounts, selectedDifficulty]);
 
   const handleSubmitReview = () => {
     // For now, this button doesn't actually do anything as specified
@@ -77,7 +79,21 @@ const CodeReviewPractice = () => {
     return (
       <div className="practice-start">
         <h2>Ready to Practice Code Reviews?</h2>
-        <p>Click the button below to get a code sample for review.</p>
+        <p>Choose your difficulty level and click the button below to get a code sample for review.</p>
+        
+        <div className="difficulty-selection">
+          <label htmlFor="difficulty-select">Difficulty Level:</label>
+          <select 
+            id="difficulty-select"
+            value={selectedDifficulty} 
+            onChange={(e) => setSelectedDifficulty(e.target.value)}
+            className="difficulty-dropdown"
+          >
+            <option value="Easy">Easy</option>
+            <option value="Medium">Medium</option>
+          </select>
+        </div>
+        
         <button
           className="start-button"
           onClick={handleStartPracticing}
@@ -95,10 +111,29 @@ const CodeReviewPractice = () => {
   return (
     <div className="code-review-practice">
       <div className="practice-header">
-        <h2>Code Review Practice - {currentTest?.level || "Easy"} Level</h2>
-        <button onClick={handleNewTest} disabled={isLoading}>
-          Get New Code Sample
-        </button>
+        <h2>Code Review Practice - {currentTest?.level || selectedDifficulty} Level</h2>
+        <div className="header-controls">
+          <div className="difficulty-selection">
+            <label htmlFor="difficulty-select-active">Difficulty:</label>
+            <select 
+              id="difficulty-select-active"
+              value={selectedDifficulty} 
+              onChange={(e) => setSelectedDifficulty(e.target.value)}
+              className="difficulty-dropdown"
+            >
+              <option value="Easy">Easy</option>
+              <option value="Medium">Medium</option>
+            </select>
+          </div>
+          <button onClick={handleNewTest} disabled={isLoading}>
+            Get New Code Sample
+          </button>
+        </div>
+        {currentTest && (
+          <div className="test-info">
+            <span className="test-id">Test ID: {currentTest.id}</span>
+          </div>
+        )}
       </div>
 
       {isLoading && <div className="loading-message">Loading code sample…</div>}
