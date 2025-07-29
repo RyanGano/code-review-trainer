@@ -306,6 +306,12 @@ node_modules/
 dist/
 *.tsbuildinfo
 
+# Package manager lock files - prefer yarn.lock
+package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
 # Visual Studio 6 build log
 *.plg
 
