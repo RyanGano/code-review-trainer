@@ -19,6 +19,8 @@ const CodeReviewPractice = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("Easy");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionResult, setSubmissionResult] = useState<string | null>(null);
 
   const fetchCodeReviewTest = useCallback(async () => {
     if (accounts.length === 0) {
@@ -50,6 +52,7 @@ const CodeReviewPractice = () => {
       const testData = await testResponse.json();
       setCurrentTest(testData);
       setReviewComments(""); // Reset comments for new test
+      setSubmissionResult(null); // Reset previous submission results
     } catch (error) {
       console.error("Error fetching code review test:", error);
       setError(
@@ -60,11 +63,45 @@ const CodeReviewPractice = () => {
     }
   }, [instance, accounts, selectedDifficulty]);
 
-  const handleSubmitReview = () => {
-    // For now, this button doesn't actually do anything as specified
-    alert(
-      "Review submitted! (This is just a placeholder - functionality will be added later)"
-    );
+  const handleSubmitReview = async () => {
+    if (!currentTest || !reviewComments.trim() || accounts.length === 0) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      // Get access token
+      const response = await instance.acquireTokenSilent({
+        scopes: apiConfig.b2cScopes,
+        account: accounts[0],
+      });
+
+      // Submit review to backend
+      const submitResponse = await fetch(`${apiConfig.webApi}tests/${currentTest.id}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${response.accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ review: reviewComments.trim() }),
+      });
+
+      if (!submitResponse.ok) {
+        throw new Error(`HTTP error! status: ${submitResponse.status}`);
+      }
+
+      const result = await submitResponse.json();
+      setSubmissionResult(result.message);
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      setError(
+        error instanceof Error ? error.message : "Unknown error occurred"
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleNewTest = () => {
@@ -178,14 +215,22 @@ const CodeReviewPractice = () => {
           <div className="submit-section">
             <button
               onClick={handleSubmitReview}
-              disabled={!reviewComments.trim()}
+              disabled={!reviewComments.trim() || isSubmitting}
               className={`submit-button ${
-                reviewComments.trim() ? "enabled" : "disabled"
+                reviewComments.trim() && !isSubmitting ? "enabled" : "disabled"
               }`}
             >
-              Submit Review
+              {isSubmitting ? "Submitting..." : "Submit Review"}
             </button>
+            {isSubmitting && <div className="loading-indicator">Please wait while we evaluate your review...</div>}
           </div>
+
+          {submissionResult && (
+            <div className="submission-result">
+              <h4>Review Evaluation:</h4>
+              <p>{submissionResult}</p>
+            </div>
+          )}
         </div>
       )}
     </div>
