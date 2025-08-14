@@ -2,6 +2,12 @@
 
 An AI-assisted tool for improving code review skills. This tool allows people to test and improve their abilities at reviewing code written by AI and other developers.
 
+## 🚀 Try it Out
+
+**[Live Demo](https://zealous-ocean-029a8df1e.2.azurestaticapps.net)** - Test your code review skills right now!
+
+Visit the live application to start practicing your code review abilities with AI-generated code examples.
+
 ## Architecture
 
 This repository contains both the backend service and frontend application for the Code Review Trainer tool:
