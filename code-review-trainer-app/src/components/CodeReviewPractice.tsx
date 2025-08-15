@@ -220,9 +220,9 @@ const CodeReviewPractice = () => {
                 reviewComments.trim() && !isSubmitting ? "enabled" : "disabled"
               }`}
             >
-              {isSubmitting ? "Submitting..." : "Submit Review"}
+              {isSubmitting ? "Submitting…" : "Submit Review"}
             </button>
-            {isSubmitting && <div className="loading-indicator">Please wait while we evaluate your review...</div>}
+            {isSubmitting && <div className="loading-indicator">Please wait while we evaluate your review…</div>}
           </div>
 
           {submissionResult && (

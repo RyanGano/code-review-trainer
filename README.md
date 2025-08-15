@@ -125,6 +125,7 @@ We welcome contributions to the Code Review Trainer project! Here's how you can 
 - Use meaningful component and variable names
 - Write JSDoc comments for complex functions
 - Follow accessibility (a11y) guidelines
+- Use ellipsis character (…) instead of three dots (...) in UI text
 
 ### Pull Request Guidelines
 
