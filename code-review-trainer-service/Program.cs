@@ -108,4 +108,18 @@ app.MapGet("/tests/", (DifficultyLevel? level) =>
 .WithName("GetTests")
 .RequireAuthorization();
 
+app.MapPost("/tests/{id}", async (string id, ReviewSubmission submission) =>
+{
+    // Add artificial 5-second delay to test frontend loading indicators
+    await Task.Delay(5000);
+    
+    // Return dummy text as specified
+    return Results.Ok(new { message = "You're a great reviewer of code!" });
+})
+.WithName("SubmitReview")
+.RequireAuthorization();
+
 app.Run();
+
+// Record for review submission payload
+public record ReviewSubmission(string review);
