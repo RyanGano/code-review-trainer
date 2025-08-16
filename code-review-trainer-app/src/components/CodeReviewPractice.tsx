@@ -1,4 +1,30 @@
 import { useState, useCallback } from "react";
+
+interface CodeReviewIssue {
+  id: string;
+  title?: string;
+  category?: string;
+  severity?: string;
+  explanation?: string;
+}
+
+interface CodeReviewMatchedUserPoint {
+  excerpt: string;
+  accuracy?: string;
+  matchedIssueIds?: string[];
+}
+
+interface CodeReviewModelResult {
+  problemId?: string;
+  overallScore?: number;
+  issuesDetected?: CodeReviewIssue[];
+  matchedUserPoints?: CodeReviewMatchedUserPoint[];
+  missedCriticalIssueIds?: string[];
+  summary?: string;
+  rawModelJson?: string;
+  isFallback?: boolean;
+  error?: string;
+}
 import { useMsal } from "@azure/msal-react";
 import { apiConfig } from "../authConfig";
 import CodeMirror from "@uiw/react-codemirror";
@@ -20,7 +46,8 @@ const CodeReviewPractice = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("Easy");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submissionResult, setSubmissionResult] = useState<string | null>(null);
+  const [submissionResult, setSubmissionResult] =
+    useState<CodeReviewModelResult | null>(null);
 
   const fetchCodeReviewTest = useCallback(async () => {
     if (accounts.length === 0) {
@@ -39,11 +66,14 @@ const CodeReviewPractice = () => {
       });
 
       // Call API to get a test with the selected difficulty
-      const testResponse = await fetch(`${apiConfig.webApi}tests/?level=${selectedDifficulty}`, {
-        headers: {
-          Authorization: `Bearer ${response.accessToken}`,
-        },
-      });
+      const testResponse = await fetch(
+        `${apiConfig.webApi}tests/?level=${selectedDifficulty}`,
+        {
+          headers: {
+            Authorization: `Bearer ${response.accessToken}`,
+          },
+        }
+      );
 
       if (!testResponse.ok) {
         throw new Error(`HTTP error! status: ${testResponse.status}`);
@@ -79,21 +109,24 @@ const CodeReviewPractice = () => {
       });
 
       // Submit review to backend
-      const submitResponse = await fetch(`${apiConfig.webApi}tests/${currentTest.id}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${response.accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ review: reviewComments.trim() }),
-      });
+      const submitResponse = await fetch(
+        `${apiConfig.webApi}tests/${currentTest.id}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${response.accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ review: reviewComments.trim() }),
+        }
+      );
 
       if (!submitResponse.ok) {
         throw new Error(`HTTP error! status: ${submitResponse.status}`);
       }
 
       const result = await submitResponse.json();
-      setSubmissionResult(result.message);
+      setSubmissionResult(result);
     } catch (error) {
       console.error("Error submitting review:", error);
       setError(
@@ -116,13 +149,16 @@ const CodeReviewPractice = () => {
     return (
       <div className="practice-start">
         <h2>Ready to Practice Code Reviews?</h2>
-        <p>Choose your difficulty level and click the button below to get a code sample for review.</p>
-        
+        <p>
+          Choose your difficulty level and click the button below to get a code
+          sample for review.
+        </p>
+
         <div className="difficulty-selection">
           <label htmlFor="difficulty-select">Difficulty Level:</label>
-          <select 
+          <select
             id="difficulty-select"
-            value={selectedDifficulty} 
+            value={selectedDifficulty}
             onChange={(e) => setSelectedDifficulty(e.target.value)}
             className="difficulty-dropdown"
           >
@@ -130,7 +166,7 @@ const CodeReviewPractice = () => {
             <option value="Medium">Medium</option>
           </select>
         </div>
-        
+
         <button
           className="start-button"
           onClick={handleStartPracticing}
@@ -148,13 +184,16 @@ const CodeReviewPractice = () => {
   return (
     <div className="code-review-practice">
       <div className="practice-header">
-        <h2>Code Review Practice - {currentTest?.level || selectedDifficulty} Level</h2>
+        <h2>
+          Code Review Practice - {currentTest?.level || selectedDifficulty}{" "}
+          Level
+        </h2>
         <div className="header-controls">
           <div className="difficulty-selection">
             <label htmlFor="difficulty-select-active">Difficulty:</label>
-            <select 
+            <select
               id="difficulty-select-active"
-              value={selectedDifficulty} 
+              value={selectedDifficulty}
               onChange={(e) => setSelectedDifficulty(e.target.value)}
               className="difficulty-dropdown"
             >
@@ -222,13 +261,79 @@ const CodeReviewPractice = () => {
             >
               {isSubmitting ? "Submitting…" : "Submit Review"}
             </button>
-            {isSubmitting && <div className="loading-indicator">Please wait while we evaluate your review…</div>}
+            {isSubmitting && (
+              <div className="loading-indicator">
+                Please wait while we evaluate your review…
+              </div>
+            )}
           </div>
 
           {submissionResult && (
             <div className="submission-result">
-              <h4>Review Evaluation:</h4>
-              <p>{submissionResult}</p>
+              <h4>Review Evaluation</h4>
+              {submissionResult.isFallback && (
+                <div className="warning">
+                  Fallback (no AI evaluation). {submissionResult.error}
+                </div>
+              )}
+              {submissionResult.overallScore !== undefined && (
+                <p>
+                  <strong>Score:</strong> {submissionResult.overallScore}
+                </p>
+              )}
+              {submissionResult.summary && (
+                <pre className="summary-block">{submissionResult.summary}</pre>
+              )}
+              {submissionResult.issuesDetected &&
+                submissionResult.issuesDetected.length > 0 && (
+                  <div className="issues-section">
+                    <h5>
+                      Detected Issues ({submissionResult.issuesDetected.length})
+                    </h5>
+                    <ul>
+                      {submissionResult.issuesDetected.map(
+                        (i: CodeReviewIssue) => (
+                          <li key={i.id}>
+                            <strong>{i.title || i.id}</strong> [{i.category}/
+                            {i.severity}] – {i.explanation}
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  </div>
+                )}
+              {submissionResult.missedCriticalIssueIds &&
+                submissionResult.missedCriticalIssueIds.length > 0 && (
+                  <div className="missed-section">
+                    <h5>Missed Critical Issues</h5>
+                    <ul>
+                      {submissionResult.missedCriticalIssueIds.map(
+                        (id: string) => (
+                          <li key={id}>{id}</li>
+                        )
+                      )}
+                    </ul>
+                  </div>
+                )}
+              {submissionResult.matchedUserPoints &&
+                submissionResult.matchedUserPoints.length > 0 && (
+                  <div className="matched-section">
+                    <h5>Your Points Matched</h5>
+                    <ul>
+                      {submissionResult.matchedUserPoints.map(
+                        (p: CodeReviewMatchedUserPoint, idx: number) => (
+                          <li key={idx}>
+                            <em>{p.excerpt}</em> → {p.accuracy} (Matches:{" "}
+                            {p.matchedIssueIds?.join(", ") || "—"})
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  </div>
+                )}
+              {submissionResult.error && !submissionResult.isFallback && (
+                <div className="error-message">{submissionResult.error}</div>
+              )}
             </div>
           )}
         </div>

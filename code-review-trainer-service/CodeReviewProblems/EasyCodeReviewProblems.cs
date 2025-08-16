@@ -11,7 +11,7 @@ public class CodeReviewProblem
 public static class EasyCodeReviewProblems
 {
     private static readonly Random _random = new Random();
-    
+
     private static readonly string[] _problems = new string[]
     {
         // Problem 1: Bad variable names + confusing logic
@@ -406,12 +406,12 @@ a[j]=a[j+1];a[j+1]=temp;
     }
 }"
     };
-    
+
     public static string GetRandomProblem()
     {
         return _problems[_random.Next(_problems.Length)];
     }
-    
+
     public static CodeReviewProblem GetRandomProblemWithId()
     {
         var index = _random.Next(_problems.Length);
@@ -421,4 +421,7 @@ a[j]=a[j+1];a[j+1]=temp;
             Problem = _problems[index]
         };
     }
+
+    public static int Count => _problems.Length;
+    public static string GetProblemByIndex(int index) => _problems[index];
 }

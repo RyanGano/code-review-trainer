@@ -144,6 +144,9 @@
   background-color: #f8f9fa;
   border: 1px solid #dee2e6;
   border-radius: 4px;
+  text-align: left; // ensure left alignment regardless of surrounding context
+  overflow-wrap: anywhere;
+  word-break: break-word;
   
   h4 {
     margin-top: 0;
@@ -155,4 +158,49 @@
     color: #28a745;
     font-weight: bold;
   }
+}
+
+// Summary block styling with wrapping
+.submission-result .summary-block {
+  background: #ffffff;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  white-space: pre-wrap; // preserve line breaks but wrap long lines
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  margin: 8px 0 14px;
+  text-align: left;
+}
+
+// Lists inside result sections
+.submission-result ul {
+  padding-left: 20px;
+  margin: 6px 0 14px;
+  text-align: left;
+  list-style: disc;
+}
+
+.submission-result li {
+  margin-bottom: 6px;
+  text-align: left;
+  line-height: 1.35;
+}
+
+.submission-result .issues-section,
+.submission-result .missed-section,
+.submission-result .matched-section {
+  text-align: left;
+}
+
+// Ensure emphasis excerpts wrap
+.submission-result em {
+  font-style: normal;
+  background: #fff3cd;
+  padding: 2px 4px;
+  border-radius: 3px;
+  display: inline;
 }

@@ -4,7 +4,7 @@ namespace code_review_trainer_service.CodeReviewProblems;
 public static class MediumCodeReviewProblems
 {
     private static readonly Random _random = new Random();
-    
+
     private static readonly string[] _problems = new string[]
     {
         // Problem 1: Compilation error - missing semicolon and spelling error in comment
@@ -570,12 +570,12 @@ public static class MediumCodeReviewProblems
     }
 }"
     };
-    
+
     public static string GetRandomProblem()
     {
         return _problems[_random.Next(_problems.Length)];
     }
-    
+
     public static CodeReviewProblem GetRandomProblemWithId()
     {
         var index = _random.Next(_problems.Length);
@@ -585,4 +585,7 @@ public static class MediumCodeReviewProblems
             Problem = _problems[index]
         };
     }
+
+    public static int Count => _problems.Length;
+    public static string GetProblemByIndex(int index) => _problems[index];
 }

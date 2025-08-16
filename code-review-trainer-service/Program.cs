@@ -1,8 +1,33 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using code_review_trainer_service.CodeReviewProblems;
 using Microsoft.IdentityModel.Tokens;
+using code_review_trainer_service.Services;
+using Azure.Identity; // added for Key Vault
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Attempt to add Azure Key Vault (production) before services build so configuration binds include secrets.
+// Fallback: if environment variables AZURE_KEY_VAULT_NAME or AzureOpenAI__ApiKey are absent / access fails, continue with existing config (user-secrets/local).
+var keyVaultName = Environment.GetEnvironmentVariable("AZURE_KEY_VAULT_NAME");
+if (!string.IsNullOrWhiteSpace(keyVaultName))
+{
+    try
+    {
+        var vaultUri = new Uri($"https://{keyVaultName}.vault.azure.net/");
+        var cred = new DefaultAzureCredential();
+        builder.Configuration.AddAzureKeyVault(vaultUri, cred, new AzureKeyVaultConfigurationOptions
+        {
+            ReloadInterval = TimeSpan.FromMinutes(10)
+        });
+    }
+    catch (Exception ex)
+    {
+        // Non-fatal: log to console and proceed (app may still rely on user-secrets/local settings)
+        Console.WriteLine($"Key Vault integration skipped: {ex.Message}");
+    }
+}
+
 
 // Add authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -21,6 +46,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddCodeReviewServices(builder.Configuration);
 
 // Add CORS
 builder.Services.AddCors(options =>
@@ -85,10 +111,11 @@ app.MapGet("/tests/", (DifficultyLevel? level) =>
     if (level == DifficultyLevel.Easy)
     {
         var randomProblem = EasyCodeReviewProblems.GetRandomProblemWithId();
-        return Results.Ok(new { 
-            level = level.ToString(), 
+        return Results.Ok(new
+        {
+            level = level.ToString(),
             problem = randomProblem.Problem,
-            id = randomProblem.Id 
+            id = randomProblem.Id
         });
     }
 
@@ -96,10 +123,11 @@ app.MapGet("/tests/", (DifficultyLevel? level) =>
     if (level == DifficultyLevel.Medium)
     {
         var randomProblem = MediumCodeReviewProblems.GetRandomProblemWithId();
-        return Results.Ok(new { 
-            level = level.ToString(), 
+        return Results.Ok(new
+        {
+            level = level.ToString(),
             problem = randomProblem.Problem,
-            id = randomProblem.Id 
+            id = randomProblem.Id
         });
     }
 
@@ -108,13 +136,15 @@ app.MapGet("/tests/", (DifficultyLevel? level) =>
 .WithName("GetTests")
 .RequireAuthorization();
 
-app.MapPost("/tests/{id}", async (string id, ReviewSubmission submission) =>
+app.MapPost("/tests/{id}", async (string id, ReviewSubmission submission, IProblemRepository repo, ICodeReviewModel model) =>
 {
-    // Add artificial 5-second delay to test frontend loading indicators
-    await Task.Delay(5000);
-    
-    // Return dummy text as specified
-    return Results.Ok(new { message = "You're a great reviewer of code!" });
+    var problem = repo.Get(id);
+    if (problem == null)
+    {
+        return Results.NotFound(new { error = "Problem not found" });
+    }
+    var result = await model.ReviewAsync(new CodeReviewRequest(problem.Value.Id, problem.Value.Code, submission.review));
+    return Results.Ok(result);
 })
 .WithName("SubmitReview")
 .RequireAuthorization();
