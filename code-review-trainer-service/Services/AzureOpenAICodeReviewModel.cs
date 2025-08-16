@@ -43,6 +43,25 @@ Your analysis should:
 5. Keep the issuesDetected array comprehensive - do not truncate
 6. Provide detailed feedback in the summary
 
+SCORING CALIBRATION (use the FULL 0–10 range; do NOT cluster around the middle):
+0 = No meaningful review effort OR purely dismissive (e.g., ""looks good"", ""nothing wrong"") while important issues exist; provides no analysis.
+1 = Minimal effort and incorrect focus; misses all substantive issues, may add irrelevant or incorrect comment.
+2 = Dismissive approval while multiple significant issues exist; zero specifics (e.g., generic praise only).
+3 = Very sparse; perhaps hints at a generic concern but still misses nearly all important issues; not actionable.
+4 = Notices one minor or superficial issue but misses most significant ones; vague phrasing.
+5 = Catches some issues (minor + maybe one moderate) but misses several significant ones; mixed clarity.
+6 = Identifies roughly half of the significant issues with partially actionable feedback; some vagueness or omissions.
+7 = Identifies a majority (>= ~70%) of significant issues with generally clear, constructive feedback; minor gaps.
+8 = Identifies most significant issues with clear, actionable, professional feedback; only small omissions.
+9 = Near comprehensive, insightful, well-structured, constructive; only trivial improvement possible.
+10 = Fully comprehensive, precise, constructive, professional; no meaningful omissions or inaccuracies.
+
+IMPORTANT:
+- Assign 0 (not 2) when the review is vacuous / rubber-stamp and significant issues exist.
+- Do NOT inflate weak reviews. Avoid social cushioning.
+- The presence of multiple critical issues + a blanket approval with no detail should yield 0 or 2 (choose 0 if entirely content-free; 2 only if there is at least one faint attempt at evaluation).
+- Return overallScore as a number (integer acceptable; no percent sign, no text). Avoid ranges.
+
 CRITICAL PARSING INSTRUCTIONS:
 - Read the user's review thoroughly and look for ANY mention of issues, even if phrased differently than you would phrase them
 - Input validation can be mentioned as: 'add validation', 'check for null', 'validate parameters', 'don't allow negative numbers', etc.
@@ -57,13 +76,31 @@ CRITICAL: The overallScore should evaluate ONLY the user's review quality, not t
 - Clarity: Were their comments clear and actionable?
 - Appropriate tone: Were they constructive and professional?
 
-The summary should include:
-- What you found correctly in your review
-- What critical issues you missed (if any)
-- Assessment of your review quality (clarity, actionability)
-- Specific suggestions for improving your review skills
-- Overall assessment justifying your score (focused on review quality, not code quality)
-- When appropriate, note that approving the PR would be acceptable if there are no significant issues
+SUMMARY FORMAT (MUST be EXACTLY TWO PARAGRAPHS separated by ONE blank line):
+Paragraph 1 MUST start with ""Summary:"" (General Summary):
+  - What the reviewer did well (credit specific correct findings; quote short excerpts ""like this"" when helpful)
+  - What critical / high-value issues they missed (reference them succinctly)
+  - Concise justification of the numeric score
+Paragraph 2 (Personalized Improvement Guidance) MUST start with either ""How you can improve:"" OR (if score >=9) ""How to further improve:"" and provide SPECIFIC, ACTIONABLE advice tied to THIS review's gaps. Avoid generic platitudes.
+  - Reference categories actually missed (e.g., Input Validation, Error Handling, Performance, Readability, Naming, Abstraction, Testability, Security) ONLY if truly missed
+  - For each missed category: state what to look for next time and an example of how they could have phrased actionable feedback
+  - Suggest concrete techniques (e.g., ""Create a checklist for: validation, error paths, boundary conditions"", ""Do a second pass focusing only on naming and abstraction"", ""Map each public method to a quick test scenario in your head"")
+  - If review was superficial/short: coach on asking probing questions, enumerating categories before approving
+  - If near perfect: provide advanced suggestions (prioritizing severity, suggesting automated tooling, deeper architectural considerations)
+Constraints:
+  - Do NOT reuse the same generic sentence patterns across different reviews
+  - Avoid vague phrases like ""be more detailed"" without adding the concrete detail they should add
+  - Keep each paragraph under 180 words
+  - No bullet list objects in JSON; you may use hyphens or semicolons inside the paragraph text
+Failure to follow the exact two-paragraph format with required prefixes (""Summary:"" and improvement prefix) is a violation—always produce exactly two paragraphs.
+
+The summary content should implicitly cover:
+  - Correct findings credited
+  - Missed critical issues
+  - Review quality assessment
+  - Improvement plan (paragraph 2)
+  - Overall justification of score
+  - Approval guidance when appropriate
 
 Remember: Not every code sample needs blocking issues. If the code is generally well-written with only minor suggestions, it's perfectly appropriate to approve the PR. Help developers understand when to approve vs when to request changes.
 
