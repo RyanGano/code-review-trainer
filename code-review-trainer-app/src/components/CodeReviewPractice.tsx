@@ -166,7 +166,7 @@ const CodeReviewPractice = () => {
       <div className="practice-start">
         <h2>Ready to practice reviewing code?</h2>
         <p>
-          Choose your difficulty level below. If you're signed in, a code sample will load automatically.
+          Choose a difficulty level and click <code>Get New Code Sample</code> to get a new test.
         </p>
 
         <div className="difficulty-selection">
