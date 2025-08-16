@@ -145,7 +145,7 @@ return pwd.Length>=8&&pwd.Length<=20?true:false;
     }
     if (b > a)
     {
-        Console.WriteLine(""This will never execute"");
+        Console.WriteLine(""b is greater"");
     }
 }",
 
