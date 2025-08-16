@@ -214,11 +214,6 @@ const CodeReviewPractice = () => {
             Get New Code Sample
           </button>
         </div>
-        {currentTest && (
-          <div className="test-info">
-            <span className="test-id">Test ID: {currentTest.id}</span>
-          </div>
-        )}
       </div>
 
       {isLoading && <div className="loading-message">Loading code sample…</div>}
@@ -310,7 +305,12 @@ const CodeReviewPractice = () => {
                 </p>
               )}
               {submissionResult.summary && (
-                <pre className="summary-block">{submissionResult.summary}</pre>
+                <div>
+                  <pre className="summary-block">{submissionResult.summary}</pre>
+                  <p className="ai-disclaimer">
+                    <em>Disclaimer: This response was AI generated, please check it for accuracy.</em>
+                  </p>
+                </div>
               )}
               {submissionResult.issuesDetected &&
                 submissionResult.issuesDetected.length > 0 && (

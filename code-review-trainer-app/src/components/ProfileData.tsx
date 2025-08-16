@@ -3,16 +3,8 @@ import { useMsal } from "@azure/msal-react";
 import { apiConfig } from "../authConfig";
 import "./shared.less";
 
-interface UserInfo {
-  name?: string;
-  isAuthenticated: boolean;
-  claims: Array<{ type: string; value: string }>;
-}
-
 const ProfileData = () => {
   const { instance, accounts } = useMsal();
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchUserInfo = useCallback(async () => {
@@ -20,7 +12,6 @@ const ProfileData = () => {
       return;
     }
 
-    setIsLoading(true);
     setError(null);
 
     try {
@@ -41,15 +32,13 @@ const ProfileData = () => {
         throw new Error(`HTTP error! status: ${userResponse.status}`);
       }
 
-      const userData = await userResponse.json();
-      setUserInfo(userData);
+      // If successful, we don't need to store the user data since we're not displaying it
+      await userResponse.json();
     } catch (error) {
       console.error("Error fetching user info:", error);
       setError(
         error instanceof Error ? error.message : "Unknown error occurred"
       );
-    } finally {
-      setIsLoading(false);
     }
   }, [instance, accounts]);
 
@@ -63,46 +52,14 @@ const ProfileData = () => {
     return <div>No user signed in</div>;
   }
 
-  const account = accounts[0];
-
   return (
     <div className="profile-container">
-      <h3>User Profile</h3>
-      <div className="profile-field">
-        <strong>Display Name:</strong> {account.name || "N/A"}
-      </div>
-      <div className="profile-field">
-        <strong>Username:</strong> {account.username || "N/A"}
-      </div>
-
-      <h4>API User Information</h4>
-      {isLoading && <div>Loading user info from API…</div>}
-      {error && <div className="error-message">Error: {error}</div>}
-      {userInfo && (
+      {error && (
         <div>
-          <div>
-            <strong>Name:</strong> {userInfo.name || "N/A"}
-          </div>
-          <div>
-            <strong>Authenticated:</strong>{" "}
-            {userInfo.isAuthenticated ? "Yes" : "No"}
-          </div>
-          <div>
-            <strong>Claims:</strong>
-            <ul className="claims-list">
-              {userInfo.claims.map((claim, index) => (
-                <li key={index}>
-                  <strong>{claim.type}:</strong> {claim.value}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <h3>User Profile</h3>
+          <div className="error-message">Error: {error}</div>
         </div>
       )}
-
-      <button onClick={fetchUserInfo} disabled={isLoading}>
-        Refresh User Info
-      </button>
     </div>
   );
 };

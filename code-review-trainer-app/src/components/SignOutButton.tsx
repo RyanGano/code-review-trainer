@@ -20,10 +20,7 @@ const SignOutButton = () => {
     return (
         <div className="button-group">
             <button onClick={() => handleLogout("popup")}>
-                Sign out using Popup
-            </button>
-            <button onClick={() => handleLogout("redirect")}>
-                Sign out using Redirect
+                Sign out
             </button>
         </div>
     );
