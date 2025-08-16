@@ -6,6 +6,25 @@
   line-height: 1.6;
 }
 
+.app-header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  padding: 1rem 2rem;
+  z-index: 100;
+  
+  .auth-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    
+    .welcome-text {
+      font-size: 0.9rem;
+      color: #333;
+    }
+  }
+}
+
 .hero {
   margin-bottom: 3rem;
 
@@ -67,7 +86,7 @@
 
   p {
     margin-bottom: 0;
-    color: #ccc;
+    color: #bbb;
   }
 }
 
@@ -113,10 +132,14 @@
 
 .auth-warning {
   margin-bottom: 20px;
-  padding: 20px;
-  border: 2px solid #ffa500;
-  border-radius: 8px;
-  background-color: #fff3cd;
+  padding: 15px;
+  text-align: center;
+  
+  p {
+    margin: 0 0 15px 0;
+    font-size: 1rem;
+    color: #666;
+  }
 }
 
 @media (max-width: 768px) {

@@ -14,6 +14,19 @@ function App() {
 
   return (
     <>
+      <div className="app-header">
+        <div className="auth-controls">
+          <UnauthenticatedTemplate>
+            <SignInButton />
+          </UnauthenticatedTemplate>
+          
+          <AuthenticatedTemplate>
+            <span className="welcome-text">Welcome {accounts[0]?.name || "User"}</span>
+            <SignOutButton />
+          </AuthenticatedTemplate>
+        </div>
+      </div>
+
       <header className="hero">
         <h1>Code Review Trainer</h1>
         <p className="tagline">Master the art of code review in the AI era</p>
@@ -57,20 +70,12 @@ function App() {
             </div>
 
             <div className="auth-warning">
-              <h2>Authentication Required</h2>
-              <p>
-                You must sign in to access this application. Please authenticate
-                using your Microsoft account.
-              </p>
+              <p>Sign in to get started</p>
               <SignInButton />
             </div>
           </UnauthenticatedTemplate>
 
           <AuthenticatedTemplate>
-            <div className="auth-welcome">
-              <h2>Welcome, {accounts[0]?.name || "User"}!</h2>
-              <SignOutButton />
-            </div>
             <div className="cta">
               <CodeReviewPractice />
             </div>
