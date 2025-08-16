@@ -20,10 +20,7 @@ const SignInButton = () => {
     return (
         <div className="button-group">
             <button onClick={() => handleLogin("popup")}>
-                Sign in using Popup
-            </button>
-            <button onClick={() => handleLogin("redirect")}>
-                Sign in using Redirect
+                Sign in
             </button>
         </div>
     );

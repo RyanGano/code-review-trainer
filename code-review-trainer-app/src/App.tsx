@@ -21,56 +21,41 @@ function App() {
 
       <main className="content">
         <section className="description">
-          <p>
-            In an environment where coding is increasingly done by AI models
-            rather than humans, the ability to{" "}
-            <strong>review code effectively</strong> has become more critical
-            than ever. Code Review Trainer is your training ground for
-            developing sharp, efficient code review skills.
-          </p>
-
-          <div className="features">
-            <div className="feature">
-              <h3>🎯 Choose Your Challenge</h3>
-              <p>
-                Select your skill level and preferred programming language to
-                get started.
-              </p>
-            </div>
-
-            <div className="feature">
-              <h3>📋 Review Mock Pull Requests</h3>
-              <p>
-                Practice on realistic pull requests designed to test your review
-                abilities.
-              </p>
-            </div>
-
-            <div className="feature">
-              <h3>📈 Get AI Feedback</h3>
-              <p>
-                Receive detailed AI-powered evaluation of your reviews with tips
-                for improvement and insights you may have missed.
-              </p>
-            </div>
-          </div>
-
-          <div className="cta">
-            <CodeReviewPractice />
-          </div>
-          <AuthenticatedTemplate>
-            <div className="auth-welcome">
-              <h2>Welcome, {accounts[0]?.name || "User"}!</h2>
-              <p>
-                You are successfully authenticated and can now access the
-                application.
-              </p>
-              <SignOutButton />
-            </div>
-            <ProfileData />
-          </AuthenticatedTemplate>
-
           <UnauthenticatedTemplate>
+            <p>
+              In an environment where coding is increasingly done by AI models
+              rather than humans, the ability to{" "}
+              <strong>review code effectively</strong> has become more critical
+              than ever. Code Review Trainer is your training ground for
+              developing sharp, efficient code review skills.
+            </p>
+
+            <div className="features">
+              <div className="feature">
+                <h3>🎯 Choose Your Challenge</h3>
+                <p>
+                  Select your skill level and preferred programming language to
+                  get started.
+                </p>
+              </div>
+
+              <div className="feature">
+                <h3>📋 Review Mock Pull Requests</h3>
+                <p>
+                  Practice on realistic pull requests designed to test your review
+                  abilities.
+                </p>
+              </div>
+
+              <div className="feature">
+                <h3>📈 Get AI Feedback</h3>
+                <p>
+                  Receive detailed AI-powered evaluation of your reviews with tips
+                  for improvement and insights you may have missed.
+                </p>
+              </div>
+            </div>
+
             <div className="auth-warning">
               <h2>Authentication Required</h2>
               <p>
@@ -80,6 +65,17 @@ function App() {
               <SignInButton />
             </div>
           </UnauthenticatedTemplate>
+
+          <AuthenticatedTemplate>
+            <div className="auth-welcome">
+              <h2>Welcome, {accounts[0]?.name || "User"}!</h2>
+              <SignOutButton />
+            </div>
+            <div className="cta">
+              <CodeReviewPractice />
+            </div>
+            <ProfileData />
+          </AuthenticatedTemplate>
 
           <footer className="disclaimer">
             <p>
