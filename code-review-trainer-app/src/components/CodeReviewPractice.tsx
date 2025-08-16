@@ -313,9 +313,6 @@ const CodeReviewPractice = () => {
               {submissionResult.summary && (
                 <div>
                   <pre className="summary-block">{submissionResult.summary}</pre>
-                  <p className="ai-disclaimer">
-                    <em>Disclaimer: This response was AI generated, please check it for accuracy.</em>
-                  </p>
                 </div>
               )}
               {submissionResult.issuesDetected &&
