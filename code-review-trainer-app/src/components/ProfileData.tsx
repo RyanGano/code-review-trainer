@@ -53,14 +53,16 @@ const ProfileData = () => {
   }
 
   return (
-    <div className="profile-container">
+    <>
       {error && (
-        <div>
-          <h3>User Profile</h3>
-          <div className="error-message">Error: {error}</div>
+        <div className="profile-container">
+          <div>
+            <h3>User Profile</h3>
+            <div className="error-message">Error: {error}</div>
+          </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
