@@ -31,7 +31,35 @@ public class AzureOpenAICodeReviewModel : ICodeReviewModel
 
     try
     {
-      var systemPrompt = "You are a senior C# engineer. Output ONLY valid, minified JSON object per the schema. ABSOLUTELY NO markdown, no backticks, no commentary. If unsure, output an empty JSON object with required keys.";
+      var systemPrompt = @"You are a senior C# engineer conducting code review training. Your goal is to help train developers to become better at code reviews.
+
+IMPORTANT: Output ONLY valid, minified JSON object per the schema. ABSOLUTELY NO markdown, no backticks, no commentary outside the JSON.
+
+Your analysis should:
+1. Conduct your own thorough review of the code (up to 1000 words total response)
+2. Parse the developer's review to identify what they found vs what they missed
+3. Evaluate their review for clarity and actionable items
+4. Provide a score from 0 (terrible) to 10 (perfect) based ONLY on the quality of their review, NOT the code quality
+5. Keep the issuesDetected array comprehensive - do not truncate
+6. Provide detailed feedback in the summary
+
+CRITICAL: The overallScore should evaluate ONLY the user's review quality, not the code quality. Score based on:
+- Completeness: Did they catch the important issues?
+- Accuracy: Were their observations correct?
+- Clarity: Were their comments clear and actionable?
+- Appropriate tone: Were they constructive and professional?
+
+The summary should include:
+- What you found correctly in your review
+- What critical issues you missed
+- Assessment of your review quality (clarity, actionability)
+- Specific suggestions for improving your review skills
+- Overall assessment justifying your score (focused on review quality, not code quality)
+- When appropriate, note that approving the PR would be acceptable if there are no significant issues
+
+Remember: Not every code sample needs blocking issues. If the code is generally well-written with only minor suggestions, it's perfectly appropriate to approve the PR. Help developers understand when to approve vs when to request changes.
+
+Address the reviewer directly using 'you' - never refer to 'the user' or 'they'. Speak directly to the person who submitted the review.";
       var userPrompt = BuildUserPrompt(request);
 
       var messages = new List<ChatMessage>
@@ -42,7 +70,7 @@ public class AzureOpenAICodeReviewModel : ICodeReviewModel
 
       var options = new ChatCompletionOptions
       {
-        MaxOutputTokenCount = 800,
+        MaxOutputTokenCount = 1200,
         Temperature = 0.2f,
         TopP = 1.0f
       };
@@ -140,11 +168,31 @@ public class AzureOpenAICodeReviewModel : ICodeReviewModel
 
   private static string BuildUserPrompt(CodeReviewRequest req)
   {
-    var truncatedCode = Truncate(req.Code, 2500);
-    var truncatedReview = Truncate(req.UserReview, 1500);
+    var truncatedCode = req.Code; // Don't truncate the code
+    var truncatedReview = Truncate(req.UserReview, 2500); // Increase user review limit to 2500
     // Escape braces by doubling for string interpolation
     var schema = "{{ problemId, overallScore, issuesDetected:[{{id,category,title,explanation,severity}}], matchedUserPoints:[{{excerpt,matchedIssueIds,accuracy}}], missedCriticalIssueIds:[], summary }}";
-    return $"ProblemId: {req.ProblemId}\nOriginalCode:\n```csharp\n{truncatedCode}\n```\nUserReview:\n{truncatedReview}\nReturn ONLY RAW JSON (no markdown fences) matching schema: {schema}.";
+    return $@"ProblemId: {req.ProblemId}
+
+OriginalCode:
+```csharp
+{truncatedCode}
+```
+
+UserReview:
+{truncatedReview}
+
+Conduct a comprehensive code review analysis:
+1. Perform your own thorough review of the code
+2. Identify all issues in the code (populate issuesDetected with comprehensive list - do not truncate)
+3. Analyze what the user found correctly (populate matchedUserPoints)
+4. Identify what critical issues the user missed (populate missedCriticalIssueIds with descriptive text like ""Issue 5: Lack of Input Validation"", not just IDs)
+5. Evaluate the user's review quality (clarity, actionability, completeness)
+6. Provide a score from 0-10 and detailed feedback in summary (up to 1000 words)
+
+IMPORTANT: For missedCriticalIssueIds, provide descriptive text that clearly identifies what was missed (e.g., ""Issue 3: Magic Numbers Should Be Constants"", ""Lack of Input Validation"", ""Poor Variable Naming""), not just the issue ID numbers.
+
+Return ONLY RAW JSON (no markdown fences) matching schema: {schema}";
   }
 
   private static string Truncate(string s, int max) => s.Length <= max ? s : s.Substring(0, max) + "\n/* truncated */";
