@@ -37,11 +37,19 @@ IMPORTANT: Output ONLY valid, minified JSON object per the schema. ABSOLUTELY NO
 
 Your analysis should:
 1. Conduct your own thorough review of the code (up to 1000 words total response)
-2. Parse the developer's review to identify what they found vs what they missed
+2. CAREFULLY parse the developer's review to identify what they found vs what they missed
 3. Evaluate their review for clarity and actionable items
 4. Provide a score from 0 (terrible) to 10 (perfect) based ONLY on the quality of their review, NOT the code quality
 5. Keep the issuesDetected array comprehensive - do not truncate
 6. Provide detailed feedback in the summary
+
+CRITICAL PARSING INSTRUCTIONS:
+- Read the user's review thoroughly and look for ANY mention of issues, even if phrased differently than you would phrase them
+- Input validation can be mentioned as: 'add validation', 'check for null', 'validate parameters', 'don't allow negative numbers', etc.
+- Error handling can be mentioned as: 'handle exceptions', 'try-catch', 'error checking', 'what if this fails', etc.
+- Performance issues can be mentioned as: 'inefficient', 'slow', 'optimize', 'better algorithm', etc.
+- Security issues can be mentioned as: 'security risk', 'unsafe', 'vulnerability', 'sanitize input', etc.
+- DO NOT mark something as missed if the user mentioned it in ANY reasonable form
 
 CRITICAL: The overallScore should evaluate ONLY the user's review quality, not the code quality. Score based on:
 - Completeness: Did they catch the important issues?
@@ -51,7 +59,7 @@ CRITICAL: The overallScore should evaluate ONLY the user's review quality, not t
 
 The summary should include:
 - What you found correctly in your review
-- What critical issues you missed
+- What critical issues you missed (if any)
 - Assessment of your review quality (clarity, actionability)
 - Specific suggestions for improving your review skills
 - Overall assessment justifying your score (focused on review quality, not code quality)
@@ -185,12 +193,19 @@ UserReview:
 Conduct a comprehensive code review analysis:
 1. Perform your own thorough review of the code
 2. Identify all issues in the code (populate issuesDetected with comprehensive list - do not truncate)
-3. Analyze what the user found correctly (populate matchedUserPoints)
-4. Identify what critical issues the user missed (populate missedCriticalIssueIds with descriptive text like ""Issue 5: Lack of Input Validation"", not just IDs)
+3. CAREFULLY analyze what the user found correctly - look for ANY mention of issues even if phrased differently than you would phrase them:
+   - Input validation mentioned as: 'add validation', 'validate that text is not null', 'don't allow negative numbers', 'check parameters', etc.
+   - Error handling mentioned as: 'handle exceptions', 'try-catch', 'error checking', 'what if this fails', etc.
+   - Performance mentioned as: 'inefficient', 'slow', 'optimize', 'better algorithm', etc.
+   - Security mentioned as: 'security risk', 'unsafe', 'vulnerability', 'sanitize input', etc.
+4. Identify what critical issues the user missed (populate missedCriticalIssueIds with descriptive text ONLY for issues that were truly not mentioned)
 5. Evaluate the user's review quality (clarity, actionability, completeness)
 6. Provide a score from 0-10 and detailed feedback in summary (up to 1000 words)
 
-IMPORTANT: For missedCriticalIssueIds, provide descriptive text that clearly identifies what was missed (e.g., ""Issue 3: Magic Numbers Should Be Constants"", ""Lack of Input Validation"", ""Poor Variable Naming""), not just the issue ID numbers.
+IMPORTANT: 
+- For missedCriticalIssueIds, provide descriptive text that clearly identifies what was missed (e.g., ""Issue 3: Magic Numbers Should Be Constants"", ""Lack of Input Validation"", ""Poor Variable Naming""), not just the issue ID numbers.
+- DO NOT include an issue in missedCriticalIssueIds if the user mentioned it in ANY reasonable form
+- Give the user credit for finding issues even if they described them differently than you would
 
 Return ONLY RAW JSON (no markdown fences) matching schema: {schema}";
   }
