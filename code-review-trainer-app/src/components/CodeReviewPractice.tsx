@@ -49,6 +49,9 @@ const CodeReviewPractice = () => {
   const [submissionResult, setSubmissionResult] =
     useState<CodeReviewModelResult | null>(null);
 
+  const MAX_REVIEW_LENGTH = 2500;
+  const WARNING_THRESHOLD = 2200; // Show warning at 88% of limit
+
   const fetchCodeReviewTest = useCallback(async () => {
     if (accounts.length === 0) {
       setError("You must be signed in to practice code reviews");
@@ -98,6 +101,12 @@ const CodeReviewPractice = () => {
       return;
     }
 
+    // Truncate review if it exceeds the limit
+    const finalReview =
+      reviewComments.length > MAX_REVIEW_LENGTH
+        ? reviewComments.substring(0, MAX_REVIEW_LENGTH)
+        : reviewComments;
+
     setIsSubmitting(true);
     setError(null);
 
@@ -117,7 +126,7 @@ const CodeReviewPractice = () => {
             Authorization: `Bearer ${response.accessToken}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ review: reviewComments.trim() }),
+          body: JSON.stringify({ review: finalReview.trim() }),
         }
       );
 
@@ -248,7 +257,26 @@ const CodeReviewPractice = () => {
               onChange={(e) => setReviewComments(e.target.value)}
               placeholder="Enter your code review comments here. What issues do you see? What would you suggest to improve this code?"
               className="review-textarea"
+              maxLength={MAX_REVIEW_LENGTH}
             />
+            <div className="character-count">
+              <span
+                className={`count ${
+                  reviewComments.length >= WARNING_THRESHOLD ? "warning" : ""
+                } ${reviewComments.length >= MAX_REVIEW_LENGTH ? "limit" : ""}`}
+              >
+                {reviewComments.length} / {MAX_REVIEW_LENGTH} characters
+              </span>
+              {reviewComments.length >= WARNING_THRESHOLD &&
+                reviewComments.length < MAX_REVIEW_LENGTH && (
+                  <span className="warning-text">
+                    Approaching character limit
+                  </span>
+                )}
+              {reviewComments.length >= MAX_REVIEW_LENGTH && (
+                <span className="limit-text">Character limit reached</span>
+              )}
+            </div>
           </div>
 
           <div className="submit-section">

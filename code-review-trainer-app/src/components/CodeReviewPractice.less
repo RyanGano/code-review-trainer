@@ -110,6 +110,40 @@
   resize: vertical;
 }
 
+.character-count {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 5px;
+  font-size: 12px;
+  
+  .count {
+    color: #666;
+    
+    &.warning {
+      color: #ff8c00;
+      font-weight: bold;
+    }
+    
+    &.limit {
+      color: #dc3545;
+      font-weight: bold;
+    }
+  }
+  
+  .warning-text {
+    color: #ff8c00;
+    font-weight: bold;
+    font-size: 11px;
+  }
+  
+  .limit-text {
+    color: #dc3545;
+    font-weight: bold;
+    font-size: 11px;
+  }
+}
+
 .submit-section {
   text-align: center;
 }

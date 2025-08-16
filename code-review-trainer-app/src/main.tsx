@@ -16,6 +16,7 @@ function isCryptoAvailable(): boolean {
   }
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 const Root = () => {
   const [cryptoReady, setCryptoReady] = useState(false);
   const [msalInstance, setMsalInstance] =
