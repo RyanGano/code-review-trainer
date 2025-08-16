@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 interface CodeReviewIssue {
   id: string;
@@ -96,6 +96,13 @@ const CodeReviewPractice = () => {
     }
   }, [instance, accounts, selectedDifficulty]);
 
+  // Auto-fetch a code review test when user signs in
+  useEffect(() => {
+    if (accounts.length > 0 && !currentTest && !isLoading) {
+      fetchCodeReviewTest();
+    }
+  }, [accounts, currentTest, isLoading, fetchCodeReviewTest]);
+
   const handleSubmitReview = async () => {
     if (!currentTest || !reviewComments.trim() || accounts.length === 0) {
       return;
@@ -157,10 +164,9 @@ const CodeReviewPractice = () => {
   if (!currentTest && !isLoading && !error) {
     return (
       <div className="practice-start">
-        <h2>Ready to Practice Code Reviews?</h2>
+        <h2>Ready to practice reviewing code?</h2>
         <p>
-          Choose your difficulty level and click the button below to get a code
-          sample for review.
+          Choose your difficulty level below. If you're signed in, a code sample will load automatically.
         </p>
 
         <div className="difficulty-selection">
