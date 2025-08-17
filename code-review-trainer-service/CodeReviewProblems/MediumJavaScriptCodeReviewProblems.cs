@@ -1,6 +1,5 @@
 namespace code_review_trainer_service.CodeReviewProblems;
 
-// Static class containing medium-level JavaScript code review problems
 public static class MediumJavaScriptCodeReviewProblems
 {
     private static readonly Random _random = new Random();
