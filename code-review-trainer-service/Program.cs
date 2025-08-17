@@ -100,7 +100,7 @@ app.MapGet("/user", (HttpContext context) =>
     };
 }).RequireAuthorization();
 
-app.MapGet("/tests/", (DifficultyLevel? level) =>
+app.MapGet("/tests/", (DifficultyLevel? level, Language language) =>
 {
     if (level == null)
     {
@@ -110,10 +110,14 @@ app.MapGet("/tests/", (DifficultyLevel? level) =>
     // Return a random problem for Easy level
     if (level == DifficultyLevel.Easy)
     {
-        var randomProblem = EasyCodeReviewProblems.GetRandomProblemWithId();
+        CodeReviewProblem randomProblem = language == Language.JavaScript
+            ? EasyJavaScriptCodeReviewProblems.GetRandomProblemWithId()
+            : EasyCodeReviewProblems.GetRandomProblemWithId();
+            
         return Results.Ok(new
         {
             level = level.ToString(),
+            language = language.ToString(),
             problem = randomProblem.Problem,
             id = randomProblem.Id
         });
@@ -122,10 +126,14 @@ app.MapGet("/tests/", (DifficultyLevel? level) =>
     // Return a random problem for Medium level
     if (level == DifficultyLevel.Medium)
     {
-        var randomProblem = MediumCodeReviewProblems.GetRandomProblemWithId();
+        CodeReviewProblem randomProblem = language == Language.JavaScript
+            ? MediumJavaScriptCodeReviewProblems.GetRandomProblemWithId()
+            : MediumCodeReviewProblems.GetRandomProblemWithId();
+            
         return Results.Ok(new
         {
             level = level.ToString(),
+            language = language.ToString(),
             problem = randomProblem.Problem,
             id = randomProblem.Id
         });

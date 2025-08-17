@@ -5,6 +5,7 @@ public class CodeReviewProblem
 {
     public string Id { get; set; } = string.Empty;
     public string Problem { get; set; } = string.Empty;
+    public Language Language { get; set; } = Language.CSharp;
 }
 
 // Static class containing easy-level code review problems
@@ -417,8 +418,9 @@ a[j]=a[j+1];a[j+1]=temp;
         var index = _random.Next(_problems.Length);
         return new CodeReviewProblem
         {
-            Id = $"easy_{index + 1:D3}",
-            Problem = _problems[index]
+            Id = $"cs_easy_{index + 1:D3}",
+            Problem = _problems[index],
+            Language = Language.CSharp
         };
     }
 
