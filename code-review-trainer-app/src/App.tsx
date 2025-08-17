@@ -7,10 +7,17 @@ import SignInButton from "./components/SignInButton";
 import SignOutButton from "./components/SignOutButton";
 import ProfileData from "./components/ProfileData";
 import CodeReviewPractice from "./components/CodeReviewPractice";
+import { loginRequest } from "./authConfig";
 import "./App.less";
 
 function App() {
-  const { accounts } = useMsal();
+  const { accounts, instance } = useMsal();
+
+  const handleSignIn = () => {
+    instance.loginPopup(loginRequest).catch(e => {
+      console.log(e);
+    });
+  };
 
   return (
     <>
@@ -70,8 +77,9 @@ function App() {
             </div>
 
             <div className="auth-warning">
-              <p>Sign in to get started</p>
-              <SignInButton />
+              <p>
+                <button className="sign-in-link" onClick={handleSignIn}>Sign in</button> to get started
+              </p>
             </div>
           </UnauthenticatedTemplate>
 
