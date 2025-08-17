@@ -581,8 +581,9 @@ public static class MediumCodeReviewProblems
         var index = _random.Next(_problems.Length);
         return new CodeReviewProblem
         {
-            Id = $"medium_{index + 1:D3}",
-            Problem = _problems[index]
+            Id = $"cs_medium_{index + 1:D3}",
+            Problem = _problems[index],
+            Language = Language.CSharp
         };
     }
 

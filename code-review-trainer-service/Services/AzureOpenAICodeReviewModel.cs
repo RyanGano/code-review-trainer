@@ -215,19 +215,27 @@ Address the reviewer directly using 'you' - never refer to 'the user' or 'they'.
   {
     var truncatedCode = req.Code; // Don't truncate the code
     var truncatedReview = Truncate(req.UserReview, 2500); // Increase user review limit to 2500
+    
+    // Determine language from problem ID
+    var language = "csharp"; // default
+    if (req.ProblemId.StartsWith("js_", StringComparison.OrdinalIgnoreCase))
+    {
+      language = "javascript";
+    }
+    
     // Escape braces by doubling for string interpolation
     var schema = "{{ problemId, overallScore, issuesDetected:[{{id,category,title,explanation,severity}}], matchedUserPoints:[{{excerpt,matchedIssueIds,accuracy}}], missedCriticalIssueIds:[], summary }}";
     return $@"ProblemId: {req.ProblemId}
 
 OriginalCode:
-```csharp
+```{language}
 {truncatedCode}
 ```
 
 UserReview:
 {truncatedReview}
 
-Conduct a comprehensive code review analysis:
+Conduct a comprehensive code review analysis for this {(language == "javascript" ? "JavaScript" : "C#")} code:
 1. Perform your own thorough review of the code
 2. Identify all issues in the code (populate issuesDetected with comprehensive list - do not truncate)
 3. CAREFULLY analyze what the user found correctly - look for ANY mention of issues even if phrased differently than you would phrase them:
