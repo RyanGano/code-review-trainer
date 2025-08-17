@@ -13,62 +13,72 @@ public class ProblemRepository : IProblemRepository
   {
     if (string.IsNullOrWhiteSpace(id)) return null;
     
+    var parts = id.Split('_');
+    if (parts.Length < 2) return null;
+    
     // Handle new format: {lang}_{difficulty}_{index}
-    if (id.StartsWith("cs_easy_", StringComparison.OrdinalIgnoreCase))
+    if (parts.Length >= 3)
     {
-      if (TryParseIndex(id, "cs_easy_", out var index, EasyCodeReviewProblems.Count))
+      var language = parts[0].ToLowerInvariant() switch
       {
-        return (id, EasyCodeReviewProblems.GetProblemByIndex(index));
-      }
+        "cs" => Language.CSharp,
+        "js" => Language.JavaScript,
+        _ => (Language?)null
+      };
+      
+      if (language == null) return null;
+      
+      var difficulty = parts[1].ToLowerInvariant() switch
+      {
+        "easy" => DifficultyLevel.Easy,
+        "medium" => DifficultyLevel.Medium,
+        _ => (DifficultyLevel?)null
+      };
+      
+      if (difficulty == null) return null;
+      
+      if (!int.TryParse(parts[2], out var oneBased) || oneBased <= 0) return null;
+      var index = oneBased - 1;
+      
+      return (language, difficulty) switch
+      {
+        (Language.CSharp, DifficultyLevel.Easy) when index < EasyCodeReviewProblems.Count => 
+          (id, EasyCodeReviewProblems.GetProblemByIndex(index)),
+        (Language.CSharp, DifficultyLevel.Medium) when index < MediumCodeReviewProblems.Count => 
+          (id, MediumCodeReviewProblems.GetProblemByIndex(index)),
+        (Language.JavaScript, DifficultyLevel.Easy) when index < EasyJavaScriptCodeReviewProblems.Count => 
+          (id, EasyJavaScriptCodeReviewProblems.GetProblemByIndex(index)),
+        (Language.JavaScript, DifficultyLevel.Medium) when index < MediumJavaScriptCodeReviewProblems.Count => 
+          (id, MediumJavaScriptCodeReviewProblems.GetProblemByIndex(index)),
+        _ => null
+      };
     }
-    else if (id.StartsWith("cs_medium_", StringComparison.OrdinalIgnoreCase))
+    
+    // Backward compatibility: handle old format {difficulty}_{index}
+    if (parts.Length == 2)
     {
-      if (TryParseIndex(id, "cs_medium_", out var index, MediumCodeReviewProblems.Count))
+      var difficulty = parts[0].ToLowerInvariant() switch
       {
-        return (id, MediumCodeReviewProblems.GetProblemByIndex(index));
-      }
-    }
-    else if (id.StartsWith("js_easy_", StringComparison.OrdinalIgnoreCase))
-    {
-      if (TryParseIndex(id, "js_easy_", out var index, EasyJavaScriptCodeReviewProblems.Count))
+        "easy" => DifficultyLevel.Easy,
+        "medium" => DifficultyLevel.Medium,
+        _ => (DifficultyLevel?)null
+      };
+      
+      if (difficulty == null) return null;
+      
+      if (!int.TryParse(parts[1], out var oneBased) || oneBased <= 0) return null;
+      var index = oneBased - 1;
+      
+      return difficulty switch
       {
-        return (id, EasyJavaScriptCodeReviewProblems.GetProblemByIndex(index));
-      }
+        DifficultyLevel.Easy when index < EasyCodeReviewProblems.Count => 
+          (id, EasyCodeReviewProblems.GetProblemByIndex(index)),
+        DifficultyLevel.Medium when index < MediumCodeReviewProblems.Count => 
+          (id, MediumCodeReviewProblems.GetProblemByIndex(index)),
+        _ => null
+      };
     }
-    else if (id.StartsWith("js_medium_", StringComparison.OrdinalIgnoreCase))
-    {
-      if (TryParseIndex(id, "js_medium_", out var index, MediumJavaScriptCodeReviewProblems.Count))
-      {
-        return (id, MediumJavaScriptCodeReviewProblems.GetProblemByIndex(index));
-      }
-    }
-    // Backward compatibility: handle old format
-    else if (id.StartsWith("easy_", StringComparison.OrdinalIgnoreCase))
-    {
-      if (TryParseIndex(id, "easy_", out var index, EasyCodeReviewProblems.Count))
-      {
-        return (id, EasyCodeReviewProblems.GetProblemByIndex(index));
-      }
-    }
-    else if (id.StartsWith("medium_", StringComparison.OrdinalIgnoreCase))
-    {
-      if (TryParseIndex(id, "medium_", out var index, MediumCodeReviewProblems.Count))
-      {
-        return (id, MediumCodeReviewProblems.GetProblemByIndex(index));
-      }
-    }
+    
     return null;
-  }
-
-  private static bool TryParseIndex(string id, string prefix, out int index, int max)
-  {
-    index = -1;
-    var part = id.Substring(prefix.Length);
-    if (int.TryParse(part, out var oneBased))
-    {
-      index = oneBased - 1;
-      return index >= 0 && index < max;
-    }
-    return false;
   }
 }
