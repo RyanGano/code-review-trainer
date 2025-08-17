@@ -23,19 +23,15 @@ public class ProblemRepository : IProblemRepository
       {
         "cs" => Language.CSharp,
         "js" => Language.JavaScript,
-        _ => (Language?)null
+        _ => throw new ArgumentException($"Invalid language identifier '{parts[0]}'. Supported languages are: cs, js", nameof(id))
       };
-      
-      if (language == null) return null;
       
       var difficulty = parts[1].ToLowerInvariant() switch
       {
         "easy" => DifficultyLevel.Easy,
         "medium" => DifficultyLevel.Medium,
-        _ => (DifficultyLevel?)null
+        _ => throw new ArgumentException($"Invalid difficulty level '{parts[1]}'. Supported difficulty levels are: easy, medium", nameof(id))
       };
-      
-      if (difficulty == null) return null;
       
       if (!int.TryParse(parts[2], out var oneBased) || oneBased <= 0) return null;
       var index = oneBased - 1;
@@ -61,10 +57,8 @@ public class ProblemRepository : IProblemRepository
       {
         "easy" => DifficultyLevel.Easy,
         "medium" => DifficultyLevel.Medium,
-        _ => (DifficultyLevel?)null
+        _ => throw new ArgumentException($"Invalid difficulty level '{parts[0]}'. Supported difficulty levels are: easy, medium", nameof(id))
       };
-      
-      if (difficulty == null) return null;
       
       if (!int.TryParse(parts[1], out var oneBased) || oneBased <= 0) return null;
       var index = oneBased - 1;
