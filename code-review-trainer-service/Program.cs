@@ -100,27 +100,24 @@ app.MapGet("/user", (HttpContext context) =>
     };
 }).RequireAuthorization();
 
-app.MapGet("/tests/", (DifficultyLevel? level, Language? language) =>
+app.MapGet("/tests/", (DifficultyLevel? level, Language language) =>
 {
     if (level == null)
     {
         return Results.Ok(Enum.GetNames<DifficultyLevel>());
     }
 
-    // Default to C# if no language specified for backward compatibility
-    var selectedLanguage = language ?? Language.CSharp;
-
     // Return a random problem for Easy level
     if (level == DifficultyLevel.Easy)
     {
-        CodeReviewProblem randomProblem = selectedLanguage == Language.JavaScript
+        CodeReviewProblem randomProblem = language == Language.JavaScript
             ? EasyJavaScriptCodeReviewProblems.GetRandomProblemWithId()
             : EasyCodeReviewProblems.GetRandomProblemWithId();
             
         return Results.Ok(new
         {
             level = level.ToString(),
-            language = selectedLanguage.ToString(),
+            language = language.ToString(),
             problem = randomProblem.Problem,
             id = randomProblem.Id
         });
@@ -129,14 +126,14 @@ app.MapGet("/tests/", (DifficultyLevel? level, Language? language) =>
     // Return a random problem for Medium level
     if (level == DifficultyLevel.Medium)
     {
-        CodeReviewProblem randomProblem = selectedLanguage == Language.JavaScript
+        CodeReviewProblem randomProblem = language == Language.JavaScript
             ? MediumJavaScriptCodeReviewProblems.GetRandomProblemWithId()
             : MediumCodeReviewProblems.GetRandomProblemWithId();
             
         return Results.Ok(new
         {
             level = level.ToString(),
-            language = selectedLanguage.ToString(),
+            language = language.ToString(),
             problem = randomProblem.Problem,
             id = randomProblem.Id
         });
