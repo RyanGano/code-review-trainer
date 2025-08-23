@@ -203,26 +203,26 @@ const CodeReviewPractice = () => {
           to get a new test.
         </p>
 
-        <div className="difficulty-selection">
+        <div className="common-selection">
           <label htmlFor="difficulty-select">Difficulty Level:</label>
           <select
             id="difficulty-select"
             value={selectedDifficulty}
             onChange={(e) => setSelectedDifficulty(e.target.value)}
-            className="difficulty-dropdown"
+            className="common-dropdown"
           >
             <option value="Easy">Easy</option>
             <option value="Medium">Medium</option>
           </select>
         </div>
 
-        <div className="language-selection">
+        <div className="common-selection">
           <label htmlFor="language-select">Language:</label>
           <select
             id="language-select"
             value={selectedLanguage}
             onChange={(e) => setSelectedLanguage(e.target.value)}
-            className="language-dropdown"
+            className="common-dropdown"
           >
             <option value="CSharp">C#</option>
             <option value="JavaScript">JavaScript</option>
@@ -272,25 +272,25 @@ const CodeReviewPractice = () => {
           Level - {currentTest?.language || selectedLanguage}
         </h2>
         <div className="header-controls">
-          <div className="difficulty-selection">
+          <div className="common-selection">
             <label htmlFor="difficulty-select-active">Difficulty:</label>
             <select
               id="difficulty-select-active"
               value={selectedDifficulty}
               onChange={(e) => setSelectedDifficulty(e.target.value)}
-              className="difficulty-dropdown"
+              className="common-dropdown"
             >
               <option value="Easy">Easy</option>
               <option value="Medium">Medium</option>
             </select>
           </div>
-          <div className="language-selection">
+          <div className="common-selection">
             <label htmlFor="language-select-active">Language:</label>
             <select
               id="language-select-active"
               value={selectedLanguage}
               onChange={(e) => setSelectedLanguage(e.target.value)}
-              className="language-dropdown"
+              className="common-dropdown"
             >
               <option value="CSharp">C#</option>
               <option value="JavaScript">JavaScript</option>
