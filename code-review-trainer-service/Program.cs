@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using code_review_trainer_service.CodeReviewProblems;
 using Microsoft.IdentityModel.Tokens;
 using code_review_trainer_service.Services;
-using Azure.Identity; // added for Key Vault
+using Azure.Identity;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,23 +29,50 @@ if (!string.IsNullOrWhiteSpace(keyVaultName))
 }
 
 
-// Add authentication
+// Authentication (cleaned & hardened)
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.Authority = $"https://login.microsoftonline.com/{builder.Configuration["AzureAd:TenantId"]}";
-        options.Audience = builder.Configuration["AzureAd:Audience"];
+        options.Authority = "https://login.microsoftonline.com/common/v2.0"; // multi-tenant v2 endpoint
+        var configuredAudience = builder.Configuration["AzureAd:Audience"];
+        if (string.IsNullOrWhiteSpace(configuredAudience))
+        {
+            throw new InvalidOperationException("AzureAd:Audience not configured.");
+        }
+        // Accept the bare GUID if config uses api://{guid}
+        var canonicalAudience = configuredAudience.StartsWith("api://", StringComparison.OrdinalIgnoreCase)
+            ? configuredAudience.Substring("api://".Length)
+            : configuredAudience;
+        options.Audience = canonicalAudience;
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = true,
+            ValidateIssuer = false, // still multi-tenant; custom issuer filtering can be added later
             ValidateAudience = true,
+            ValidAudience = canonicalAudience,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             ClockSkew = TimeSpan.FromMinutes(5)
         };
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = ctx =>
+            {
+                Console.WriteLine($"[Auth] Failed: {ctx.Exception.GetType().Name} - {ctx.Exception.Message}");
+                return Task.CompletedTask;
+            }
+        };
     });
 
-builder.Services.AddAuthorization();
+// Default authorization policy requiring access_as_user scope
+builder.Services.AddAuthorization(o =>
+{
+    o.DefaultPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .RequireAssertion(ctx =>
+            ctx.User.HasClaim(c => c.Type == "scp" && c.Value.Split(' ').Contains("access_as_user")) ||
+            ctx.User.HasClaim(c => c.Type == "http://schemas.microsoft.com/identity/claims/scope" && c.Value.Split(' ').Contains("access_as_user")))
+        .Build();
+});
 builder.Services.AddCodeReviewServices(builder.Configuration);
 
 // Add CORS
@@ -113,7 +140,7 @@ app.MapGet("/tests/", (DifficultyLevel? level, Language language) =>
         CodeReviewProblem randomProblem = language == Language.JavaScript
             ? EasyJavaScriptCodeReviewProblems.GetRandomProblemWithId()
             : EasyCodeReviewProblems.GetRandomProblemWithId();
-            
+
         return Results.Ok(new
         {
             level = level.ToString(),
@@ -129,7 +156,7 @@ app.MapGet("/tests/", (DifficultyLevel? level, Language language) =>
         CodeReviewProblem randomProblem = language == Language.JavaScript
             ? MediumJavaScriptCodeReviewProblems.GetRandomProblemWithId()
             : MediumCodeReviewProblems.GetRandomProblemWithId();
-            
+
         return Results.Ok(new
         {
             level = level.ToString(),

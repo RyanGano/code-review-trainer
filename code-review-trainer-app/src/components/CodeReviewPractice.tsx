@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useMsal } from "@azure/msal-react";
+import { InteractionRequiredAuthError } from "@azure/msal-browser";
 import { apiConfig } from "../authConfig";
 import CodeMirror from "@uiw/react-codemirror";
 import { csharp } from "@replit/codemirror-lang-csharp";
@@ -57,6 +58,32 @@ const CodeReviewPractice = () => {
   const MAX_REVIEW_LENGTH = 2500;
   const WARNING_THRESHOLD = 2200; // Show warning at 88% of limit
 
+  // Helper to acquire API token with interactive fallback
+  const acquireApiToken = useCallback(async (): Promise<string> => {
+    if (accounts.length === 0) throw new Error("Not signed in");
+    const request = {
+      scopes: apiConfig.b2cScopes,
+      account: accounts[0],
+    } as const;
+    try {
+      const silent = await instance.acquireTokenSilent(request);
+      return silent.accessToken;
+    } catch (err: unknown) {
+      const msalErr = err as { errorCode?: string };
+      const needsInteraction =
+        err instanceof InteractionRequiredAuthError ||
+        ["consent_required", "interaction_required", "login_required"].includes(
+          msalErr?.errorCode || ""
+        );
+      if (!needsInteraction) throw err as Error;
+      const popup = await instance.acquireTokenPopup({
+        ...request,
+        prompt: "select_account",
+      });
+      return popup.accessToken;
+    }
+  }, [accounts, instance]);
+
   const fetchCodeReviewTest = useCallback(async () => {
     if (accounts.length === 0) {
       setError("You must be signed in to practice code reviews");
@@ -67,18 +94,14 @@ const CodeReviewPractice = () => {
     setError(null);
 
     try {
-      // Get access token
-      const response = await instance.acquireTokenSilent({
-        scopes: apiConfig.b2cScopes,
-        account: accounts[0],
-      });
+      const accessToken = await acquireApiToken();
 
       // Call API to get a test with the selected difficulty and language
       const testResponse = await fetch(
         `${apiConfig.webApi}tests/?level=${selectedDifficulty}&language=${selectedLanguage}`,
         {
           headers: {
-            Authorization: `Bearer ${response.accessToken}`,
+            Authorization: `Bearer ${accessToken}`,
           },
         }
       );
@@ -99,7 +122,7 @@ const CodeReviewPractice = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [instance, accounts, selectedDifficulty, selectedLanguage]);
+  }, [accounts, selectedDifficulty, selectedLanguage, acquireApiToken]);
 
   // Auto-fetch a code review test once when user signs in (avoid infinite retry loop on errors)
   useEffect(() => {
@@ -135,11 +158,7 @@ const CodeReviewPractice = () => {
     setError(null);
 
     try {
-      // Get access token
-      const response = await instance.acquireTokenSilent({
-        scopes: apiConfig.b2cScopes,
-        account: accounts[0],
-      });
+      const accessToken = await acquireApiToken();
 
       // Submit review to backend
       const submitResponse = await fetch(
@@ -147,7 +166,7 @@ const CodeReviewPractice = () => {
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${response.accessToken}`,
+            Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ review: finalReview.trim() }),

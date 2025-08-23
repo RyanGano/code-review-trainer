@@ -29,7 +29,7 @@ console.log("API Base URL:", import.meta.env.VITE_API_BASE_URL);
  * https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-permissions-and-consent#openid-connect-scopes
  */
 export const loginRequest: PopupRequest = {
-  scopes: ["User.Read"],
+  scopes: ["api://e8f9c30f-3840-4ac5-9fd2-f6fc5d8c0ae1/access_as_user"],
 };
 
 /**
@@ -43,7 +43,20 @@ export const graphConfig = {
 /**
  * API configuration
  */
+// Ensure base API URL always has a trailing slash so concatenations like `${webApi}tests/...` are valid.
+const rawApiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:5137";
+const normalizedApiBase = rawApiBase.endsWith("/")
+  ? rawApiBase
+  : rawApiBase + "/";
+
 export const apiConfig = {
   b2cScopes: ["api://e8f9c30f-3840-4ac5-9fd2-f6fc5d8c0ae1/access_as_user"],
-  webApi: import.meta.env.VITE_API_BASE_URL || "http://localhost:5137",
+  webApi: normalizedApiBase,
 };
+
+if (rawApiBase !== normalizedApiBase) {
+  console.log(
+    "Normalized API Base URL (added trailing slash):",
+    normalizedApiBase
+  );
+}

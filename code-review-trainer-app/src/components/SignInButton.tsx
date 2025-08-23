@@ -3,27 +3,21 @@ import { loginRequest } from "../authConfig";
 import "./shared.less";
 
 const SignInButton = () => {
-    const { instance } = useMsal();
+  const { instance, accounts } = useMsal();
 
-    const handleLogin = (loginType: string) => {
-        if (loginType === "popup") {
-            instance.loginPopup(loginRequest).catch(e => {
-                console.log(e);
-            });
-        } else if (loginType === "redirect") {
-            instance.loginRedirect(loginRequest).catch(e => {
-                console.log(e);
-            });
-        }
-    }
+  const handleSignIn = () => {
+    instance.loginPopup(loginRequest).catch(() => {
+      /* optionally surface error to user */
+    });
+  };
 
-    return (
-        <div className="button-group">
-            <button onClick={() => handleLogin("popup")}>
-                Sign in
-            </button>
-        </div>
-    );
+  if (accounts.length > 0) return null;
+
+  return (
+    <div className="button-group">
+      <button onClick={handleSignIn}>Sign in</button>
+    </div>
+  );
 };
 
 export default SignInButton;
