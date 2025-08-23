@@ -8,9 +8,7 @@ import type { Configuration, PopupRequest } from "@azure/msal-browser";
 export const msalConfig: Configuration = {
   auth: {
     clientId: import.meta.env.VITE_AZURE_CLIENT_ID || "YOUR_CLIENT_ID", // This is the ONLY mandatory field that you need to supply.
-    authority: `https://login.microsoftonline.com/${
-      import.meta.env.VITE_AZURE_TENANT_ID || "YOUR_TENANT_ID"
-    }`, // Defaults to "https://login.microsoftonline.com/common"
+    authority: `https://login.microsoftonline.com/common`, // Defaults to "https://login.microsoftonline.com/common"
     redirectUri: import.meta.env.VITE_REDIRECT_URI || window.location.origin, // You must register this URI on Azure Portal/App Registration.
     postLogoutRedirectUri:
       import.meta.env.VITE_POST_LOGOUT_REDIRECT_URI || window.location.origin, // Indicates the page to navigate after logout.
