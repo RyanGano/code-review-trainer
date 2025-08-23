@@ -51,6 +51,8 @@ const CodeReviewPractice = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionResult, setSubmissionResult] =
     useState<CodeReviewModelResult | null>(null);
+  // Prevent infinite re-fetch loop when backend is failing
+  const [autoFetchAttempted, setAutoFetchAttempted] = useState(false);
 
   const MAX_REVIEW_LENGTH = 2500;
   const WARNING_THRESHOLD = 2200; // Show warning at 88% of limit
@@ -99,12 +101,24 @@ const CodeReviewPractice = () => {
     }
   }, [instance, accounts, selectedDifficulty, selectedLanguage]);
 
-  // Auto-fetch a code review test when user signs in
+  // Auto-fetch a code review test once when user signs in (avoid infinite retry loop on errors)
   useEffect(() => {
-    if (accounts.length > 0 && !currentTest && !isLoading) {
+    if (
+      accounts.length > 0 &&
+      !currentTest &&
+      !isLoading &&
+      !autoFetchAttempted
+    ) {
+      setAutoFetchAttempted(true);
       fetchCodeReviewTest();
     }
-  }, [accounts, currentTest, isLoading, fetchCodeReviewTest]);
+  }, [
+    accounts,
+    currentTest,
+    isLoading,
+    autoFetchAttempted,
+    fetchCodeReviewTest,
+  ]);
 
   const handleSubmitReview = async () => {
     if (!currentTest || !reviewComments.trim() || accounts.length === 0) {
@@ -160,16 +174,14 @@ const CodeReviewPractice = () => {
     fetchCodeReviewTest();
   };
 
-  const handleStartPracticing = () => {
-    fetchCodeReviewTest();
-  };
-
-  if (!currentTest && !isLoading && !error) {
+  // When no test loaded yet (either fresh start or after an error), show the start panel
+  if (!currentTest && !isLoading) {
     return (
       <div className="practice-start">
         <h2>Ready to practice reviewing code?</h2>
         <p>
-          Choose a difficulty level and click <code>Get New Code Sample</code> to get a new test.
+          Choose a difficulty level and click <code>Get New Code Sample</code>{" "}
+          to get a new test.
         </p>
 
         <div className="difficulty-selection">
@@ -200,13 +212,34 @@ const CodeReviewPractice = () => {
 
         <button
           className="start-button"
-          onClick={handleStartPracticing}
-          disabled={accounts.length === 0}
+          onClick={() => {
+            // Allow another auto attempt after manual retry
+            setAutoFetchAttempted(true); // mark attempted; manual triggers explicit fetch
+            fetchCodeReviewTest();
+          }}
+          disabled={accounts.length === 0 || isLoading}
         >
-          Start Practicing
+          {isLoading ? "Loading…" : currentTest ? "Loaded" : "Start Practicing"}
         </button>
         {accounts.length === 0 && (
           <p className="signin-required">Please sign in to start practicing</p>
+        )}
+        {error && (
+          <div className="error-message" style={{ marginTop: "1rem" }}>
+            Error loading sample: {error}
+            <div>
+              <button
+                onClick={() => {
+                  setError(null);
+                  fetchCodeReviewTest();
+                }}
+                disabled={isLoading}
+                style={{ marginTop: "0.5rem" }}
+              >
+                {isLoading ? "Retrying…" : "Retry"}
+              </button>
+            </div>
+          </div>
         )}
       </div>
     );
@@ -261,7 +294,9 @@ const CodeReviewPractice = () => {
             <div className="code-viewer-container">
               <CodeMirror
                 value={currentTest.problem}
-                extensions={[selectedLanguage === "JavaScript" ? javascript() : csharp()]}
+                extensions={[
+                  selectedLanguage === "JavaScript" ? javascript() : csharp(),
+                ]}
                 editable={false}
                 basicSetup={{
                   lineNumbers: true,
@@ -340,7 +375,9 @@ const CodeReviewPractice = () => {
               )}
               {submissionResult.summary && (
                 <div>
-                  <pre className="summary-block">{submissionResult.summary}</pre>
+                  <pre className="summary-block">
+                    {submissionResult.summary}
+                  </pre>
                 </div>
               )}
               {submissionResult.issuesDetected &&
