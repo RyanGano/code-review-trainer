@@ -1,4 +1,11 @@
 import { useState, useCallback, useEffect } from "react";
+import { useMsal } from "@azure/msal-react";
+import { apiConfig } from "../authConfig";
+import CodeMirror from "@uiw/react-codemirror";
+import { csharp } from "@replit/codemirror-lang-csharp";
+import { javascript } from "@codemirror/lang-javascript";
+
+import "./CodeReviewPractice.less";
 
 interface CodeReviewIssue {
   id: string;
@@ -25,15 +32,10 @@ interface CodeReviewModelResult {
   isFallback?: boolean;
   error?: string;
 }
-import { useMsal } from "@azure/msal-react";
-import { apiConfig } from "../authConfig";
-import CodeMirror from "@uiw/react-codemirror";
-import { csharp } from "@replit/codemirror-lang-csharp";
-
-import "./CodeReviewPractice.less";
 
 interface CodeReviewTest {
   level: string;
+  language?: string;
   problem: string;
   id: string;
 }
@@ -45,6 +47,7 @@ const CodeReviewPractice = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("Easy");
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("CSharp");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionResult, setSubmissionResult] =
     useState<CodeReviewModelResult | null>(null);
@@ -68,9 +71,9 @@ const CodeReviewPractice = () => {
         account: accounts[0],
       });
 
-      // Call API to get a test with the selected difficulty
+      // Call API to get a test with the selected difficulty and language
       const testResponse = await fetch(
-        `${apiConfig.webApi}tests/?level=${selectedDifficulty}`,
+        `${apiConfig.webApi}tests/?level=${selectedDifficulty}&language=${selectedLanguage}`,
         {
           headers: {
             Authorization: `Bearer ${response.accessToken}`,
@@ -94,7 +97,7 @@ const CodeReviewPractice = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [instance, accounts, selectedDifficulty]);
+  }, [instance, accounts, selectedDifficulty, selectedLanguage]);
 
   // Auto-fetch a code review test when user signs in
   useEffect(() => {
@@ -182,6 +185,19 @@ const CodeReviewPractice = () => {
           </select>
         </div>
 
+        <div className="language-selection">
+          <label htmlFor="language-select">Language:</label>
+          <select
+            id="language-select"
+            value={selectedLanguage}
+            onChange={(e) => setSelectedLanguage(e.target.value)}
+            className="language-dropdown"
+          >
+            <option value="CSharp">C#</option>
+            <option value="JavaScript">JavaScript</option>
+          </select>
+        </div>
+
         <button
           className="start-button"
           onClick={handleStartPracticing}
@@ -201,7 +217,7 @@ const CodeReviewPractice = () => {
       <div className="practice-header">
         <h2>
           Code Review Practice - {currentTest?.level || selectedDifficulty}{" "}
-          Level
+          Level - {currentTest?.language || selectedLanguage}
         </h2>
         <div className="header-controls">
           <div className="difficulty-selection">
@@ -214,6 +230,18 @@ const CodeReviewPractice = () => {
             >
               <option value="Easy">Easy</option>
               <option value="Medium">Medium</option>
+            </select>
+          </div>
+          <div className="language-selection">
+            <label htmlFor="language-select-active">Language:</label>
+            <select
+              id="language-select-active"
+              value={selectedLanguage}
+              onChange={(e) => setSelectedLanguage(e.target.value)}
+              className="language-dropdown"
+            >
+              <option value="CSharp">C#</option>
+              <option value="JavaScript">JavaScript</option>
             </select>
           </div>
           <button onClick={handleNewTest} disabled={isLoading}>
@@ -233,7 +261,7 @@ const CodeReviewPractice = () => {
             <div className="code-viewer-container">
               <CodeMirror
                 value={currentTest.problem}
-                extensions={[csharp()]}
+                extensions={[selectedLanguage === "JavaScript" ? javascript() : csharp()]}
                 editable={false}
                 basicSetup={{
                   lineNumbers: true,
