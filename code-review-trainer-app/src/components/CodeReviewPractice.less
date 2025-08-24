@@ -248,3 +248,46 @@
   font-style: italic;
   display: inline;
 }
+
+/* Bonus badge styles */
+.score-row {
+  display: inline-flex;
+  align-items: center; /* vertically center badge and score text */
+  gap: 0.5rem;
+}
+
+.bonus-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  background: linear-gradient(180deg,#fffbe6,#fff1b8);
+  color: #664d03;
+  border: 1px solid #ffd966;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  line-height: 1; /* ensure consistent vertical alignment */
+}
+
+.bonus-symbol {
+  color: #ffb400;
+  font-size: 1.05rem;
+  line-height: 1;
+  display: inline-block;
+  transform: none; /* center via flex alignment */
+}
+
+.bonus-value {
+  font-size: 0.85rem;
+  color: #6b4f00;
+  display: inline-block;
+}
+
+.score {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  margin: 0;
+}

@@ -13,6 +13,7 @@ interface CodeReviewIssue {
   title?: string;
   category?: string;
   severity?: string;
+  possibleScore?: number;
   explanation?: string;
 }
 
@@ -24,7 +25,6 @@ interface CodeReviewMatchedUserPoint {
 
 interface CodeReviewModelResult {
   problemId?: string;
-  overallScore?: number;
   issuesDetected?: CodeReviewIssue[];
   matchedUserPoints?: CodeReviewMatchedUserPoint[];
   missedCriticalIssueIds?: string[];
@@ -32,6 +32,9 @@ interface CodeReviewModelResult {
   rawModelJson?: string;
   isFallback?: boolean;
   error?: string;
+  userScore?: number;
+  possibleScore?: number;
+  reviewQualityBonusGranted?: boolean;
 }
 
 interface CodeReviewTest {
@@ -387,11 +390,28 @@ const CodeReviewPractice = () => {
                   Fallback (no AI evaluation). {submissionResult.error}
                 </div>
               )}
-              {submissionResult.overallScore !== undefined && (
-                <p>
-                  <strong>Score:</strong> {submissionResult.overallScore}
-                </p>
-              )}
+              {/* overallScore removed - using server-calculated score instead */}
+              <div className="score-row">
+                {(submissionResult.userScore !== undefined ||
+                  submissionResult.possibleScore !== undefined) && (
+                  <p className="score">
+                    {`Score: ${submissionResult.userScore ?? 0} / ${
+                      submissionResult.possibleScore ?? 0
+                    }`}
+                  </p>
+                )}
+                {submissionResult.reviewQualityBonusGranted && (
+                  <div
+                    className="bonus-badge"
+                    title={"Awarded +2 for a clear and actionable review"}
+                    aria-label={"Awarded +2 for a clear and actionable review"}
+                    role="img"
+                  >
+                    <span className="bonus-symbol">★</span>
+                    <span className="bonus-value">+2</span>
+                  </div>
+                )}
+              </div>
               {submissionResult.summary && (
                 <div>
                   <pre className="summary-block">
@@ -411,6 +431,12 @@ const CodeReviewPractice = () => {
                           <li key={i.id}>
                             <strong>{i.title || i.id}</strong> [{i.category}/
                             {i.severity}] – {i.explanation}
+                            {i.possibleScore !== undefined && (
+                              <span className="possible-score">
+                                {" "}
+                                (Possible: {i.possibleScore})
+                              </span>
+                            )}
                           </li>
                         )
                       )}

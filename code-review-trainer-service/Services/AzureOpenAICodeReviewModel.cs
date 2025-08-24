@@ -39,72 +39,25 @@ Your analysis should:
 1. Conduct your own thorough review of the code (up to 1000 words total response)
 2. CAREFULLY parse the developer's review to identify what they found vs what they missed
 3. Evaluate their review for clarity and actionable items
-4. Provide a score from 0 (terrible) to 10 (perfect) based ONLY on the quality of their review, NOT the code quality
-5. Keep the issuesDetected array comprehensive - do not truncate
-6. Provide detailed feedback in the summary
+4. Keep the issuesDetected array comprehensive - do not truncate
+5. Provide detailed feedback in the summary
 
-SCORING CALIBRATION (use the FULL 0–10 range; do NOT cluster around the middle):
-0 = No meaningful review effort OR purely dismissive (e.g., ""looks good"", ""nothing wrong"") while important issues exist; provides no analysis.
-1 = Minimal effort and incorrect focus; misses all substantive issues, may add irrelevant or incorrect comment.
-2 = Dismissive approval while multiple significant issues exist; zero specifics (e.g., generic praise only).
-3 = Very sparse; perhaps hints at a generic concern but still misses nearly all important issues; not actionable.
-4 = Notices one minor or superficial issue but misses most significant ones; vague phrasing.
-5 = Catches some issues (minor + maybe one moderate) but misses several significant ones; mixed clarity.
-6 = Identifies roughly half of the significant issues with partially actionable feedback; some vagueness or omissions.
-7 = Identifies a majority (>= ~70%) of significant issues with generally clear, constructive feedback; minor gaps.
-8 = Identifies most significant issues with clear, actionable, professional feedback; only small omissions.
-9 = Near comprehensive, insightful, well-structured, constructive; only trivial improvement possible.
-10 = Fully comprehensive, precise, constructive, professional; no meaningful omissions or inaccuracies.
-
-IMPORTANT:
-- Assign 0 (not 2) when the review is vacuous / rubber-stamp and significant issues exist.
-- Do NOT inflate weak reviews. Avoid social cushioning.
-- The presence of multiple critical issues + a blanket approval with no detail should yield 0 or 2 (choose 0 if entirely content-free; 2 only if there is at least one faint attempt at evaluation).
-- Return overallScore as a number (integer acceptable; no percent sign, no text). Avoid ranges.
+IMPORTANT: For scoring, include a numeric ""possibleScore"" for each item in ""issuesDetected"". Do NOT include any overall numeric totals in the model output; the server will compute totals. If you include any totals, ensure they never exceed the sum of the per-issue possibleScore values plus 2 (two points reserved for general review quality).
+MUST include a boolean field in the JSON root named ""reviewQualityBonusGranted"": true or false indicating whether the reviewer earned the +2 general review quality bonus. This field is REQUIRED and must always be present (set true when the review is clear and actionable, otherwise set false). Do NOT omit this field. Optionally include the exact phrase ""Earned 2 additional points for a clear and actionable review"" in the summary paragraph when true so humans can see it. Do not vary the spelling of that phrase if you include it.
 
 CRITICAL PARSING INSTRUCTIONS:
 - Read the user's review thoroughly and look for ANY mention of issues, even if phrased differently than you would phrase them
 - Input validation can be mentioned as: 'add validation', 'check for null', 'validate parameters', 'don't allow negative numbers', etc.
 - Error handling can be mentioned as: 'handle exceptions', 'try-catch', 'error checking', 'what if this fails', etc.
-- Performance issues can be mentioned as: 'inefficient', 'slow', 'optimize', 'better algorithm', etc.
-- Security issues can be mentioned as: 'security risk', 'unsafe', 'vulnerability', 'sanitize input', etc.
+- Performance can be mentioned as: 'inefficient', 'slow', 'optimize', 'better algorithm', etc.
+- Security can be mentioned as: 'security risk', 'unsafe', 'vulnerability', 'sanitize input', etc.
 - DO NOT mark something as missed if the user mentioned it in ANY reasonable form
 
-CRITICAL: The overallScore should evaluate ONLY the user's review quality, not the code quality. Score based on:
-- Completeness: Did they catch the important issues?
-- Accuracy: Were their observations correct?
-- Clarity: Were their comments clear and actionable?
-- Appropriate tone: Were they constructive and professional?
+SUMMARY FORMAT (MUST be EXACTLY TWO PARAGRAPHS separated by ONE blank LINE):
+Paragraph 1 MUST start with ""Summary:"" and include: what the reviewer did well, missed critical/high-value issues, and concise justification of review quality.
+Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How to further improve:"" and provide specific, actionable guidance tied to this review's gaps. If the review is already very good and there are no actionable improvements, the second paragraph should still be present but may be a single short line such as: ""How to further improve: keep up the good work"". However, if there ARE spelling, formatting, clarity, or missing-item issues, the second paragraph must contain specific, actionable advice addressing them.
 
-SUMMARY FORMAT (MUST be EXACTLY TWO PARAGRAPHS separated by ONE blank line):
-Paragraph 1 MUST start with ""Summary:"" (General Summary):
-  - What the reviewer did well (credit specific correct findings; quote short excerpts ""like this"" when helpful)
-  - What critical / high-value issues they missed (reference them succinctly)
-  - Concise justification of the numeric score
-Paragraph 2 (Personalized Improvement Guidance) MUST start with either ""How you can improve:"" OR (if score >=9) ""How to further improve:"" and provide SPECIFIC, ACTIONABLE advice tied to THIS review's gaps. Avoid generic platitudes.
-  - Reference categories actually missed (e.g., Input Validation, Error Handling, Performance, Readability, Naming, Abstraction, Testability, Security) ONLY if truly missed
-  - For each missed category: state what to look for next time and an example of how they could have phrased actionable feedback
-  - Suggest concrete techniques (e.g., ""Create a checklist for: validation, error paths, boundary conditions"", ""Do a second pass focusing only on naming and abstraction"", ""Map each public method to a quick test scenario in your head"")
-  - If review was superficial/short: coach on asking probing questions, enumerating categories before approving
-  - If near perfect: provide advanced suggestions (prioritizing severity, suggesting automated tooling, deeper architectural considerations)
-Constraints:
-  - Do NOT reuse the same generic sentence patterns across different reviews
-  - Avoid vague phrases like ""be more detailed"" without adding the concrete detail they should add
-  - Keep each paragraph under 180 words
-  - No bullet list objects in JSON; you may use hyphens or semicolons inside the paragraph text
-Failure to follow the exact two-paragraph format with required prefixes (""Summary:"" and improvement prefix) is a violation—always produce exactly two paragraphs.
-
-The summary content should implicitly cover:
-  - Correct findings credited
-  - Missed critical issues
-  - Review quality assessment
-  - Improvement plan (paragraph 2)
-  - Overall justification of score
-  - Approval guidance when appropriate
-
-Remember: Not every code sample needs blocking issues. If the code is generally well-written with only minor suggestions, it's perfectly appropriate to approve the PR. Help developers understand when to approve vs when to request changes.
-
-Address the reviewer directly using 'you' - never refer to 'the user' or 'they'. Speak directly to the person who submitted the review.";
+Return only the JSON matching the schema described in the user prompt. Do not add explanatory fields or markdown";
       var userPrompt = BuildUserPrompt(request);
 
       var messages = new List<ChatMessage>
@@ -168,7 +121,6 @@ Address the reviewer directly using 'you' - never refer to 'the user' or 'they'.
 
   private CodeReviewModelResult MapModelJson(string problemId, string raw, JsonElement el)
   {
-    double overall = el.TryGetProperty("overallScore", out var os) && os.TryGetDouble(out var d) ? d : 0;
     var issues = new List<CodeReviewIssue>();
     if (el.TryGetProperty("issuesDetected", out var issuesArr) && issuesArr.ValueKind == JsonValueKind.Array)
     {
@@ -184,7 +136,28 @@ Address the reviewer directly using 'you' - never refer to 'the user' or 'they'.
         string title = i.TryGetProperty("title", out var t) ? AsFlexibleString(t) : string.Empty;
         string explanation = i.TryGetProperty("explanation", out var ex) ? AsFlexibleString(ex) : string.Empty;
         string severity = i.TryGetProperty("severity", out var sev) ? AsFlexibleString(sev) : string.Empty;
-        issues.Add(new CodeReviewIssue(issueId, category, title, explanation, severity));
+        int possibleScore = 0;
+        if (i.TryGetProperty("possibleScore", out var ps) && ps.ValueKind == JsonValueKind.Number)
+        {
+          // Read as int if possible, otherwise round
+          if (ps.TryGetInt32(out var intVal)) possibleScore = intVal;
+          else if (ps.TryGetDouble(out var dbl)) possibleScore = (int)Math.Round(dbl);
+          else possibleScore = 1;
+        }
+        else
+        {
+          // Infer possible score from severity if model didn't provide one
+          possibleScore = severity.ToLowerInvariant() switch
+          {
+            "critical" => 3,
+            "high" => 3,
+            "medium" => 2,
+            "low" => 1,
+            "trivial" => 1,
+            _ => 2
+          };
+        }
+        issues.Add(new CodeReviewIssue(issueId, category, title, explanation, severity, possibleScore));
       }
     }
     var matched = new List<CodeReviewMatchedUserPoint>();
@@ -208,23 +181,151 @@ Address the reviewer directly using 'you' - never refer to 'the user' or 'they'.
       missed.AddRange(mc.EnumerateArray().Select(AsFlexibleString));
     }
     var summary = el.TryGetProperty("summary", out var sum) ? sum.GetString() ?? string.Empty : string.Empty;
-    return new CodeReviewModelResult(problemId, overall, issues, matched, missed, summary, raw, false, null);
+
+    // Compute empirical scoring: sum possible for all detected issues, and user-earned score from matched points
+    int possibleTotal = issues.Sum(i => i.PossibleScore);
+    const int reviewQualityBonus = 2; // reserved bump for general review quality
+                                      // Include the reserved bonus in possible total so the AI cannot cause server to award more than possible
+    possibleTotal += reviewQualityBonus;
+    int userTotal = 0;
+
+    // For each matched user point, award the possibleScore for matched issues only once per issue.
+    var awardedIssueIds = new HashSet<string>();
+    foreach (var m in matched)
+    {
+      // Skip matches with low accuracy or empty matched IDs
+      var accuracyNormalized = (m.Accuracy ?? string.Empty).ToLowerInvariant();
+      foreach (var mid in m.MatchedIssueIds ?? Array.Empty<string>())
+      {
+        if (string.IsNullOrWhiteSpace(mid)) continue;
+        if (awardedIssueIds.Contains(mid)) continue; // already awarded
+        var issue = issues.FirstOrDefault(i => string.Equals(i.Id, mid, StringComparison.OrdinalIgnoreCase));
+        if (issue == null) continue;
+
+        // Determine award multiplier: only award if accuracy not explicitly 'incorrect' or 'false'
+        bool award = !accuracyNormalized.Contains("incorrect") && !accuracyNormalized.Contains("false") && !accuracyNormalized.Contains("no");
+        if (award)
+        {
+          userTotal += issue.PossibleScore;
+          awardedIssueIds.Add(mid);
+        }
+      }
+    }
+
+    // Extra/penalty rules not directly represented by matched items: prefer explicit model flag, then summary cues
+    bool awardedReviewBonus = false;
+    // Detect presence of the required reviewQualityBonusGranted field
+    bool modelProvidedBonusField = el.TryGetProperty("reviewQualityBonusGranted", out var rqbTemp);
+    if (!modelProvidedBonusField)
+    {
+      _logger.LogWarning("Model output missing required 'reviewQualityBonusGranted' boolean. Falling back to summary heuristics. Raw: {Raw}", raw);
+    }
+    // First, prefer a machine-readable boolean flag from the model output
+    if (modelProvidedBonusField && el.TryGetProperty("reviewQualityBonusGranted", out var rqb) && rqb.ValueKind == JsonValueKind.True)
+    {
+      // Respect the explicit flag in the model output when the summary also contains positive signals
+      // (exact award phrase, clear/actionable mentions, or positive adjectives). Only ignore when
+      // there are negative cues and no positive indicators.
+      var sForFlag = summary.ToLowerInvariant();
+      var negationKeywordsForFlag = new[] { "lack", "lacks", "missing", "missed", "no", "not", "doesn't", "didn't", "without", "low", "poor", "insufficient" };
+      bool hasNegationForFlag = negationKeywordsForFlag.Any(k => sForFlag.Contains(k));
+
+      var positiveIndicators = new[] { "earned 2 additional points", "earning 2 additional points", "clear and actionable", "clear, actionable", "actionable feedback", "actionable", "good", "well" };
+      bool hasPositiveIndicator = positiveIndicators.Any(p => sForFlag.Contains(p));
+
+      if (!hasNegationForFlag || hasPositiveIndicator)
+      {
+        userTotal += 2;
+        awardedReviewBonus = true;
+      }
+      else
+      {
+        _logger.LogInformation("Ignoring reviewQualityBonusGranted=true because summary contains negation cues and no positive indicators: {Summary}", summary);
+      }
+    }
+
+    // Then inspect the summary for an explicit human-readable phrase or fallback keywords
+    if (!string.IsNullOrWhiteSpace(summary))
+    {
+      var s = summary.ToLowerInvariant();
+
+      // Exact phrase fallback (as requested in prompt):
+      if (!awardedReviewBonus && s.Contains("earned 2 additional points for a clear and actionable review"))
+      {
+        userTotal += 2;
+        awardedReviewBonus = true;
+      }
+
+      // Last-resort fallback: keyword-based detection of clarity/actionability.
+      // Only award if the summary indicates positive clarity/actionability (no nearby negation cues).
+      if (!awardedReviewBonus)
+      {
+        var negationKeywords = new[] { "lack", "lacks", "missing", "missed", "no", "not", "doesn't", "didn't", "without", "low", "poor", "insufficient" };
+        bool hasNegation = negationKeywords.Any(k => s.Contains(k));
+        var positiveActionablePhrases = new[] { "clear and actionable", "clear, actionable", "actionable guidance", "actionable suggestions", "actionable items", "actionable feedback", "actionable" };
+        bool hasActionable = positiveActionablePhrases.Any(p => s.Contains(p));
+        if (hasActionable && !hasNegation)
+        {
+          userTotal += 2;
+          awardedReviewBonus = true;
+        }
+      }
+
+      // -1 for spelling errors or non-functional mistakes: if model mentions 'spelling' or 'typo'
+      if (s.Contains("spelling") || s.Contains("typo") || s.Contains("spelling error"))
+      {
+        userTotal -= 1;
+      }
+
+      // Final permissive check: if summary mentions both 'clear' and 'actionable' (not necessarily as a phrase)
+      // and we haven't awarded the bonus yet, grant it unless there are negation cues.
+      if (!awardedReviewBonus)
+      {
+        bool mentionsClear = s.Contains("clear");
+        bool mentionsActionable = s.Contains("actionable");
+        var negationKeywords = new[] { "lack", "lacks", "missing", "missed", "no", "not", "doesn't", "didn't", "without", "low", "poor", "insufficient" };
+        bool hasNegation = negationKeywords.Any(k => s.Contains(k));
+        // If the summary explicitly says 'Overall, ...' along with clear+actionable, honor the positive signal
+        if (mentionsClear && mentionsActionable && (!hasNegation || s.Contains("overall")))
+        {
+          userTotal += 2;
+          awardedReviewBonus = true;
+          _logger.LogInformation("Awarding review quality bonus based on permissive check (clear+actionable) for summary: {Summary}", summary);
+        }
+      }
+    }
+
+    // Ensure that a sample that only has minor/low issues does not penalize simple LGTM approvals.
+    // If all issues are low/trivial and userTotal == 0 (i.e., matched none), consider not penalizing.
+    if (possibleTotal > 0 && issues.All(i => i.PossibleScore <= 1) && userTotal <= 0)
+    {
+      // Treat LGTM as acceptable - award zero rather than negative or leave zero
+      userTotal = Math.Max(0, userTotal);
+    }
+
+    // Clamp totals and ensure userTotal does not exceed possibleTotal
+    possibleTotal = Math.Max(0, possibleTotal);
+    userTotal = Math.Max(0, userTotal);
+    if (userTotal > possibleTotal) userTotal = possibleTotal;
+
+    return new CodeReviewModelResult(problemId, issues, matched, missed, summary, raw, false, null, awardedReviewBonus, UserScore: userTotal, PossibleScore: possibleTotal);
   }
 
   private static string BuildUserPrompt(CodeReviewRequest req)
   {
     var truncatedCode = req.Code; // Don't truncate the code
     var truncatedReview = Truncate(req.UserReview, 2500); // Increase user review limit to 2500
-    
+
     // Determine language from problem ID
     var language = "csharp"; // default
     if (req.ProblemId.StartsWith("js_", StringComparison.OrdinalIgnoreCase))
     {
       language = "javascript";
     }
-    
+
     // Escape braces by doubling for string interpolation
-    var schema = "{{ problemId, overallScore, issuesDetected:[{{id,category,title,explanation,severity}}], matchedUserPoints:[{{excerpt,matchedIssueIds,accuracy}}], missedCriticalIssueIds:[], summary }}";
+    // Extend schema to include possibleScore for each detected issue and for matched points include possibleScore
+    var schema = "{{ problemId, issuesDetected:[{{id,category,title,explanation,severity,possibleScore}}], matchedUserPoints:[{{excerpt,matchedIssueIds,accuracy}}], missedCriticalIssueIds:[], reviewQualityBonusGranted, summary }}";
     return $@"ProblemId: {req.ProblemId}
 
 OriginalCode:
@@ -244,8 +345,8 @@ Conduct a comprehensive code review analysis for this {(language == "javascript"
    - Performance mentioned as: 'inefficient', 'slow', 'optimize', 'better algorithm', etc.
    - Security mentioned as: 'security risk', 'unsafe', 'vulnerability', 'sanitize input', etc.
 4. Identify what critical issues the user missed (populate missedCriticalIssueIds with descriptive text ONLY for issues that were truly not mentioned)
-5. Evaluate the user's review quality (clarity, actionability, completeness)
-6. Provide a score from 0-10 and detailed feedback in summary (up to 1000 words)
+  5. Evaluate the user's review quality (clarity, actionability, completeness)
+6. Provide detailed feedback in summary (up to 1000 words)
 
 IMPORTANT: 
 - For missedCriticalIssueIds, provide descriptive text that clearly identifies what was missed (e.g., ""Issue 3: Magic Numbers Should Be Constants"", ""Lack of Input Validation"", ""Poor Variable Naming""), not just the issue ID numbers.
@@ -258,17 +359,19 @@ Return ONLY RAW JSON (no markdown fences) matching schema: {schema}";
   private static string Truncate(string s, int max) => s.Length <= max ? s : s.Substring(0, max) + "\n/* truncated */";
 
   private CodeReviewModelResult Fallback(string problemId, string reason, string? details = null, string? raw = null) =>
-      new(
-          ProblemId: problemId,
-          OverallScore: 0,
-          IssuesDetected: Array.Empty<CodeReviewIssue>(),
-          MatchedUserPoints: Array.Empty<CodeReviewMatchedUserPoint>(),
-          MissedCriticalIssueIds: Array.Empty<string>(),
-          Summary: $"Fallback: {reason} {(details ?? string.Empty)}",
-          RawModelJson: raw ?? string.Empty,
-          IsFallback: true,
-          Error: reason + (details != null ? ": " + details : string.Empty)
-      );
+    new(
+      ProblemId: problemId,
+      IssuesDetected: Array.Empty<CodeReviewIssue>(),
+      MatchedUserPoints: Array.Empty<CodeReviewMatchedUserPoint>(),
+      MissedCriticalIssueIds: Array.Empty<string>(),
+      Summary: $"Fallback: {reason} {(details ?? string.Empty)}",
+      RawModelJson: raw ?? string.Empty,
+      IsFallback: true,
+      Error: reason + (details != null ? ": " + details : string.Empty),
+      ReviewQualityBonusGranted: false,
+      UserScore: 0,
+      PossibleScore: 0
+    );
 
   // JSON cleaning + repair helpers below support lenient parsing of model output.
 

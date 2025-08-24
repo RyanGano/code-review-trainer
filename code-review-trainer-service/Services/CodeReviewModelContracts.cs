@@ -7,7 +7,8 @@ public record CodeReviewIssue(
     string Category,
     string Title,
     string Explanation,
-    string Severity
+    string Severity,
+    int PossibleScore
 );
 
 public record CodeReviewMatchedUserPoint(
@@ -18,17 +19,21 @@ public record CodeReviewMatchedUserPoint(
 
 public record CodeReviewModelResult(
     string ProblemId,
-    double OverallScore,
     IReadOnlyList<CodeReviewIssue> IssuesDetected,
     IReadOnlyList<CodeReviewMatchedUserPoint> MatchedUserPoints,
     IReadOnlyList<string> MissedCriticalIssueIds,
     string Summary,
     string RawModelJson,
     bool IsFallback,
-    string? Error
+    string? Error,
+    // Whether the model (or server fallback heuristics) granted the +2 review quality bonus
+    bool ReviewQualityBonusGranted,
+    // Scores calculated server-side
+    int UserScore,
+    int PossibleScore
 );
 
 public interface ICodeReviewModel
 {
-  Task<CodeReviewModelResult> ReviewAsync(CodeReviewRequest request, CancellationToken ct = default);
+    Task<CodeReviewModelResult> ReviewAsync(CodeReviewRequest request, CancellationToken ct = default);
 }
