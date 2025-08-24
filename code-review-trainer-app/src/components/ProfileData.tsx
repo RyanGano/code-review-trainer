@@ -59,9 +59,9 @@ const ProfileData = () => {
     if (accounts.length > 0 && !checked) attemptFetch(false);
   }, [accounts, checked, attemptFetch]);
 
-  if (accounts.length === 0) return null; // Hidden when signed out
+  if (accounts.length === 0) return null;
 
-  if (!error && checked && !pendingInteraction) return null; // Nothing to show on success
+  if (!error && checked && !pendingInteraction) return null;
 
   return (
     <div className="profile-container">

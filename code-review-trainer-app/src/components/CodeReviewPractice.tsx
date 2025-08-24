@@ -61,7 +61,7 @@ const CodeReviewPractice = () => {
   const [autoFetchAttempted, setAutoFetchAttempted] = useState(false);
 
   const MAX_REVIEW_LENGTH = 2500;
-  const WARNING_THRESHOLD = 2200; // Show warning at 88% of limit
+  const WARNING_THRESHOLD = 2200;
 
   // Helper to acquire API token with interactive fallback
   const acquireApiToken = useCallback(async (): Promise<string> => {
@@ -117,8 +117,8 @@ const CodeReviewPractice = () => {
 
       const testData = await testResponse.json();
       setCurrentTest(testData);
-      setReviewComments(""); // Reset comments for new test
-      setSubmissionResult(null); // Reset previous submission results
+      setReviewComments("");
+      setSubmissionResult(null);
     } catch (error) {
       console.error("Error fetching code review test:", error);
       setError(
@@ -153,7 +153,6 @@ const CodeReviewPractice = () => {
       return;
     }
 
-    // Truncate review if it exceeds the limit
     const finalReview =
       reviewComments.length > MAX_REVIEW_LENGTH
         ? reviewComments.substring(0, MAX_REVIEW_LENGTH)
@@ -165,7 +164,6 @@ const CodeReviewPractice = () => {
     try {
       const accessToken = await acquireApiToken();
 
-      // Submit review to backend
       const submitResponse = await fetch(
         `${apiConfig.webApi}tests/${currentTest.id}`,
         {
@@ -270,7 +268,7 @@ const CodeReviewPractice = () => {
           className="start-button"
           onClick={() => {
             // Allow another auto attempt after manual retry
-            setAutoFetchAttempted(true); // mark attempted; manual triggers explicit fetch
+            setAutoFetchAttempted(true);
             fetchCodeReviewTest();
           }}
           disabled={accounts.length === 0 || isLoading}
@@ -424,7 +422,7 @@ const CodeReviewPractice = () => {
                   Fallback (no AI evaluation). {submissionResult.error}
                 </div>
               )}
-              {/* overallScore removed - using server-calculated score instead */}
+
               <div className="score-row">
                 {(submissionResult.userScore !== undefined ||
                   submissionResult.possibleScore !== undefined) && (
@@ -445,9 +443,6 @@ const CodeReviewPractice = () => {
                     <span className="bonus-text">Well-written review</span>
                   </div>
                 )}
-                {/* Negative badge shown when AI indicates multiple spelling/typo errors.
-                    It intentionally appears after the positive/bonus badge so a
-                    user who earned both sees the positive badge first. */}
                 {hasSpellingProblems(submissionResult) && (
                   <div
                     className="negative-badge"

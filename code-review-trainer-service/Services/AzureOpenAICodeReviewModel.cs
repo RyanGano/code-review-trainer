@@ -269,7 +269,7 @@ Return only the JSON matching the schema described in the user prompt. Do not ad
       foreach (var mid in m.MatchedIssueIds ?? Array.Empty<string>())
       {
         if (string.IsNullOrWhiteSpace(mid)) continue;
-        if (awardedIssueIds.Contains(mid)) continue; // already awarded
+        if (awardedIssueIds.Contains(mid)) continue;
         var issue = issuesList.FirstOrDefault(i => string.Equals(i.Id, mid, StringComparison.OrdinalIgnoreCase));
         if (issue == null) continue;
 
@@ -379,11 +379,10 @@ Return only the JSON matching the schema described in the user prompt. Do not ad
 
   private static string BuildUserPrompt(CodeReviewRequest req)
   {
-    var truncatedCode = req.Code; // Don't truncate the code
-    var truncatedReview = Truncate(req.UserReview, 2500); // Increase user review limit to 2500
+    var truncatedCode = req.Code;
+    var truncatedReview = Truncate(req.UserReview, 2500);
 
-    // Determine language from problem ID
-    var language = "csharp"; // default
+    var language = "csharp";
     if (req.ProblemId.StartsWith("js_", StringComparison.OrdinalIgnoreCase))
     {
       language = "javascript";
@@ -441,7 +440,6 @@ Return ONLY RAW JSON (no markdown fences) matching schema: {schema}";
     );
 
   // JSON cleaning + repair helpers below support lenient parsing of model output.
-
   private static string CleanModelContent(string content)
   {
     if (string.IsNullOrWhiteSpace(content)) return content;

@@ -75,17 +75,14 @@ builder.Services.AddAuthorization(o =>
 });
 builder.Services.AddCodeReviewServices(builder.Configuration);
 
-// Add CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
         var allowedOrigins = new List<string>();
 
-        // Production origins
         allowedOrigins.Add("https://zealous-ocean-029a8df1e.2.azurestaticapps.net");
 
-        // Development origins
         if (builder.Environment.IsDevelopment())
         {
             allowedOrigins.Add("http://localhost:5173");
@@ -93,7 +90,6 @@ builder.Services.AddCors(options =>
             allowedOrigins.Add("https://localhost:5173");
         }
 
-        // Add configured origins from appsettings
         var configuredOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
         if (configuredOrigins != null)
         {
@@ -113,7 +109,6 @@ app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Endpoints
 app.MapGet("/", () => "I'm ALIVE!");
 
 app.MapGet("/user", (HttpContext context) =>
@@ -186,5 +181,4 @@ app.MapPost("/tests/{id}", async (string id, ReviewSubmission submission, IProbl
 
 app.Run();
 
-// Record for review submission payload
 public record ReviewSubmission(string review);

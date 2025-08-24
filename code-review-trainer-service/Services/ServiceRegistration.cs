@@ -21,7 +21,6 @@ public static class ServiceRegistration
       return new AzureOpenAIClient(new Uri(aiSettings.Endpoint), new AzureKeyCredential(aiSettings.ApiKey));
     });
 
-    // Create ChatClient per deployment
     services.AddSingleton<ChatClient>(sp =>
     {
       var aiSettings = sp.GetRequiredService<IOptions<AzureOpenAISettings>>().Value;
