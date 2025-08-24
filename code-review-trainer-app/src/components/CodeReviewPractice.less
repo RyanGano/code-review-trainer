@@ -291,3 +291,82 @@
   line-height: 1;
   margin: 0;
 }
+
+// Dark mode tweaks to ensure readability when browser/OS is in dark mode
+@media (prefers-color-scheme: dark) {
+  .common-dropdown {
+    background-color: #2b2b2b;
+    color: #e6e6e6;
+    border: 1px solid #444;
+  }
+
+  .common-dropdown:focus {
+    box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.12);
+    border-color: #5b7bff;
+  }
+
+  .code-viewer-container {
+    border: 1px solid #333;
+    background-color: #1e1e1e; /* code background */
+
+    .cm-editor,
+    .cm-scroller,
+    .cm-content {
+      background: transparent; /* inherit container background */
+      color: #e6e6e6; /* default text color for code */
+    }
+
+    /* Line numbers / gutter styling */
+    .cm-gutters {
+      background: #161616;
+      color: #8b8b8b;
+      border-right: 1px solid #2b2b2b;
+    }
+
+    /* Ensure individual lines inherit readable color */
+    .cm-line {
+      color: inherit;
+    }
+  }
+
+  .submission-result {
+    background-color: #121212;
+    border: 1px solid #222;
+    color: #e6e6e6;
+  }
+
+  .submission-result .summary-block {
+    background: #171717;
+    border: 1px solid #2a2a2a;
+    color: #e6e6e6;
+  }
+
+  .review-textarea {
+    background-color: #181818;
+    color: #e6e6e6;
+    border: 1px solid #333;
+  }
+
+  .character-count .count {
+    color: #cfcfcf;
+  }
+
+  .loading-indicator {
+    color: #9fb0ff;
+  }
+
+  /* Make disabled submit button less bright in dark themes */
+  .submit-button.disabled {
+    background-color: #2a2a2a; /* dark, muted background */
+    color: #8f8f8f; /* low-contrast text */
+    border: 1px solid #333;
+    opacity: 0.9;
+    cursor: not-allowed;
+  }
+
+  /* Prevent hover from making disabled button appear enabled */
+  .submit-button.disabled:hover {
+    background-color: #2a2a2a;
+    color: #8f8f8f;
+  }
+}

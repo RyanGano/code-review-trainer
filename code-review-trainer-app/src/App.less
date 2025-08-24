@@ -25,6 +25,22 @@
   }
 }
 
+// Dark mode app-level overrides
+@media (prefers-color-scheme: dark) {
+  #root {
+    background-color: #0f0f0f;
+    color: #e6e6e6;
+  }
+
+  .app-header {
+    .auth-controls {
+      .welcome-text {
+        color: #e6e6e6; /* ensure welcome text is visible on dark header */
+      }
+    }
+  }
+}
+
 .hero {
   margin-bottom: 3rem;
 
