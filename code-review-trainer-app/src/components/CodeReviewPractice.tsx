@@ -453,9 +453,7 @@ const CodeReviewPractice = () => {
                     role="img"
                   >
                     <span className="negative-symbol">✖</span>
-                    <span className="negative-text">
-                      Several spelling errors
-                    </span>
+                    <span className="negative-text">Has spelling errors</span>
                   </div>
                 )}
               </div>
