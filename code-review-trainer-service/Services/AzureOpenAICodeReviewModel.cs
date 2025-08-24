@@ -183,10 +183,10 @@ Return only the JSON matching the schema described in the user prompt. Do not ad
     var summary = el.TryGetProperty("summary", out var sum) ? sum.GetString() ?? string.Empty : string.Empty;
 
     // Compute empirical scoring: sum possible for all detected issues, and user-earned score from matched points
+    // Base possible total is the sum of per-issue possible scores. The +2
+    // review-quality bonus is not included in this value; it is reported via
+    // ReviewQualityBonusGranted and may be added to the user's score only.
     int possibleTotal = issues.Sum(i => i.PossibleScore);
-    const int reviewQualityBonus = 2; // reserved bump for general review quality
-                                      // Include the reserved bonus in possible total so the AI cannot cause server to award more than possible
-    possibleTotal += reviewQualityBonus;
     int userTotal = 0;
 
     // For each matched user point, award the possibleScore for matched issues only once per issue.
@@ -303,7 +303,6 @@ Return only the JSON matching the schema described in the user prompt. Do not ad
       userTotal = Math.Max(0, userTotal);
     }
 
-    // Clamp totals and ensure userTotal does not exceed possibleTotal
     possibleTotal = Math.Max(0, possibleTotal);
     userTotal = Math.Max(0, userTotal);
     if (userTotal > possibleTotal) userTotal = possibleTotal;

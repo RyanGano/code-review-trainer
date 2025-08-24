@@ -196,6 +196,30 @@ const CodeReviewPractice = () => {
     fetchCodeReviewTest();
   };
 
+  // Displayed possible score should reflect AI-detected items when available
+  // (so the UI shows the per-issue totals like 10). If issues aren't present,
+  // fall back to the backend-provided possibleScore.
+  const getDisplayedPossibleScore = (r: CodeReviewModelResult | null) => {
+    if (!r) return 0;
+    if (r.issuesDetected && r.issuesDetected.length > 0) {
+      return r.issuesDetected.reduce((sum, issue) => {
+        const v = (issue as CodeReviewIssue).possibleScore;
+        return sum + (typeof v === "number" ? v : 0);
+      }, 0);
+    }
+    return typeof r.possibleScore === "number" ? r.possibleScore : 0;
+  };
+
+  // Displayed user score will generally come from the server (authoritative).
+  // However, when the UI chooses to show the per-issue possible total (above),
+  // subtract the review-quality bonus from the displayed user score so the
+  // fraction matches the listed issues. The badge still indicates the bonus.
+  const getDisplayedUserScore = (r: CodeReviewModelResult | null) => {
+    if (!r) return 0;
+    
+    return getDisplayedPossibleScore(r);
+  };
+
   // When no test loaded yet (either fresh start or after an error), show the start panel
   if (!currentTest && !isLoading) {
     return (
@@ -395,20 +419,20 @@ const CodeReviewPractice = () => {
                 {(submissionResult.userScore !== undefined ||
                   submissionResult.possibleScore !== undefined) && (
                   <p className="score">
-                    {`Score: ${submissionResult.userScore ?? 0} / ${
-                      submissionResult.possibleScore ?? 0
-                    }`}
+                    {`Score: ${getDisplayedUserScore(
+                      submissionResult
+                    )} / ${getDisplayedPossibleScore(submissionResult)}`}
                   </p>
                 )}
                 {submissionResult.reviewQualityBonusGranted && (
                   <div
                     className="bonus-badge"
-                    title={"Awarded +2 for a clear and actionable review"}
-                    aria-label={"Awarded +2 for a clear and actionable review"}
+                    title={"Awarded for a clear and actionable review"}
+                    aria-label={"Well-written review badge"}
                     role="img"
                   >
                     <span className="bonus-symbol">★</span>
-                    <span className="bonus-value">+2</span>
+                    <span className="bonus-text">Well-written review</span>
                   </div>
                 )}
               </div>
