@@ -43,7 +43,11 @@ Your analysis should:
 5. Provide detailed feedback in the summary
 
 IMPORTANT: For scoring, include a numeric ""possibleScore"" for each item in ""issuesDetected"". Do NOT include any overall numeric totals in the model output; the server will compute totals. If you include any totals, ensure they never exceed the sum of the per-issue possibleScore values plus 2 (two points reserved for general review quality).
-MUST include a boolean field in the JSON root named ""reviewQualityBonusGranted"": true or false indicating whether the reviewer earned the +2 general review quality bonus. This field is REQUIRED and must always be present (set true when the review is clear and actionable, otherwise set false). Do NOT omit this field. Optionally include the exact phrase ""Earned 2 additional points for a clear and actionable review"" in the summary paragraph when true so humans can see it. Do not vary the spelling of that phrase if you include it.
+  MUST include a boolean field in the JSON root named ""reviewQualityBonusGranted"": true or false indicating whether the reviewer earned the +2 general review quality bonus. This field is REQUIRED and must always be present (set true when the review is clear and actionable, otherwise set false). Do NOT omit this field.
+
+  MUST include a boolean field in the JSON root named ""spellingProblemsDetected"": true or false indicating whether the user's review contains multiple spelling/typo issues. This field is REQUIRED and must always be present (set true when the model detected spelling/typo problems in the user's review or parsed matched points).
+
+  IMPORTANT: Do NOT include machine-readable signals (for example the review-quality award phrase or the spelling flag) as part of the human-facing summary text. Specifically, do NOT include the exact phrase ""Earned 2 additional points for a clear and actionable review"" (or any variant) in the summary - set the boolean fields and let the UI display badges. The summary should be strictly human-facing guidance and must not repeat machine-readable flags.
 
 CRITICAL PARSING INSTRUCTIONS:
 - Read the user's review thoroughly and look for ANY mention of issues, even if phrased differently than you would phrase them
@@ -181,17 +185,84 @@ Return only the JSON matching the schema described in the user prompt. Do not ad
       missed.AddRange(mc.EnumerateArray().Select(AsFlexibleString));
     }
     var summary = el.TryGetProperty("summary", out var sum) ? sum.GetString() ?? string.Empty : string.Empty;
+    // Allow model to explicitly signal spelling problems with a boolean flag
+    bool modelIndicatedSpelling = false;
+    if (el.TryGetProperty("spellingProblemsDetected", out var sp) && sp.ValueKind == JsonValueKind.True)
+    {
+      modelIndicatedSpelling = true;
+    }
+
+    // Conservative fallback heuristics: prefer an explicit boolean from the model.
+    // If the model did not provide the flag, count spelling/typo cues across
+    // summary, raw JSON, detected issues, and matched points and only set the
+    // flag when multiple cues appear (threshold=2) to avoid false positives.
+    var spellingKeywords = new[] { "spelling", "spelling error", "misspell", "misspelled", "typo", "typos", "misspelling" };
+    bool modelProvidedSpellingFlag = el.TryGetProperty("spellingProblemsDetected", out var sp2) && sp2.ValueKind == JsonValueKind.True;
+    if (modelProvidedSpellingFlag)
+    {
+      modelIndicatedSpelling = true;
+    }
+    else
+    {
+      int matchCount = 0;
+      string Norm(string s) => (s ?? string.Empty).ToLowerInvariant();
+
+      // count occurrences helper
+      int CountOccurrences(string haystack, string needle)
+      {
+        if (string.IsNullOrEmpty(haystack) || string.IsNullOrEmpty(needle)) return 0;
+        int count = 0;
+        int idx = 0;
+        while ((idx = haystack.IndexOf(needle, idx, StringComparison.Ordinal)) >= 0)
+        {
+          count++;
+          idx += needle.Length;
+        }
+        return count;
+      }
+
+      var normSummary = Norm(summary);
+      var normRaw = Norm(raw);
+      foreach (var kw in spellingKeywords)
+      {
+        matchCount += CountOccurrences(normSummary, kw);
+        matchCount += CountOccurrences(normRaw, kw);
+      }
+
+      if (issues != null)
+      {
+        foreach (var issue in issues)
+        {
+          var combined = Norm(issue.Title) + " " + Norm(issue.Explanation);
+          foreach (var kw in spellingKeywords) matchCount += CountOccurrences(combined, kw);
+        }
+      }
+
+      if (matched != null)
+      {
+        foreach (var mpt in matched)
+        {
+          var combined = Norm(mpt.Excerpt) + " " + Norm(mpt.Accuracy);
+          foreach (var kw in spellingKeywords) matchCount += CountOccurrences(combined, kw);
+        }
+      }
+
+      // Require at least two mentions to reduce false positives
+      if (matchCount >= 2) modelIndicatedSpelling = true;
+    }
 
     // Compute empirical scoring: sum possible for all detected issues, and user-earned score from matched points
     // Base possible total is the sum of per-issue possible scores. The +2
     // review-quality bonus is not included in this value; it is reported via
     // ReviewQualityBonusGranted and may be added to the user's score only.
-    int possibleTotal = issues.Sum(i => i.PossibleScore);
+    var issuesList = issues ?? new List<CodeReviewIssue>();
+    var matchedList = matched ?? new List<CodeReviewMatchedUserPoint>();
+    int possibleTotal = issuesList.Sum(i => i.PossibleScore);
     int userTotal = 0;
 
     // For each matched user point, award the possibleScore for matched issues only once per issue.
     var awardedIssueIds = new HashSet<string>();
-    foreach (var m in matched)
+    foreach (var m in matchedList)
     {
       // Skip matches with low accuracy or empty matched IDs
       var accuracyNormalized = (m.Accuracy ?? string.Empty).ToLowerInvariant();
@@ -199,7 +270,7 @@ Return only the JSON matching the schema described in the user prompt. Do not ad
       {
         if (string.IsNullOrWhiteSpace(mid)) continue;
         if (awardedIssueIds.Contains(mid)) continue; // already awarded
-        var issue = issues.FirstOrDefault(i => string.Equals(i.Id, mid, StringComparison.OrdinalIgnoreCase));
+        var issue = issuesList.FirstOrDefault(i => string.Equals(i.Id, mid, StringComparison.OrdinalIgnoreCase));
         if (issue == null) continue;
 
         // Determine award multiplier: only award if accuracy not explicitly 'incorrect' or 'false'
@@ -271,11 +342,6 @@ Return only the JSON matching the schema described in the user prompt. Do not ad
         }
       }
 
-      // -1 for spelling errors or non-functional mistakes: if model mentions 'spelling' or 'typo'
-      if (s.Contains("spelling") || s.Contains("typo") || s.Contains("spelling error"))
-      {
-        userTotal -= 1;
-      }
 
       // Final permissive check: if summary mentions both 'clear' and 'actionable' (not necessarily as a phrase)
       // and we haven't awarded the bonus yet, grant it unless there are negation cues.
@@ -297,7 +363,7 @@ Return only the JSON matching the schema described in the user prompt. Do not ad
 
     // Ensure that a sample that only has minor/low issues does not penalize simple LGTM approvals.
     // If all issues are low/trivial and userTotal == 0 (i.e., matched none), consider not penalizing.
-    if (possibleTotal > 0 && issues.All(i => i.PossibleScore <= 1) && userTotal <= 0)
+    if (possibleTotal > 0 && issuesList.All(i => i.PossibleScore <= 1) && userTotal <= 0)
     {
       // Treat LGTM as acceptable - award zero rather than negative or leave zero
       userTotal = Math.Max(0, userTotal);
@@ -305,9 +371,10 @@ Return only the JSON matching the schema described in the user prompt. Do not ad
 
     possibleTotal = Math.Max(0, possibleTotal);
     userTotal = Math.Max(0, userTotal);
+
     if (userTotal > possibleTotal) userTotal = possibleTotal;
 
-    return new CodeReviewModelResult(problemId, issues, matched, missed, summary, raw, false, null, awardedReviewBonus, UserScore: userTotal, PossibleScore: possibleTotal);
+    return new CodeReviewModelResult(problemId, issuesList, matchedList, missed, summary, raw ?? string.Empty, false, null, modelIndicatedSpelling, awardedReviewBonus, UserScore: userTotal, PossibleScore: possibleTotal);
   }
 
   private static string BuildUserPrompt(CodeReviewRequest req)
@@ -324,7 +391,7 @@ Return only the JSON matching the schema described in the user prompt. Do not ad
 
     // Escape braces by doubling for string interpolation
     // Extend schema to include possibleScore for each detected issue and for matched points include possibleScore
-    var schema = "{{ problemId, issuesDetected:[{{id,category,title,explanation,severity,possibleScore}}], matchedUserPoints:[{{excerpt,matchedIssueIds,accuracy}}], missedCriticalIssueIds:[], reviewQualityBonusGranted, summary }}";
+    var schema = "{{ problemId, issuesDetected:[{{id,category,title,explanation,severity,possibleScore}}], matchedUserPoints:[{{excerpt,matchedIssueIds,accuracy}}], missedCriticalIssueIds:[], reviewQualityBonusGranted, spellingProblemsDetected, summary }}";
     return $@"ProblemId: {req.ProblemId}
 
 OriginalCode:
@@ -363,13 +430,14 @@ Return ONLY RAW JSON (no markdown fences) matching schema: {schema}";
       IssuesDetected: Array.Empty<CodeReviewIssue>(),
       MatchedUserPoints: Array.Empty<CodeReviewMatchedUserPoint>(),
       MissedCriticalIssueIds: Array.Empty<string>(),
-      Summary: $"Fallback: {reason} {(details ?? string.Empty)}",
-      RawModelJson: raw ?? string.Empty,
-      IsFallback: true,
-      Error: reason + (details != null ? ": " + details : string.Empty),
-      ReviewQualityBonusGranted: false,
-      UserScore: 0,
-      PossibleScore: 0
+  Summary: $"Fallback: {reason} {(details ?? string.Empty)}",
+  RawModelJson: raw ?? string.Empty,
+  IsFallback: true,
+  Error: reason + (details != null ? ": " + details : string.Empty),
+  SpellingProblemsDetected: false,
+  ReviewQualityBonusGranted: false,
+  UserScore: 0,
+  PossibleScore: 0
     );
 
   // JSON cleaning + repair helpers below support lenient parsing of model output.

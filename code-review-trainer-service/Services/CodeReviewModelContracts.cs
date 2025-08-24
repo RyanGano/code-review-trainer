@@ -24,8 +24,11 @@ public record CodeReviewModelResult(
     IReadOnlyList<string> MissedCriticalIssueIds,
     string Summary,
     string RawModelJson,
+    // Whether this result is a fallback (no model evaluation)
     bool IsFallback,
     string? Error,
+    // Whether the model indicated spelling/typo problems in the user's review
+    bool SpellingProblemsDetected,
     // Whether the model (or server fallback heuristics) granted the +2 review quality bonus
     bool ReviewQualityBonusGranted,
     // Scores calculated server-side

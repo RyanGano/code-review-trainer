@@ -292,6 +292,34 @@
   margin: 0;
 }
 
+/* Negative badge for spelling/typo issues */
+.negative-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  background: linear-gradient(180deg,#fff1f0,#ffd6d3);
+  color: #6b0b00;
+  border: 1px solid #ff8a80;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.negative-symbol {
+  color: #d32f2f;
+  font-size: 1rem;
+  line-height: 1;
+  display: inline-block;
+}
+
+.negative-text {
+  font-size: 0.85rem;
+  color: #6b0b00;
+  display: inline-block;
+}
+
 // Dark mode tweaks to ensure readability when browser/OS is in dark mode
 @media (prefers-color-scheme: dark) {
   .common-dropdown {

@@ -32,6 +32,8 @@ interface CodeReviewModelResult {
   rawModelJson?: string;
   isFallback?: boolean;
   error?: string;
+  // New: model (server) indicates spelling/typo problems found in the user's review
+  spellingProblemsDetected?: boolean;
   userScore?: number;
   possibleScore?: number;
   reviewQualityBonusGranted?: boolean;
@@ -216,8 +218,16 @@ const CodeReviewPractice = () => {
   // fraction matches the listed issues. The badge still indicates the bonus.
   const getDisplayedUserScore = (r: CodeReviewModelResult | null) => {
     if (!r) return 0;
-    
+
     return getDisplayedPossibleScore(r);
+  };
+
+  // Prefer machine-readable flag from server indicating spelling problems.
+  // The frontend should display what the backend provides rather than
+  // attempting to parse or infer from free-form text.
+  const hasSpellingProblems = (r: CodeReviewModelResult | null) => {
+    if (!r) return false;
+    return !!r.spellingProblemsDetected;
   };
 
   // When no test loaded yet (either fresh start or after an error), show the start panel
@@ -433,6 +443,24 @@ const CodeReviewPractice = () => {
                   >
                     <span className="bonus-symbol">★</span>
                     <span className="bonus-text">Well-written review</span>
+                  </div>
+                )}
+                {/* Negative badge shown when AI indicates multiple spelling/typo errors.
+                    It intentionally appears after the positive/bonus badge so a
+                    user who earned both sees the positive badge first. */}
+                {hasSpellingProblems(submissionResult) && (
+                  <div
+                    className="negative-badge"
+                    title={
+                      "AI detected several spelling/typo issues in your review"
+                    }
+                    aria-label={"Several spelling errors badge"}
+                    role="img"
+                  >
+                    <span className="negative-symbol">✖</span>
+                    <span className="negative-text">
+                      Several spelling errors
+                    </span>
                   </div>
                 )}
               </div>
