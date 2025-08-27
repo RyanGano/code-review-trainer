@@ -128,7 +128,10 @@ const CodeReviewPractice = () => {
       const testData = await testResponse.json();
       setCurrentTest(testData);
       setReviewComments("");
+      // Clear previous submission results and any per-issue explanations
       setSubmissionResult(null);
+      setExplanations({});
+      setExplainLoading({});
     } catch (error) {
       console.error("Error fetching code review test:", error);
       setError(
@@ -191,7 +194,10 @@ const CodeReviewPractice = () => {
       }
 
       const result = await submitResponse.json();
+      // Replace submission result and clear any stale explanations from prior runs
       setSubmissionResult(result);
+      setExplanations({});
+      setExplainLoading({});
     } catch (error) {
       console.error("Error submitting review:", error);
       setError(
@@ -227,7 +233,21 @@ const CodeReviewPractice = () => {
   const getDisplayedUserScore = (r: CodeReviewModelResult | null) => {
     if (!r) return 0;
 
-    return getDisplayedPossibleScore(r);
+    // Prefer the server-provided userScore when available
+    const serverUser = typeof r.userScore === "number" ? r.userScore : 0;
+    const hasIssues = r.issuesDetected && r.issuesDetected.length > 0;
+
+    // If we are showing per-issue possible totals, subtract the review-quality
+    // bonus from the displayed user score so the fraction aligns with the
+    // listed issue totals (the UI still shows a badge for the bonus).
+    if (hasIssues) {
+      const bonus = r.reviewQualityBonusGranted ? 2 : 0;
+      const adjusted = Math.max(0, serverUser - bonus);
+      return adjusted;
+    }
+
+    // No per-issue list present: just show the authoritative server user score.
+    return serverUser;
   };
 
   // Prefer machine-readable flag from server indicating spelling problems.
