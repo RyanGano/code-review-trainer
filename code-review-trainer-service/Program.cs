@@ -4,6 +4,9 @@ using Microsoft.IdentityModel.Tokens;
 using code_review_trainer_service.Services;
 using Azure.Identity;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
+using OpenAI.Chat;
+using Microsoft.Extensions.Options;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -179,6 +182,97 @@ app.MapPost("/tests/{id}", async (string id, ReviewSubmission submission, IProbl
 .WithName("SubmitReview")
 .RequireAuthorization();
 
+// Explain an individual item from a review result. For now this returns a static placeholder
+// In future this can delegate to the AI/model to generate a contextual explanation.
+// Explain an individual item from a review result. Accepts a JSON body with the item's full text
+// (title, category/severity, and explanation). Example field name: "itemText".
+app.MapPost("/tests/{id}/explain", async (string id, ExplainRequest body, IProblemRepository repo, ChatClient? chat, IOptions<AzureOpenAISettings> options) =>
+{
+    // Parameters:
+    //  - id: the test/problem id
+    //  - body.ItemText: the full text of the item to explain (from the UI)
+
+    var problem = repo.Get(id);
+    if (problem == null)
+    {
+        return Results.NotFound(new { error = "Problem not found" });
+    }
+
+    // If ChatClient or configuration missing, return fallback placeholder
+    var aiSettings = options?.Value;
+    if (chat == null || aiSettings == null || !aiSettings.IsConfigured)
+    {
+        var fallback = "Explanation goes here";
+        return Results.Ok(new { explanation = fallback });
+    }
+
+    // Build prompt using original code and item text. Include the full original code.
+    string code = problem.Value.Code ?? string.Empty;
+
+    var system = new SystemChatMessage("You are a helpful, patient senior engineer. Return ONLY valid JSON (no markdown, no backticks, no commentary) using the schema: { \"explanation\": string, \"examples\": string (optional) }.");
+
+    var userBuilder = $@"You recently reviewed this code and gave this feedback:
+{body.ItemText}
+
+Here is the original code:
+```csharp
+{code}
+```
+
+Please do the following:
+1) Explain your feedback clearly and simply so the developer can fully understand the implications.
+2) If the issue relates to bounds checking, provide example input values that produce bad output and show the bad output.
+3) If the issue is a code-style or formatting issue, provide concrete guidance or examples in the examples field.
+4) Re-evaluate your original review item and note any uncertainty or mistakes.
+
+Return ONLY a single JSON object matching the schema: {{ ""explanation"": string, ""examples"": string }}. Do NOT include any markdown or extra text.";
+
+    var messages = new List<ChatMessage>
+    {
+        system,
+        new UserChatMessage(userBuilder)
+    };
+
+    try
+    {
+        var resp = await chat.CompleteChatAsync(messages, new ChatCompletionOptions { MaxOutputTokenCount = 1200, Temperature = 0.2f });
+        var text = resp.Value?.Content?.FirstOrDefault()?.Text ?? string.Empty;
+
+        // Try to extract a JSON object from the model's response
+        int first = text.IndexOf('{');
+        int last = text.LastIndexOf('}');
+        if (first >= 0 && last > first)
+        {
+            var candidate = text.Substring(first, last - first + 1).Trim();
+            try
+            {
+                var doc = JsonDocument.Parse(candidate);
+                var root = doc.RootElement;
+                var explanationStr = root.TryGetProperty("explanation", out var exEl) ? exEl.GetString() ?? string.Empty : string.Empty;
+                var examplesStr = root.TryGetProperty("examples", out var exsEl) ? exsEl.GetString() ?? string.Empty : string.Empty;
+                return Results.Ok(new { explanation = explanationStr, examples = examplesStr });
+            }
+            catch (Exception parseEx)
+            {
+                Console.WriteLine($"Failed to parse JSON from model: {parseEx.Message}");
+                // fall through to return raw text explanation
+            }
+        }
+
+        // If parsing failed, return the raw text as explanation in the structured form
+        return Results.Ok(new { explanation = text, examples = string.Empty });
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Explain call failed: {ex.Message}");
+        return Results.Ok(new { explanation = "Explanation goes here", examples = string.Empty });
+    }
+})
+.WithName("ExplainItem")
+.RequireAuthorization();
+
+
 app.Run();
 
 public record ReviewSubmission(string review);
+public record ExplainRequest(string ItemText);

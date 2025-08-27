@@ -57,6 +57,16 @@ const CodeReviewPractice = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionResult, setSubmissionResult] =
     useState<CodeReviewModelResult | null>(null);
+  interface ExplainResponse {
+    explanation: string;
+    examples?: string;
+  }
+  const [explanations, setExplanations] = useState<
+    Record<string, ExplainResponse>
+  >({});
+  const [explainLoading, setExplainLoading] = useState<Record<string, boolean>>(
+    {}
+  );
   // Prevent infinite re-fetch loop when backend is failing
   const [autoFetchAttempted, setAutoFetchAttempted] = useState(false);
 
@@ -481,6 +491,111 @@ const CodeReviewPractice = () => {
                                 {" "}
                                 (Possible: {i.possibleScore})
                               </span>
+                            )}
+                            {/* Explain this button */}
+                            <div className="explain-row">
+                              <button
+                                className={`explain-button ${
+                                  explainLoading[i.id] || explanations[i.id]
+                                    ? "disabled"
+                                    : ""
+                                }`}
+                                disabled={
+                                  !!explainLoading[i.id] || !!explanations[i.id]
+                                }
+                                onClick={async () => {
+                                  if (!currentTest) return;
+                                  if (explainLoading[i.id]) return;
+                                  if (explanations[i.id]) return; // already explained
+                                  setError(null);
+                                  setExplainLoading((prev) => ({
+                                    ...prev,
+                                    [i.id]: true,
+                                  }));
+                                  try {
+                                    const accessToken = await acquireApiToken();
+                                    // Build a small, human-readable item text to send to the server
+                                    const itemText = `${i.title || i.id} [${
+                                      i.category
+                                    }/${i.severity}] – ${i.explanation || ""}`;
+                                    const resp = await fetch(
+                                      `${apiConfig.webApi}tests/${currentTest.id}/explain`,
+                                      {
+                                        method: "POST",
+                                        headers: {
+                                          Authorization: `Bearer ${accessToken}`,
+                                          "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify({ itemText }),
+                                      }
+                                    );
+                                    if (!resp.ok) {
+                                      throw new Error(
+                                        `HTTP error! status: ${resp.status}`
+                                      );
+                                    }
+                                    const data = await resp.json();
+                                    // data may be { explanation, examples } or a plain string
+                                    let parsed: ExplainResponse;
+                                    if (!data) {
+                                      parsed = { explanation: "" };
+                                    } else if (typeof data === "string") {
+                                      parsed = { explanation: data };
+                                    } else if (typeof data === "object") {
+                                      parsed = {
+                                        explanation:
+                                          data.explanation ||
+                                          data.Explanation ||
+                                          "",
+                                        examples:
+                                          data.examples || data.Examples || "",
+                                      };
+                                    } else {
+                                      parsed = { explanation: String(data) };
+                                    }
+                                    setExplanations((prev) => ({
+                                      ...prev,
+                                      [i.id]: parsed,
+                                    }));
+                                  } catch (err) {
+                                    console.error("Explain error:", err);
+                                    setError(
+                                      err instanceof Error
+                                        ? err.message
+                                        : String(err)
+                                    );
+                                  } finally {
+                                    setExplainLoading((prev) => ({
+                                      ...prev,
+                                      [i.id]: false,
+                                    }));
+                                  }
+                                }}
+                              >
+                                {explanations[i.id] ? (
+                                  "Explained"
+                                ) : explainLoading[i.id] ? (
+                                  <>
+                                    Explaining… <span className="spinner" />
+                                  </>
+                                ) : (
+                                  "Explain this"
+                                )}
+                              </button>
+                            </div>
+                            {explanations[i.id] && (
+                              <div className="explanation-block">
+                                <div className="explanation-text">
+                                  {explanations[i.id].explanation}
+                                </div>
+                                {explanations[i.id].examples && (
+                                  <div className="explanation-examples">
+                                    <strong>Examples:</strong>
+                                    <pre>{explanations[i.id].examples}</pre>
+                                  </div>
+                                )}
+                                {/* proposedFix removed: UI displays explanation and examples only */}
+                              </div>
                             )}
                           </li>
                         )
