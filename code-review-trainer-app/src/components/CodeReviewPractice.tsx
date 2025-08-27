@@ -67,6 +67,10 @@ const CodeReviewPractice = () => {
   const [explainLoading, setExplainLoading] = useState<Record<string, boolean>>(
     {}
   );
+  // Track per-issue visibility of already-fetched explanations so users can hide/show
+  const [shownExplanations, setShownExplanations] = useState<
+    Record<string, boolean>
+  >({});
   // Prevent infinite re-fetch loop when backend is failing
   const [autoFetchAttempted, setAutoFetchAttempted] = useState(false);
 
@@ -132,6 +136,7 @@ const CodeReviewPractice = () => {
       setSubmissionResult(null);
       setExplanations({});
       setExplainLoading({});
+      setShownExplanations({});
     } catch (error) {
       console.error("Error fetching code review test:", error);
       setError(
@@ -198,6 +203,7 @@ const CodeReviewPractice = () => {
       setSubmissionResult(result);
       setExplanations({});
       setExplainLoading({});
+      setShownExplanations({});
     } catch (error) {
       console.error("Error submitting review:", error);
       setError(
@@ -516,17 +522,23 @@ const CodeReviewPractice = () => {
                             <div className="explain-row">
                               <button
                                 className={`explain-button ${
-                                  explainLoading[i.id] || explanations[i.id]
-                                    ? "disabled"
-                                    : ""
+                                  explainLoading[i.id] ? "disabled" : ""
                                 }`}
-                                disabled={
-                                  !!explainLoading[i.id] || !!explanations[i.id]
-                                }
+                                disabled={!!explainLoading[i.id]}
                                 onClick={async () => {
                                   if (!currentTest) return;
                                   if (explainLoading[i.id]) return;
-                                  if (explanations[i.id]) return; // already explained
+
+                                  // If explanation already exists, toggle visibility only
+                                  if (explanations[i.id]) {
+                                    setShownExplanations((prev) => ({
+                                      ...prev,
+                                      [i.id]: !prev[i.id],
+                                    }));
+                                    return;
+                                  }
+
+                                  // Otherwise, fetch explanation from server
                                   setError(null);
                                   setExplainLoading((prev) => ({
                                     ...prev,
@@ -534,7 +546,6 @@ const CodeReviewPractice = () => {
                                   }));
                                   try {
                                     const accessToken = await acquireApiToken();
-                                    // Build a small, human-readable item text to send to the server
                                     const itemText = `${i.title || i.id} [${
                                       i.category
                                     }/${i.severity}] – ${i.explanation || ""}`;
@@ -555,7 +566,6 @@ const CodeReviewPractice = () => {
                                       );
                                     }
                                     const data = await resp.json();
-                                    // data may be { explanation, examples } or a plain string
                                     let parsed: ExplainResponse;
                                     if (!data) {
                                       parsed = { explanation: "" };
@@ -577,6 +587,11 @@ const CodeReviewPractice = () => {
                                       ...prev,
                                       [i.id]: parsed,
                                     }));
+                                    // make it visible immediately after fetch
+                                    setShownExplanations((prev) => ({
+                                      ...prev,
+                                      [i.id]: true,
+                                    }));
                                   } catch (err) {
                                     console.error("Explain error:", err);
                                     setError(
@@ -593,7 +608,11 @@ const CodeReviewPractice = () => {
                                 }}
                               >
                                 {explanations[i.id] ? (
-                                  "Explained"
+                                  shownExplanations[i.id] ? (
+                                    "Hide explanation"
+                                  ) : (
+                                    "Show explanation"
+                                  )
                                 ) : explainLoading[i.id] ? (
                                   <>
                                     Explaining… <span className="spinner" />
@@ -603,7 +622,7 @@ const CodeReviewPractice = () => {
                                 )}
                               </button>
                             </div>
-                            {explanations[i.id] && (
+                            {explanations[i.id] && shownExplanations[i.id] && (
                               <div className="explanation-block">
                                 <div className="explanation-text">
                                   {explanations[i.id].explanation}

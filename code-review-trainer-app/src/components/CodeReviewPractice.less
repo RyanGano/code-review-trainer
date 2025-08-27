@@ -238,7 +238,7 @@
 }
 
 .explain-row {
-  margin-top: 6px;
+  margin-top: 10px;
 }
 
 .explain-button {
@@ -256,13 +256,26 @@
 }
 
 .explanation-block {
-  margin-top: 8px;
-  margin-left: 12px;
-  padding-left: 12px;
-  border-left: 3px solid #e9ecef;
+  margin-top: 18px;
+  margin-bottom: 18px;
+  margin-left: 0;
+  /* keep no vertical padding so the left bar matches text height; use margins for spacing */
+  padding: 0 0 0 16px; /* left padding to make room for the bar (indent +4px) */
+  position: relative;
   color: #333;
   font-size: 13px;
-  background: #fbfbfb;
+  background: transparent;
+}
+
+.explanation-block::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0;
+  width: 3px;
+  height: 100%;
+  background: #e9ecef;
+  border-radius: 2px;
 }
 
 .explanation-text {
@@ -271,11 +284,7 @@
   /* Quiet, indented styling to make explanations stand out without changing font scale much */
   font-size: 14px; /* match main UI text size */
   color: #2f3840; /* slightly muted text color */
-  background: #fbfcfd; /* very subtle background */
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: 1px solid #eef3f6;
-  margin-left: 8px; /* additional indentation */
+  margin-left: 0;
   line-height: 1.5;
 }
 
@@ -285,6 +294,12 @@
   padding: 8px;
   border-radius: 4px;
   margin-top: 8px;
+  /* Make examples visually inline with explanation - remove boxed styling */
+  background: transparent;
+  border: none;
+  padding: 0;
+  border-radius: 0;
+  margin-top: 6px;
 }
 
 .explanation-examples pre {
