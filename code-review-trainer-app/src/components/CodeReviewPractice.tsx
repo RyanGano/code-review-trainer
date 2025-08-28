@@ -145,8 +145,13 @@ const CodeReviewPractice = () => {
       setExplanations({});
       setExplainLoading({});
       setShownExplanations({});
-    } catch (error) {
-      console.error("Error fetching code review test:", error);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching code review test:", err);
+      setError(err instanceof Error ? err.message : String(err));
+      setCurrentTest(null);
+    } finally {
+      setIsLoading(false);
     }
   }, [accounts, selectedDifficulty, selectedLanguage, acquireApiToken]);
 
@@ -369,12 +374,16 @@ const CodeReviewPractice = () => {
             </select>
           </div>
           <button onClick={handleNewTest} disabled={isLoading}>
-            Get New Code Sample
+            {isLoading ? (
+              <>
+                Getting sample… <span className="spinner" aria-hidden="true" />
+              </>
+            ) : (
+              "Get New Code Sample"
+            )}
           </button>
         </div>
       </div>
-
-      {isLoading && <div className="loading-message">Loading code sample…</div>}
 
       {error && <div className="error-message">Error: {error}</div>}
 
