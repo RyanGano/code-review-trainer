@@ -5,6 +5,7 @@ import { apiConfig } from "../authConfig";
 import CodeMirror from "@uiw/react-codemirror";
 import { csharp } from "@replit/codemirror-lang-csharp";
 import { javascript } from "@codemirror/lang-javascript";
+import { BinocularsFill } from "react-bootstrap-icons";
 
 import "./CodeReviewPractice.less";
 
@@ -30,6 +31,7 @@ interface CodeReviewModelResult {
   missedCriticalIssueIds?: string[];
   summary?: string;
   rawModelJson?: string;
+  recommendedCode?: string | null;
   isFallback?: boolean;
   error?: string;
   // New: model (server) indicates spelling/typo problems found in the user's review
@@ -73,6 +75,8 @@ const CodeReviewPractice = () => {
   >({});
   // Prevent infinite re-fetch loop when backend is failing
   const [autoFetchAttempted, setAutoFetchAttempted] = useState(false);
+  // Show/hide state for recommended code snippet
+  const [showRecommendedCode, setShowRecommendedCode] = useState(false);
 
   const MAX_REVIEW_LENGTH = 2500;
   const WARNING_THRESHOLD = 2200;
@@ -139,15 +143,10 @@ const CodeReviewPractice = () => {
       setShownExplanations({});
     } catch (error) {
       console.error("Error fetching code review test:", error);
-      setError(
-        error instanceof Error ? error.message : "Unknown error occurred"
-      );
-    } finally {
-      setIsLoading(false);
     }
   }, [accounts, selectedDifficulty, selectedLanguage, acquireApiToken]);
 
-  // Auto-fetch a code review test once when user signs in (avoid infinite retry loop on errors)
+  // Auto-load a test once after sign-in to streamline first-run experience.
   useEffect(() => {
     if (
       accounts.length > 0 &&
@@ -402,6 +401,58 @@ const CodeReviewPractice = () => {
                 }}
               />
             </div>
+            {/* Recommended code displayed under the original code viewer for easy comparison */}
+            {submissionResult && (
+              <div className="recommended-code-section below-code">
+                {submissionResult.recommendedCode &&
+                submissionResult.recommendedCode.length > 0 ? (
+                  <>
+                    <button
+                      className="toggle-recommended-code"
+                      onClick={() => setShowRecommendedCode((s) => !s)}
+                      aria-expanded={showRecommendedCode}
+                    >
+                      {showRecommendedCode ? (
+                        <>
+                          <BinocularsFill /> Hide Recommended Code
+                        </>
+                      ) : (
+                        <>
+                          <BinocularsFill /> Recommended Code
+                        </>
+                      )}
+                    </button>
+
+                    {/* Keep the block mounted to allow CSS transitions; toggle open/closed class */}
+                    <div
+                      className={`recommended-code-block ${
+                        showRecommendedCode ? "open" : "closed"
+                      }`}
+                      aria-hidden={!showRecommendedCode}
+                    >
+                      <CodeMirror
+                        value={submissionResult.recommendedCode}
+                        extensions={[
+                          selectedLanguage === "JavaScript"
+                            ? javascript()
+                            : csharp(),
+                        ]}
+                        editable={false}
+                        basicSetup={{
+                          lineNumbers: true,
+                          foldGutter: true,
+                        }}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <div className="no-recommendation">
+                    No code recommendation was provided by the AI for this
+                    sample.
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="review-section">
@@ -500,6 +551,7 @@ const CodeReviewPractice = () => {
                   </pre>
                 </div>
               )}
+
               {submissionResult.issuesDetected &&
                 submissionResult.issuesDetected.length > 0 && (
                   <div className="issues-section">

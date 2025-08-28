@@ -24,6 +24,7 @@
     "@uiw/react-codemirror": "^4.24.0",
     "codemirror": "^6.0.1",
     "react": "^19.1.0",
+    "react-bootstrap-icons": "^1.11.6",
     "react-dom": "^19.1.0"
   },
   "devDependencies": {

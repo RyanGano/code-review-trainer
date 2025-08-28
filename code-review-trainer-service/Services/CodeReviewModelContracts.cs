@@ -24,6 +24,7 @@ public record CodeReviewModelResult(
     IReadOnlyList<string> MissedCriticalIssueIds,
     string Summary,
     string RawModelJson,
+    string RecommendedCode,
     bool IsFallback,
     string? Error,
     bool SpellingProblemsDetected,

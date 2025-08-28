@@ -317,6 +317,63 @@
   cursor: not-allowed;
 }
 
+.recommended-code-section {
+  margin-top: 12px;
+
+  .toggle-recommended-code {
+    padding: 6px 10px;
+    font-size: 13px;
+    border-radius: 4px;
+    border: 1px solid #6c757d;
+    background: white;
+    color: #343a40;
+    cursor: pointer;
+  }
+
+  .toggle-recommended-code:hover {
+    background: #f8f9fa;
+  }
+
+  .recommended-code-block {
+    margin-top: 8px;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    /* Make the recommended code mirror the main code viewer alignment and wrapping */
+    .cm-editor {
+      text-align: left;
+    }
+    .cm-content {
+      text-align: left;
+      white-space: pre;
+    }
+    .cm-line {
+      text-align: left;
+    }
+  }
+
+  /* animate the recommended code block appearing/disappearing */
+  .recommended-code-block {
+    transition: max-height 0.5s ease, opacity 0.5s ease, transform 0.5s ease;
+    max-height: 0;
+    opacity: 0;
+    transform: scaleY(0.98) translateY(-6px);
+    will-change: max-height, opacity, transform;
+  }
+
+  .recommended-code-block.open {
+    max-height: 1200px; /* large enough to contain typical snippets */
+    opacity: 1;
+    transform: scaleY(1) translateY(0);
+  }
+
+  .recommended-code-block.closed {
+    max-height: 0;
+    opacity: 0;
+    transform: scaleY(0.98) translateY(-6px);
+  }
+}
+
 .spinner {
   display: inline-block;
   width: 10px;
@@ -494,5 +551,15 @@
   .submit-button.disabled:hover {
     background-color: #2a2a2a;
     color: #8f8f8f;
+  }
+}
+
+.recommended-code-section.below-code {
+  margin-top: 8px;
+  display: block;
+  text-align: left; /* left align contents under the code viewer */
+
+  .toggle-recommended-code {
+    margin-left: 0; /* ensure flush left */
   }
 }

@@ -47,6 +47,15 @@ IMPORTANT: For scoring, include a numeric ""possibleScore"" for each item in ""i
 
   MUST include a boolean field in the JSON root named ""spellingProblemsDetected"": true or false indicating whether the user's review contains multiple spelling/typo issues. This field is REQUIRED and must always be present (set true when the model detected spelling/typo problems in the user's review or parsed matched points).
 
+  REQUIRED: Include a field in the JSON root named ""recommendedCode"" whose value is a string. The model MUST return a concise, directly runnable code recommendation in this field whenever it is possible to provide one — i.e., return the full recommended code snippet as the string value (exactly the code, no commentary, no markdown fences). Only if it is absolutely impossible to provide a runnable code snippet (for example the issues are purely conceptual or the model cannot produce valid code within the token limits) MAY the model set ""recommendedCode"" to an empty string. Do NOT set this property to null or omit it. The UI depends on receiving a string for this field in every response.
+
+  CODE STYLE / LANGUAGE GUIDANCE (APPLY TO recommendedCode):
+  - Always produce the recommended code using modern, idiomatic language features current as of the present day. For C# targets, prefer .NET 8 / C# 11 idioms: nullable reference types, async/await, using declarations, pattern matching, records, expression-bodied members, interpolation, and other non-deprecated APIs. For JavaScript targets, prefer modern ECMAScript (ES2022+) idioms: modules, const/let, arrow functions, async/await, optional chaining, nullish coalescing, and native platform APIs (fetch, Promise, etc.).
+  - Keep snippets minimal and focused: include only the smallest, runnable code necessary to fix or demonstrate the recommended change (a function, small class, or short patch), not a full project unless the fix requires it.
+  - Do NOT include any comments, explanatory text, or markdown fences inside the string; the value must be pure code text.
+  - Prefer safe, secure, and performant solutions. Avoid deprecated APIs and anti-patterns.
+  - If the recommended code must reference external libraries or packages, prefer stable, widely-used standard libraries and show only the code; do not include install instructions in the string.
+
   IMPORTANT: Do NOT include machine-readable signals (for example the review-quality award phrase or the spelling flag) as part of the human-facing summary text. Specifically, do NOT include the exact phrase ""Earned 2 additional points for a clear and actionable review"" (or any variant) in the summary - set the boolean fields and let the UI display badges. The summary should be strictly human-facing guidance and must not repeat machine-readable flags.
 
 CRITICAL PARSING INSTRUCTIONS:
@@ -185,6 +194,12 @@ Return only the JSON matching the schema described in the user prompt. Do not ad
       missed.AddRange(mc.EnumerateArray().Select(AsFlexibleString));
     }
     var summary = el.TryGetProperty("summary", out var sum) ? sum.GetString() ?? string.Empty : string.Empty;
+    // Recommended code snippet is required as a string per prompt: empty string when not applicable
+    string recommendedCode = string.Empty;
+    if (el.TryGetProperty("recommendedCode", out var rc) && rc.ValueKind == JsonValueKind.String)
+    {
+      recommendedCode = rc.GetString() ?? string.Empty;
+    }
     // Allow model to explicitly signal spelling problems with a boolean flag
     bool modelIndicatedSpelling = false;
     if (el.TryGetProperty("spellingProblemsDetected", out var sp) && sp.ValueKind == JsonValueKind.True)
@@ -374,7 +389,7 @@ Return only the JSON matching the schema described in the user prompt. Do not ad
 
     if (userTotal > possibleTotal) userTotal = possibleTotal;
 
-    return new CodeReviewModelResult(problemId, issuesList, matchedList, missed, summary, raw ?? string.Empty, false, null, modelIndicatedSpelling, awardedReviewBonus, UserScore: userTotal, PossibleScore: possibleTotal);
+    return new CodeReviewModelResult(problemId, issuesList, matchedList, missed, summary, raw ?? string.Empty, recommendedCode, false, null, modelIndicatedSpelling, awardedReviewBonus, UserScore: userTotal, PossibleScore: possibleTotal);
   }
 
   private static string BuildUserPrompt(CodeReviewRequest req)
@@ -390,7 +405,8 @@ Return only the JSON matching the schema described in the user prompt. Do not ad
 
     // Escape braces by doubling for string interpolation
     // Extend schema to include possibleScore for each detected issue and for matched points include possibleScore
-    var schema = "{{ problemId, issuesDetected:[{{id,category,title,explanation,severity,possibleScore}}], matchedUserPoints:[{{excerpt,matchedIssueIds,accuracy}}], missedCriticalIssueIds:[], reviewQualityBonusGranted, spellingProblemsDetected, summary }}";
+    // Also request an optional machine-readable recommendedCode field containing a full recommended code snippet or null.
+    var schema = "{{ problemId, issuesDetected:[{{id,category,title,explanation,severity,possibleScore}}], matchedUserPoints:[{{excerpt,matchedIssueIds,accuracy}}], missedCriticalIssueIds:[], reviewQualityBonusGranted, spellingProblemsDetected, summary, recommendedCode }}";
     return $@"ProblemId: {req.ProblemId}
 
 OriginalCode:
@@ -431,6 +447,7 @@ Return ONLY RAW JSON (no markdown fences) matching schema: {schema}";
       MissedCriticalIssueIds: Array.Empty<string>(),
   Summary: $"Fallback: {reason} {(details ?? string.Empty)}",
   RawModelJson: raw ?? string.Empty,
+  RecommendedCode: string.Empty,
   IsFallback: true,
   Error: reason + (details != null ? ": " + details : string.Empty),
   SpellingProblemsDetected: false,
