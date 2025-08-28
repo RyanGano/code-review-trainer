@@ -135,9 +135,12 @@ app.MapGet("/tests/", (DifficultyLevel? level, Language language) =>
     // Return a random problem for Easy level
     if (level == DifficultyLevel.Easy)
     {
-        CodeReviewProblem randomProblem = language == Language.JavaScript
-            ? EasyJavaScriptCodeReviewProblems.GetRandomProblemWithId()
-            : EasyCodeReviewProblems.GetRandomProblemWithId();
+        CodeReviewProblem randomProblem = language switch
+        {
+            Language.JavaScript => EasyJavaScriptCodeReviewProblems.GetRandomProblemWithId(),
+            Language.TypeScript => EasyTypeScriptCodeReviewProblems.GetRandomProblemWithId(),
+            _ => EasyCodeReviewProblems.GetRandomProblemWithId()
+        };
 
         return Results.Ok(new
         {
@@ -151,9 +154,12 @@ app.MapGet("/tests/", (DifficultyLevel? level, Language language) =>
     // Return a random problem for Medium level
     if (level == DifficultyLevel.Medium)
     {
-        CodeReviewProblem randomProblem = language == Language.JavaScript
-            ? MediumJavaScriptCodeReviewProblems.GetRandomProblemWithId()
-            : MediumCodeReviewProblems.GetRandomProblemWithId();
+        CodeReviewProblem randomProblem = language switch
+        {
+            Language.JavaScript => MediumJavaScriptCodeReviewProblems.GetRandomProblemWithId(),
+            Language.TypeScript => MediumTypeScriptCodeReviewProblems.GetRandomProblemWithId(),
+            _ => MediumCodeReviewProblems.GetRandomProblemWithId()
+        };
 
         return Results.Ok(new
         {

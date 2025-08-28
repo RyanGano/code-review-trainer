@@ -303,6 +303,7 @@ const CodeReviewPractice = () => {
           >
             <option value="CSharp">C#</option>
             <option value="JavaScript">JavaScript</option>
+            <option value="TypeScript">TypeScript</option>
           </select>
         </div>
 
@@ -371,6 +372,7 @@ const CodeReviewPractice = () => {
             >
               <option value="CSharp">C#</option>
               <option value="JavaScript">JavaScript</option>
+              <option value="TypeScript">TypeScript</option>
             </select>
           </div>
           <button onClick={handleNewTest} disabled={isLoading}>
@@ -395,7 +397,10 @@ const CodeReviewPractice = () => {
               <CodeMirror
                 value={currentTest.problem}
                 extensions={[
-                  selectedLanguage === "JavaScript" ? javascript() : csharp(),
+                  selectedLanguage === "JavaScript" ||
+                  selectedLanguage === "TypeScript"
+                    ? javascript()
+                    : csharp(),
                 ]}
                 editable={false}
                 basicSetup={{

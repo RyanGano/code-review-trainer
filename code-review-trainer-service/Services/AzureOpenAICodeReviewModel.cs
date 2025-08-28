@@ -31,7 +31,7 @@ public class AzureOpenAICodeReviewModel : ICodeReviewModel
 
     try
     {
-      var systemPrompt = @"You are a senior C# engineer conducting code review training. Your goal is to help train developers to become better at code reviews.
+      var systemPrompt = @"You are a senior software engineer with deep experience in all programming languages, including C#, JavaScript, and TypeScript conducting code review training. Your goal is to help train developers to become better at code reviews.
 
 IMPORTANT: Output ONLY valid, minified JSON object per the schema. ABSOLUTELY NO markdown, no backticks, no commentary outside the JSON.
 
@@ -50,7 +50,10 @@ IMPORTANT: For scoring, include a numeric ""possibleScore"" for each item in ""i
   REQUIRED: Include a field in the JSON root named ""recommendedCode"" whose value is a string. The model MUST return a concise, directly runnable code recommendation in this field whenever it is possible to provide one — i.e., return the full recommended code snippet as the string value (exactly the code, no commentary, no markdown fences). Only if it is absolutely impossible to provide a runnable code snippet (for example the issues are purely conceptual or the model cannot produce valid code within the token limits) MAY the model set ""recommendedCode"" to an empty string. Do NOT set this property to null or omit it. The UI depends on receiving a string for this field in every response.
 
   CODE STYLE / LANGUAGE GUIDANCE (APPLY TO recommendedCode):
-  - Always produce the recommended code using modern, idiomatic language features current as of the present day. For C# targets, prefer .NET 8 / C# 11 idioms: nullable reference types, async/await, using declarations, pattern matching, records, expression-bodied members, interpolation, and other non-deprecated APIs. For JavaScript targets, prefer modern ECMAScript (ES2022+) idioms: modules, const/let, arrow functions, async/await, optional chaining, nullish coalescing, and native platform APIs (fetch, Promise, etc.).
+  - Always produce the recommended code using modern, idiomatic language features current as of the present day.
+    - For C# targets, prefer .NET 8 / C# 11 idioms: nullable reference types, async/await, using declarations, pattern matching, records, expression-bodied members, interpolation, and other non-deprecated APIs.
+    - For JavaScript targets, prefer modern ECMAScript (ES2022+) idioms: modules, const/let, arrow functions, async/await, optional chaining, nullish coalescing, and native platform APIs (fetch, Promise, etc.).
+    - For TypeScript targets, prefer idiomatic TypeScript: explicit types/interfaces where helpful, generics, readonly and const assertions, utility types, async/await, and minimal but correct type annotations. When recommending code for TypeScript prefer small, self-contained typed snippets that compile under strict mode when practical.
   - Keep snippets minimal and focused: include only the smallest, runnable code necessary to fix or demonstrate the recommended change (a function, small class, or short patch), not a full project unless the fix requires it.
   - Do NOT include any comments, explanatory text, or markdown fences inside the string; the value must be pure code text.
   - Prefer safe, secure, and performant solutions. Avoid deprecated APIs and anti-patterns.
@@ -402,6 +405,10 @@ Return only the JSON matching the schema described in the user prompt. Do not ad
     {
       language = "javascript";
     }
+    else if (req.ProblemId.StartsWith("ts_", StringComparison.OrdinalIgnoreCase))
+    {
+      language = "typescript";
+    }
 
     // Escape braces by doubling for string interpolation
     // Extend schema to include possibleScore for each detected issue and for matched points include possibleScore
@@ -417,7 +424,7 @@ OriginalCode:
 UserReview:
 {truncatedReview}
 
-Conduct a comprehensive code review analysis for this {(language == "javascript" ? "JavaScript" : "C#")} code:
+Conduct a comprehensive code review analysis for this {(language == "javascript" ? "JavaScript" : (language == "typescript" ? "TypeScript" : "C#"))} code:
 1. Perform your own thorough review of the code
 2. Identify all issues in the code (populate issuesDetected with comprehensive list - do not truncate)
 3. CAREFULLY analyze what the user found correctly - look for ANY mention of issues even if phrased differently than you would phrase them:

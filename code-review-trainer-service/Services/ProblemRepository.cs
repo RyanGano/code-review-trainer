@@ -20,6 +20,7 @@ public class ProblemRepository : IProblemRepository
     {
       "cs" => Language.CSharp,
       "js" => Language.JavaScript,
+      "ts" => Language.TypeScript,
       _ => (Language?)null
     };
 
@@ -47,6 +48,10 @@ public class ProblemRepository : IProblemRepository
         (id, EasyJavaScriptCodeReviewProblems.GetProblemByIndex(index)),
       (Language.JavaScript, DifficultyLevel.Medium) when index < MediumJavaScriptCodeReviewProblems.Count =>
         (id, MediumJavaScriptCodeReviewProblems.GetProblemByIndex(index)),
+      (Language.TypeScript, DifficultyLevel.Easy) when index < EasyTypeScriptCodeReviewProblems.Count =>
+        (id, EasyTypeScriptCodeReviewProblems.GetProblemByIndex(index)),
+      (Language.TypeScript, DifficultyLevel.Medium) when index < MediumTypeScriptCodeReviewProblems.Count =>
+        (id, MediumTypeScriptCodeReviewProblems.GetProblemByIndex(index)),
       _ => null
     };
   }
