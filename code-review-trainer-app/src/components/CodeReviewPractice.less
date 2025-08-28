@@ -317,6 +317,36 @@
   cursor: not-allowed;
 }
 
+.explain-error {
+  margin-top: 6px;
+  color: #b02a37; /* brief, noticeable error color */
+  font-size: 12px;
+}
+
+/* Animate the explanation-block open/closed using the same approach as recommended-code-block */
+.explanation-block {
+  transition: max-height 0.45s ease, opacity 0.45s ease, transform 0.45s ease, padding 0.28s ease;
+  max-height: 0;
+  opacity: 0;
+  transform: scaleY(0.98) translateY(-6px);
+  overflow: hidden; /* clip content while closed */
+}
+
+.explanation-block.open {
+  max-height: 1000px; /* large enough for typical explanation content */
+  opacity: 1;
+  transform: scaleY(1) translateY(0);
+  padding: 0 0 0 16px; /* keep left indent when open */
+}
+
+.explanation-block.closed {
+  max-height: 0;
+  opacity: 0;
+  transform: scaleY(0.98) translateY(-6px);
+  padding: 0 0 0 0; /* remove left padding while closed to avoid gap */
+}
+
+
 .recommended-code-section {
   margin-top: 12px;
 

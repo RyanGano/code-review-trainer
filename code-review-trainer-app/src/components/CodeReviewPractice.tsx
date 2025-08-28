@@ -69,6 +69,10 @@ const CodeReviewPractice = () => {
   const [explainLoading, setExplainLoading] = useState<Record<string, boolean>>(
     {}
   );
+  // Per-issue short error messages when explanation fetch fails
+  const [explainErrors, setExplainErrors] = useState<
+    Record<string, string | null>
+  >({});
   // Track per-issue visibility of already-fetched explanations so users can hide/show
   const [shownExplanations, setShownExplanations] = useState<
     Record<string, boolean>
@@ -205,9 +209,7 @@ const CodeReviewPractice = () => {
       setShownExplanations({});
     } catch (error) {
       console.error("Error submitting review:", error);
-      setError(
-        error instanceof Error ? error.message : "Unknown error occurred"
-      );
+      setError(error instanceof Error ? error.message : String(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -592,6 +594,11 @@ const CodeReviewPractice = () => {
 
                                   // Otherwise, fetch explanation from server
                                   setError(null);
+                                  // clear any prior per-issue explain error and mark loading
+                                  setExplainErrors((prev) => ({
+                                    ...prev,
+                                    [i.id]: null,
+                                  }));
                                   setExplainLoading((prev) => ({
                                     ...prev,
                                     [i.id]: true,
@@ -639,6 +646,11 @@ const CodeReviewPractice = () => {
                                       ...prev,
                                       [i.id]: parsed,
                                     }));
+                                    // clear any per-issue explain error on success
+                                    setExplainErrors((prev) => ({
+                                      ...prev,
+                                      [i.id]: null,
+                                    }));
                                     // make it visible immediately after fetch
                                     setShownExplanations((prev) => ({
                                       ...prev,
@@ -646,6 +658,11 @@ const CodeReviewPractice = () => {
                                     }));
                                   } catch (err) {
                                     console.error("Explain error:", err);
+                                    // keep a short, local UI message and surface full details in the global error area
+                                    setExplainErrors((prev) => ({
+                                      ...prev,
+                                      [i.id]: "Error getting explanation",
+                                    }));
                                     setError(
                                       err instanceof Error
                                         ? err.message
@@ -673,21 +690,38 @@ const CodeReviewPractice = () => {
                                   "Explain this"
                                 )}
                               </button>
-                            </div>
-                            {explanations[i.id] && shownExplanations[i.id] && (
-                              <div className="explanation-block">
-                                <div className="explanation-text">
-                                  {explanations[i.id].explanation}
+                              {explainErrors[i.id] && (
+                                <div className="explain-error" role="alert">
+                                  {explainErrors[i.id]}
                                 </div>
-                                {explanations[i.id].examples && (
-                                  <div className="explanation-examples">
-                                    <strong>Examples:</strong>
-                                    <pre>{explanations[i.id].examples}</pre>
+                              )}
+                            </div>
+                            {/* Keep the explanation block mounted so CSS transitions can run; toggle open/closed class */}
+                            <div
+                              className={`explanation-block ${
+                                explanations[i.id] && shownExplanations[i.id]
+                                  ? "open"
+                                  : "closed"
+                              }`}
+                              aria-hidden={
+                                !(explanations[i.id] && shownExplanations[i.id])
+                              }
+                            >
+                              {explanations[i.id] && (
+                                <>
+                                  <div className="explanation-text">
+                                    {explanations[i.id].explanation}
                                   </div>
-                                )}
-                                {/* proposedFix removed: UI displays explanation and examples only */}
-                              </div>
-                            )}
+                                  {explanations[i.id].examples && (
+                                    <div className="explanation-examples">
+                                      <strong>Examples:</strong>
+                                      <pre>{explanations[i.id].examples}</pre>
+                                    </div>
+                                  )}
+                                </>
+                              )}
+                              {/* proposedFix removed: UI displays explanation and examples only */}
+                            </div>
                           </li>
                         )
                       )}
