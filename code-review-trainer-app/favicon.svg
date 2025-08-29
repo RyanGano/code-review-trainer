@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="code diff" width="64" height="64">
+  <rect width="64" height="64" rx="12" fill="none"/>
+
+  <!-- minimal diff-style lines: red (deletion) and green (addition) - thicker and extended -->
+  <g stroke-linecap="round" stroke-linejoin="round" stroke-width="12" fill="none">
+    <!-- top red deletion line (muted) -->
+    <line x1="8" y1="16" x2="56" y2="16" stroke="#b33b3b" stroke-opacity="0.95" />
+    <!-- middle green addition line (muted) -->
+    <line x1="8" y1="32" x2="56" y2="32" stroke="#2e9b4a" stroke-opacity="0.95" />
+    <!-- bottom green addition line (muted) -->
+    <line x1="8" y1="48" x2="56" y2="48" stroke="#2e9b4a" stroke-opacity="0.95" />
+  </g>
+
+</svg>
