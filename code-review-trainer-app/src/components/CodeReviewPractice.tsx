@@ -97,17 +97,34 @@ const CodeReviewPractice = () => {
       return silent.accessToken;
     } catch (err: unknown) {
       const msalErr = err as { errorCode?: string };
+      const errorCode = msalErr?.errorCode || "";
       const needsInteraction =
         err instanceof InteractionRequiredAuthError ||
         ["consent_required", "interaction_required", "login_required"].includes(
-          msalErr?.errorCode || ""
+          errorCode
         );
       if (!needsInteraction) throw err as Error;
-      const popup = await instance.acquireTokenPopup({
-        ...request,
-        prompt: "select_account",
-      });
-      return popup.accessToken;
+
+      // If consent is required, explicitly request consent to show the "Accept" dialog
+      const promptType =
+        errorCode === "consent_required" ? "consent" : "select_account";
+      try {
+        const popup = await instance.acquireTokenPopup({
+          ...request,
+          prompt: promptType,
+        });
+        return popup.accessToken;
+      } catch (popupErr: unknown) {
+        // Surface a clearer message when users can't grant consent (e.g. admin required)
+        const pe = popupErr as { errorCode?: string; message?: string };
+        const pcode = pe?.errorCode || "";
+        if (pcode === "consent_required" || pcode === "access_denied") {
+          throw new Error(
+            "Consent is required to call the API. Your tenant may require an administrator to grant consent. Please contact your IT admin or use an account with proper permissions."
+          );
+        }
+        throw popupErr as Error;
+      }
     }
   }, [accounts, instance]);
 
