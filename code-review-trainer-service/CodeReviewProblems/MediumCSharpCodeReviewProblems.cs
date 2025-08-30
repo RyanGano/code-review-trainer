@@ -1,10 +1,9 @@
 namespace code_review_trainer_service.CodeReviewProblems;
 
 // Static class containing medium-level code review problems
-public static class MediumCSharpCodeReviewProblems
+public sealed class MediumCSharpCodeReviewProblems : CodeReviewProblems
 {
-    private static readonly Random _random = new Random();
-
+    // Providers are constructed by DI; no static instance is required.
     private static readonly ProblemDefinition[] _problems = new ProblemDefinition[]
     {
         // Patch example: original vs patched (Medium C#)
@@ -583,25 +582,8 @@ public static class MediumCSharpCodeReviewProblems
 }", "Add DatabaseService.GetUsersAsync example."),
     };
 
-    public static string GetRandomProblem()
+    public MediumCSharpCodeReviewProblems()
+        : base(_problems, Language.CSharp, "cs_medium", DifficultyLevel.Medium)
     {
-        return _problems[_random.Next(_problems.Length)].Updated;
     }
-
-    public static CodeReviewProblem GetRandomProblemWithId()
-    {
-        var index = _random.Next(_problems.Length);
-        var def = _problems[index];
-        return new CodeReviewProblem
-        {
-            Id = $"cs_medium_{index + 1:D3}",
-            Problem = def.Updated,
-            Language = Language.CSharp,
-            Original = def.Original ?? string.Empty,
-            Purpose = def.Purpose ?? string.Empty
-        };
-    }
-
-    public static int Count => _problems.Length;
-    public static string GetProblemByIndex(int index) => _problems[index].Updated;
 }

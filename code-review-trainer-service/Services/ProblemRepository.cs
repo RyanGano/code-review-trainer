@@ -9,6 +9,13 @@ public interface IProblemRepository
 
 public class ProblemRepository : IProblemRepository
 {
+  private readonly IEnumerable<IProblemProvider> _providers;
+
+  public ProblemRepository(IEnumerable<IProblemProvider> providers)
+  {
+    _providers = providers;
+  }
+
   public (string Id, string Code)? Get(string id)
   {
     if (string.IsNullOrWhiteSpace(id)) return null;
@@ -38,21 +45,9 @@ public class ProblemRepository : IProblemRepository
     if (!int.TryParse(parts[2], out var oneBased) || oneBased <= 0) return null;
     var index = oneBased - 1;
 
-    return (language, difficulty) switch
-    {
-      (Language.CSharp, DifficultyLevel.Easy) when index < EasyCSharpCodeReviewProblems.Count =>
-        (id, EasyCSharpCodeReviewProblems.GetProblemByIndex(index)),
-      (Language.CSharp, DifficultyLevel.Medium) when index < MediumCSharpCodeReviewProblems.Count =>
-        (id, MediumCSharpCodeReviewProblems.GetProblemByIndex(index)),
-      (Language.JavaScript, DifficultyLevel.Easy) when index < EasyJavaScriptCodeReviewProblems.Count =>
-        (id, EasyJavaScriptCodeReviewProblems.GetProblemByIndex(index)),
-      (Language.JavaScript, DifficultyLevel.Medium) when index < MediumJavaScriptCodeReviewProblems.Count =>
-        (id, MediumJavaScriptCodeReviewProblems.GetProblemByIndex(index)),
-      (Language.TypeScript, DifficultyLevel.Easy) when index < EasyTypeScriptCodeReviewProblems.Count =>
-        (id, EasyTypeScriptCodeReviewProblems.GetProblemByIndex(index)),
-      (Language.TypeScript, DifficultyLevel.Medium) when index < MediumTypeScriptCodeReviewProblems.Count =>
-        (id, MediumTypeScriptCodeReviewProblems.GetProblemByIndex(index)),
-      _ => null
-    };
+    var provider = _providers.FirstOrDefault(p => p.Language == language && p.Difficulty == difficulty);
+    if (provider == null) return null;
+    if (index < 0 || index >= provider.Count) return null;
+    return (id, provider.GetProblemByIndex(index));
   }
 }

@@ -1,9 +1,7 @@
 namespace code_review_trainer_service.CodeReviewProblems;
 
-public static class MediumJavaScriptCodeReviewProblems
+public sealed class MediumJavaScriptCodeReviewProblems : CodeReviewProblems
 {
-    private static readonly Random _random = new Random();
-
     private static readonly ProblemDefinition[] _problems = new ProblemDefinition[]
     {
         // Patch example: original vs patched (Medium JS)
@@ -224,25 +222,10 @@ function updateUserRole(userId, role) {
 }", "Add processWorkflow promise chain")
     };
 
-    public static string GetRandomProblem()
-    {
-        return _problems[_random.Next(_problems.Length)].Updated;
-    }
+    // Providers are constructed by DI; no static instance is required.
 
-    public static CodeReviewProblem GetRandomProblemWithId()
+    public MediumJavaScriptCodeReviewProblems()
+        : base(_problems, Language.JavaScript, "js_medium", DifficultyLevel.Medium)
     {
-        var index = _random.Next(_problems.Length);
-        var def = _problems[index];
-        return new CodeReviewProblem
-        {
-            Id = $"js_medium_{index + 1:D3}",
-            Problem = def.Updated,
-            Language = Language.JavaScript,
-            Original = def.Original ?? string.Empty,
-            Purpose = def.Purpose ?? string.Empty
-        };
     }
-
-    public static int Count => _problems.Length;
-    public static string GetProblemByIndex(int index) => _problems[index].Updated;
 }

@@ -13,10 +13,8 @@ public class CodeReviewProblem
 }
 
 // Static class containing easy-level code review problems
-public static class EasyCSharpCodeReviewProblems
+public sealed class EasyCSharpCodeReviewProblems : CodeReviewProblems
 {
-    private static readonly Random _random = new Random();
-
     private static readonly ProblemDefinition[] _problems = new ProblemDefinition[]
     {
         // Patch example: original vs patched (Easy C#)
@@ -420,25 +418,9 @@ a[j]=a[j+1];a[j+1]=temp;
 }" , "Add BankAccount with Deposit validation and GetBalance")
     };
 
-    public static string GetRandomProblem()
+    // Constructor is public so DI can construct and manage lifetime
+    public EasyCSharpCodeReviewProblems()
+        : base(_problems, Language.CSharp, "cs_easy", DifficultyLevel.Easy)
     {
-        return _problems[_random.Next(_problems.Length)].Updated;
     }
-
-    public static CodeReviewProblem GetRandomProblemWithId()
-    {
-        var index = _random.Next(_problems.Length);
-        var def = _problems[index];
-        return new CodeReviewProblem
-        {
-            Id = $"cs_easy_{index + 1:D3}",
-            Problem = def.Updated,
-            Language = Language.CSharp,
-            Original = def.Original ?? string.Empty,
-            Purpose = def.Purpose ?? string.Empty
-        };
-    }
-
-    public static int Count => _problems.Length;
-    public static string GetProblemByIndex(int index) => _problems[index].Updated;
 }

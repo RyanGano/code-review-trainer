@@ -1,9 +1,7 @@
 namespace code_review_trainer_service.CodeReviewProblems;
 
-public static class EasyTypeScriptCodeReviewProblems
+public sealed class EasyTypeScriptCodeReviewProblems : CodeReviewProblems
 {
-    private static readonly Random _random = new Random();
-
     private static readonly ProblemDefinition[] _problems = new ProblemDefinition[]
     {
         // Patch example: original vs patched (Easy TS)
@@ -219,25 +217,10 @@ public static class EasyTypeScriptCodeReviewProblems
 }", "Add isArrayEmpty function"),
     };
 
-    public static string GetRandomProblem()
-    {
-        return _problems[_random.Next(_problems.Length)].Updated;
-    }
+    // Providers are constructed by DI; no static instance is required.
 
-    public static CodeReviewProblem GetRandomProblemWithId()
+    public EasyTypeScriptCodeReviewProblems()
+        : base(_problems, Language.TypeScript, "ts_easy", DifficultyLevel.Easy)
     {
-        var index = _random.Next(_problems.Length);
-        var def = _problems[index];
-        return new CodeReviewProblem
-        {
-            Id = $"ts_easy_{index + 1:D3}",
-            Problem = def.Updated,
-            Language = Language.TypeScript,
-            Original = def.Original ?? string.Empty,
-            Purpose = def.Purpose ?? string.Empty
-        };
     }
-
-    public static int Count => _problems.Length;
-    public static string GetProblemByIndex(int index) => _problems[index].Updated;
 }

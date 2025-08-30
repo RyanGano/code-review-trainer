@@ -132,28 +132,18 @@ app.MapGet("/tests/", (DifficultyLevel? level, Language language) =>
         return Results.Ok(Enum.GetNames<DifficultyLevel>());
     }
 
-    // Select a random problem from the appropriate list. Each language-specific
-    // problem list may contain 'patch' style entries where Original is non-empty.
-    CodeReviewProblem? randomProblem = level.Value switch
+    // Resolve providers from DI and pick the matching provider for language+difficulty
+    var providers = app.Services.GetServices<IProblemProvider>();
+    var provider = providers.FirstOrDefault(p => p.Language == language && p.Difficulty == level.Value);
+    if (provider == null)
     {
-        DifficultyLevel.Easy => language switch
-        {
-            Language.JavaScript => EasyJavaScriptCodeReviewProblems.GetRandomProblemWithId(),
-            Language.TypeScript => EasyTypeScriptCodeReviewProblems.GetRandomProblemWithId(),
-            _ => EasyCSharpCodeReviewProblems.GetRandomProblemWithId()
-        },
-        DifficultyLevel.Medium => language switch
-        {
-            Language.JavaScript => MediumJavaScriptCodeReviewProblems.GetRandomProblemWithId(),
-            Language.TypeScript => MediumTypeScriptCodeReviewProblems.GetRandomProblemWithId(),
-            _ => MediumCSharpCodeReviewProblems.GetRandomProblemWithId()
-        },
-        _ => null
-    };
+        return Results.BadRequest(new { error = "Unsupported difficulty level or language" });
+    }
 
+    var randomProblem = provider.GetRandomProblemWithId();
     if (randomProblem == null)
     {
-        return Results.BadRequest(new { error = "Unsupported difficulty level" });
+        return Results.BadRequest(new { error = "No problems available for selected provider" });
     }
 
     return Results.Ok(new

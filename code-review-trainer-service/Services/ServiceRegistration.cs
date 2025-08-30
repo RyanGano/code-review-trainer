@@ -31,6 +31,21 @@ public static class ServiceRegistration
 
     services.AddSingleton<AzureOpenAICodeReviewModel>();
     services.AddSingleton<ICodeReviewModel>(sp => sp.GetRequiredService<AzureOpenAICodeReviewModel>());
+    // Register problem providers
+    // Register concrete providers so DI constructs them (no static Instance usage)
+    services.AddSingleton<code_review_trainer_service.CodeReviewProblems.EasyCSharpCodeReviewProblems>();
+    services.AddSingleton<code_review_trainer_service.CodeReviewProblems.MediumCSharpCodeReviewProblems>();
+    services.AddSingleton<code_review_trainer_service.CodeReviewProblems.EasyJavaScriptCodeReviewProblems>();
+    services.AddSingleton<code_review_trainer_service.CodeReviewProblems.MediumJavaScriptCodeReviewProblems>();
+    services.AddSingleton<code_review_trainer_service.CodeReviewProblems.EasyTypeScriptCodeReviewProblems>();
+    services.AddSingleton<code_review_trainer_service.CodeReviewProblems.MediumTypeScriptCodeReviewProblems>();
+    // Expose them as IProblemProvider for lookup
+    services.AddSingleton<IProblemProvider>(sp => sp.GetRequiredService<code_review_trainer_service.CodeReviewProblems.EasyCSharpCodeReviewProblems>());
+    services.AddSingleton<IProblemProvider>(sp => sp.GetRequiredService<code_review_trainer_service.CodeReviewProblems.MediumCSharpCodeReviewProblems>());
+    services.AddSingleton<IProblemProvider>(sp => sp.GetRequiredService<code_review_trainer_service.CodeReviewProblems.EasyJavaScriptCodeReviewProblems>());
+    services.AddSingleton<IProblemProvider>(sp => sp.GetRequiredService<code_review_trainer_service.CodeReviewProblems.MediumJavaScriptCodeReviewProblems>());
+    services.AddSingleton<IProblemProvider>(sp => sp.GetRequiredService<code_review_trainer_service.CodeReviewProblems.EasyTypeScriptCodeReviewProblems>());
+    services.AddSingleton<IProblemProvider>(sp => sp.GetRequiredService<code_review_trainer_service.CodeReviewProblems.MediumTypeScriptCodeReviewProblems>());
     services.AddSingleton<IProblemRepository, ProblemRepository>();
     return services;
   }
