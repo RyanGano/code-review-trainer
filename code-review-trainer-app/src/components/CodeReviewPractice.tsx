@@ -6,6 +6,7 @@ import CodeMirror from "@uiw/react-codemirror";
 import { csharp } from "@replit/codemirror-lang-csharp";
 import { javascript } from "@codemirror/lang-javascript";
 import { BinocularsFill } from "react-bootstrap-icons";
+import UnifiedMergeView from "./UnifiedMergeView";
 
 import "./CodeReviewPractice.less";
 
@@ -44,11 +45,15 @@ interface CodeReviewModelResult {
 interface CodeReviewTest {
   level: string;
   language?: string;
-  problem: string;
+  // The backend now always returns a structured patch object
+  problem: { original: string; patched: string };
+  purpose?: string;
   id: string;
 }
 
 const CodeReviewPractice = () => {
+  // Backend now always returns a structured patch object; no runtime guard needed.
+
   const { instance, accounts } = useMsal();
   const [currentTest, setCurrentTest] = useState<CodeReviewTest | null>(null);
   const [reviewComments, setReviewComments] = useState("");
@@ -190,6 +195,12 @@ const CodeReviewPractice = () => {
     autoFetchAttempted,
     fetchCodeReviewTest,
   ]);
+
+  // Current test patch (server always returns structured patch)
+  const currentPatch =
+    (currentTest
+      ? (currentTest.problem as { original: string; patched: string })
+      : null) || null;
 
   const handleSubmitReview = async () => {
     if (!currentTest || !reviewComments.trim() || accounts.length === 0) {
@@ -411,27 +422,12 @@ const CodeReviewPractice = () => {
           <div className="code-section">
             <h3>Code to Review:</h3>
             <div className="code-viewer-container">
-              <CodeMirror
-                value={currentTest.problem}
-                extensions={[
-                  selectedLanguage === "JavaScript" ||
-                  selectedLanguage === "TypeScript"
-                    ? javascript()
-                    : csharp(),
-                ]}
-                editable={false}
-                basicSetup={{
-                  lineNumbers: true,
-                  foldGutter: true,
-                  dropCursor: false,
-                  allowMultipleSelections: false,
-                  indentOnInput: false,
-                  bracketMatching: true,
-                  closeBrackets: false,
-                  autocompletion: false,
-                  highlightSelectionMatches: false,
-                  searchKeymap: false,
-                }}
+              {/* Server now always returns a structured patch (original + patched) */}
+              <UnifiedMergeView
+                original={currentPatch?.original ?? ""}
+                patched={currentPatch?.patched ?? ""}
+                language={currentTest?.language || selectedLanguage}
+                purpose={currentTest?.purpose}
               />
             </div>
             {/* Recommended code displayed under the original code viewer for easy comparison */}
@@ -493,7 +489,9 @@ const CodeReviewPractice = () => {
             <textarea
               value={reviewComments}
               onChange={(e) => setReviewComments(e.target.value)}
-              placeholder="Enter your code review comments here. What issues do you see? What would you suggest to improve this code?"
+              placeholder={
+                "Enter your code review comments here. What issues do you see? What would you suggest to improve this code?"
+              }
               className="review-textarea"
               maxLength={MAX_REVIEW_LENGTH}
             />

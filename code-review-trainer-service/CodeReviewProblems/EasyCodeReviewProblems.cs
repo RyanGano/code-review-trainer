@@ -6,6 +6,10 @@ public class CodeReviewProblem
     public string Id { get; set; } = string.Empty;
     public string Problem { get; set; } = string.Empty;
     public Language Language { get; set; } = Language.CSharp;
+    // Original code (for patch-style problems). Empty when not applicable.
+    public string Original { get; set; } = string.Empty;
+    // Short purpose/description shown in the UI (e.g., what to look for).
+    public string Purpose { get; set; } = string.Empty;
 }
 
 // Static class containing easy-level code review problems
@@ -13,10 +17,20 @@ public static class EasyCodeReviewProblems
 {
     private static readonly Random _random = new Random();
 
-    private static readonly string[] _problems = new string[]
+    private static readonly ProblemDefinition[] _problems = new ProblemDefinition[]
     {
-        // Problem 1: Bad variable names + confusing logic
-        @"public class Calculator
+        // Patch example: original vs patched (Easy C#)
+        new ProblemDefinition(@"public int Add(int a, int b)
+{
+    return a + b;
+}", @"public int Add(int x, int y)
+{
+    int z = x - y;
+    return z;
+}", "Change variable names for clarity"),
+
+    // Problem 1: Bad variable names + confusing logic
+        new ProblemDefinition(string.Empty, @"public class Calculator
 {
     public int x(int a, int b)
     {
@@ -31,10 +45,10 @@ public static class EasyCodeReviewProblems
         }
         return z;
     }
-}",
-        
-        // Problem 2: Unreachable code + bad formatting
-        @"public void ProcessOrder(bool isValid)
+}", "Add a Calculator class"),
+
+    // Problem 2: Unreachable code + bad formatting
+    new ProblemDefinition(string.Empty, @"public void ProcessOrder(bool isValid)
 {
 if(isValid==true){
 Console.WriteLine(""Processing order..."");
@@ -43,11 +57,10 @@ Console.WriteLine(""Order processed successfully"");
 }
 else{
 Console.WriteLine(""Invalid order"");
-}
-}",
+}", "Process an order with validation"),
 
-        // Problem 3: Bad variable names + failing logic
-        @"public bool CheckAge(int age)
+    // Problem 3: Bad variable names + failing logic
+    new ProblemDefinition(string.Empty, @"public bool CheckAge(int age)
 {
     int x = 18;
     if (age > x)
@@ -55,17 +68,17 @@ Console.WriteLine(""Invalid order"");
         return false;
     }
     return true;
-}",
+}", "Implement an age check"),
 
-        // Problem 4: Bad formatting + confusing logic
-        @"public string GetDiscount(double price,int customerType){
+    // Problem 4: Bad formatting + confusing logic
+    new ProblemDefinition(string.Empty, @"public string GetDiscount(double price,int customerType){
 double d=0.0;
 if(customerType==1){d=0.1;}else if(customerType==2){d=0.15;}else{d=0.05;}
 return (price*d).ToString();
-}",
+}", "Calculate discount based on customer type"),
 
-        // Problem 5: Bad variable names + unreachable code
-        @"public void PrintNumbers()
+    // Problem 5: Bad variable names + unreachable code
+        new ProblemDefinition(string.Empty, @"public void PrintNumbers()
 {
     int i = 1;
     while (i <= 5)
@@ -75,10 +88,10 @@ return (price*d).ToString();
         break;
         Console.WriteLine($""New value: {i}"");
     }
-}",
+}", "Print numbers from 1 to 5"),
 
-        // Problem 6: Failing logic + bad formatting
-        @"public int FindMax(int[]arr){
+    // Problem 6: Failing logic + bad formatting
+    new ProblemDefinition(string.Empty, @"public int FindMax(int[]arr){
 int max=arr[0];
 for(int i=1;i<arr.Length;i++){
 if(arr[i]>max){
@@ -86,10 +99,10 @@ max=arr[i];
 }
 }
 return max;
-}",
+}", "Find maximum value in an array"),
 
-        // Problem 7: Confusing logic + bad variable names
-        @"public bool IsEven(int num)
+    // Problem 7: Confusing logic + bad variable names
+        new ProblemDefinition(string.Empty, @"public bool IsEven(int num)
 {
     bool x = false;
     if (num % 2 == 1)
@@ -97,18 +110,18 @@ return max;
         x = true;
     }
     return x;
-}",
+}", "Check if a number is even"),
 
-        // Problem 8: Bad variable names + bad formatting
-        @"public void DoSomething(string s){
+    // Problem 8: Bad variable names + bad formatting
+    new ProblemDefinition(string.Empty, @"public void DoSomething(string s){
 if(s!=null&&s.Length>0){
 string t=s.ToUpper();
 Console.WriteLine(t);
 }
-}",
+}", "Process and print a string if present"),
 
-        // Problem 9: Unreachable code + confusing logic
-        @"public int Calculate(int x, int y)
+    // Problem 9: Unreachable code + confusing logic
+        new ProblemDefinition(string.Empty, @"public int Calculate(int x, int y)
 {
     if (x > 0)
     {
@@ -119,23 +132,23 @@ Console.WriteLine(t);
         return x - y;
     }
     return 0;
-}",
+}", "Calculate a value based on x and y"),
 
-        // Problem 10: Bad variable names + failing logic
-        @"public double CalculateArea(double r)
+    // Problem 10: Bad variable names + failing logic
+        new ProblemDefinition(string.Empty, @"public double CalculateArea(double r)
 {
     double pi = 3.14;
     double a = pi * r;
     return a;
-}",
+}", "Compute area given a radius"),
 
-        // Problem 11: Bad formatting + confusing logic
-        @"public bool ValidatePassword(string pwd){
+    // Problem 11: Bad formatting + confusing logic
+    new ProblemDefinition(string.Empty, @"public bool ValidatePassword(string pwd){
 return pwd.Length>=8&&pwd.Length<=20?true:false;
-}",
+}", "Validate password length"),
 
-        // Problem 12: Bad variable names + unreachable code
-        @"public void Method1()
+    // Problem 12: Bad variable names + unreachable code
+        new ProblemDefinition(string.Empty, @"public void Method1()
 {
     int a = 5;
     int b = 10;
@@ -148,17 +161,17 @@ return pwd.Length>=8&&pwd.Length<=20?true:false;
     {
         Console.WriteLine(""b is greater"");
     }
-}",
+}", "Compare two integers and print relationship"),
 
-        // Problem 13: Failing logic + bad formatting
-        @"public string FormatName(string firstName,string lastName){
+    // Problem 13: Failing logic + bad formatting
+    new ProblemDefinition(string.Empty, @"public string FormatName(string firstName,string lastName){
 if(firstName==null)firstName="""";
 if(lastName==null)lastName="""";
 return firstName+"" ""+lastName;
-}",
+}", "Format a full name from first and last"),
 
-        // Problem 14: Confusing logic + bad variable names
-        @"public int CountItems(List<string> items)
+    // Problem 14: Confusing logic + bad variable names
+        new ProblemDefinition(string.Empty, @"public int CountItems(List<string> items)
 {
     int c = 0;
     foreach (var i in items)
@@ -169,19 +182,19 @@ return firstName+"" ""+lastName;
         }
     }
     return c;
-}",
+}", "Count non-null items in a list"),
 
-        // Problem 15: Bad variable names + bad formatting
-        @"public void UpdateRecord(int id,string name,double salary){
+    // Problem 15: Bad variable names + bad formatting
+    new ProblemDefinition(string.Empty, @"public void UpdateRecord(int id,string name,double salary){
 var r=GetRecord(id);
 if(r!=null){
 r.Name=name;r.Salary=salary;
 SaveRecord(r);
 }
-}",
+}", "Update an existing record's fields"),
 
-        // Problem 16: Unreachable code + failing logic
-        @"public int Divide(int x, int y)
+    // Problem 16: Unreachable code + failing logic
+        new ProblemDefinition(string.Empty, @"public int Divide(int x, int y)
 {
     if (y == 0)
     {
@@ -189,10 +202,10 @@ SaveRecord(r);
         Console.WriteLine(""Division by zero attempted"");
     }
     return x / y;
-}",
+}", "Perform integer division with zero check"),
 
-        // Problem 17: Bad variable names + confusing logic
-        @"public bool IsValid(int n)
+    // Problem 17: Bad variable names + confusing logic
+        new ProblemDefinition(string.Empty, @"public bool IsValid(int n)
 {
     bool r = true;
     if (n > 0)
@@ -204,19 +217,19 @@ SaveRecord(r);
         r = true;
     }
     return !r;
-}",
+}", "Validate sign logic for an integer"),
 
-        // Problem 18: Bad formatting + failing logic
-        @"public List<int>GetEvenNumbers(int[]numbers){
+    // Problem 18: Bad formatting + failing logic
+    new ProblemDefinition(string.Empty, @"public List<int>GetEvenNumbers(int[]numbers){
 List<int>result=new List<int>();
 for(int i=0;i<=numbers.Length;i++){
 result.Add(numbers[i]);
 }
 return result;
-}",
+}", "Return even numbers from an array"),
 
-        // Problem 19: Confusing logic + unreachable code
-        @"public string GetGrade(int score)
+    // Problem 19: Confusing logic + unreachable code
+        new ProblemDefinition(string.Empty, @"public string GetGrade(int score)
 {
     if (score >= 90) return ""A"";
     else if (score >= 80) return ""B"";
@@ -225,16 +238,16 @@ return result;
     else return ""F"";
     
     Console.WriteLine(""Grade calculated"");
-}",
+}", "Determine letter grade from score"),
 
-        // Problem 20: Bad variable names + bad formatting
-        @"public double CalcTax(double amt,double rate){
+    // Problem 20: Bad variable names + bad formatting
+    new ProblemDefinition(string.Empty, @"public double CalcTax(double amt,double rate){
 double t=amt*rate/100;
 return t>0?t:0;
-}",
+}", "Calculate tax amount given rate and amount"),
 
-        // Problem 21: Failing logic + confusing logic
-        @"public bool IsPrime(int number)
+    // Problem 21: Failing logic + confusing logic
+        new ProblemDefinition(string.Empty, @"public bool IsPrime(int number)
 {
     if (number <= 1) return true;
     for (int i = 2; i < number; i++)
@@ -245,10 +258,10 @@ return t>0?t:0;
         }
     }
     return true;
-}",
+}", "Check if a number is prime"),
 
-        // Problem 22: Bad variable names + unreachable code
-        @"public void ProcessData()
+    // Problem 22: Bad variable names + unreachable code
+        new ProblemDefinition(string.Empty, @"public void ProcessData()
 {
     bool f = true;
     while (f)
@@ -258,19 +271,19 @@ return t>0?t:0;
         break;
         Console.WriteLine(""Done processing"");
     }
-}",
+}", "Process data once with loop"),
 
-        // Problem 23: Bad formatting + confusing logic
-        @"public int GetAbsolute(int num){
+    // Problem 23: Bad formatting + confusing logic
+    new ProblemDefinition(string.Empty, @"public int GetAbsolute(int num){
 if(num<0){
 return num*-1;
 }else{
 return num>0?num:1;
 }
-}",
+}", "Return absolute value of an integer"),
 
-        // Problem 24: Bad variable names + failing logic
-        @"public string ReverseString(string str)
+    // Problem 24: Bad variable names + failing logic
+        new ProblemDefinition(string.Empty, @"public string ReverseString(string str)
 {
     string r = """";
     for (int i = str.Length; i >= 0; i--)
@@ -278,10 +291,10 @@ return num>0?num:1;
         r += str[i];
     }
     return r;
-}",
+}", "Reverse a string"),
 
-        // Problem 25: Multiple issues - bad names, formatting, logic
-        @"public void BubbleSort(int[]a){
+    // Problem 25: Multiple issues - bad names, formatting, logic
+    new ProblemDefinition(string.Empty, @"public void BubbleSort(int[]a){
 int n=a.Length;
 for(int i=0;i<n-1;i++){
 for(int j=0;j<n-i-1;j++){
@@ -291,12 +304,11 @@ a[j]=a[j+1];a[j+1]=temp;
 }
 }
 }
-}",
+}", "Implement bubble sort"),
 
         // === GOOD CODE EXAMPLES (no issues to fix) ===
-        
         // Good Example 1: Well-written calculator with proper naming and formatting
-        @"public class Calculator
+        new ProblemDefinition(string.Empty, @"public class Calculator
 {
     public double Add(double firstNumber, double secondNumber)
     {
@@ -307,30 +319,30 @@ a[j]=a[j+1];a[j+1]=temp;
     {
         return firstNumber * secondNumber;
     }
-}",
+}", "Add Calculator class with Add and Multiply methods"),
 
         // Good Example 2: Clean string validation with proper error handling
-        @"public bool IsValidEmail(string email)
+        new ProblemDefinition(string.Empty, @"public bool IsValidEmail(string email)
 {
     if (string.IsNullOrWhiteSpace(email))
     {
         return false;
     }
     
-    return email.Contains(""@"") && email.Contains(""."");
-}",
+    return email.Contains(""@"") && email.Contains(""."" );
+}", "Add IsValidEmail with null-check and simple format checks"),
 
         // Good Example 3: Well-formatted loop with descriptive variable names
-        @"public void PrintNumbers(int count)
+        new ProblemDefinition(string.Empty, @"public void PrintNumbers(int count)
 {
     for (int currentNumber = 1; currentNumber <= count; currentNumber++)
     {
-        Console.WriteLine($""Number: {currentNumber}"");
+        Console.WriteLine($""Number: {currentNumber}"" );
     }
-}",
+}", "Add PrintNumbers method that writes numbered output"),
 
         // Good Example 4: Clean data processing method
-        @"public List<string> FilterActiveUsers(List<User> users)
+        new ProblemDefinition(string.Empty, @"public List<string> FilterActiveUsers(List<User> users)
 {
     var activeUsers = new List<string>();
     
@@ -343,10 +355,10 @@ a[j]=a[j+1];a[j+1]=temp;
     }
     
     return activeUsers;
-}",
+}", "Add FilterActiveUsers returning names of active users"),
 
         // Good Example 5: Proper null checking and formatting
-        @"public string FormatFullName(string firstName, string lastName)
+        new ProblemDefinition(string.Empty, @"public string FormatFullName(string firstName, string lastName)
 {
     if (string.IsNullOrEmpty(firstName))
     {
@@ -359,10 +371,10 @@ a[j]=a[j+1];a[j+1]=temp;
     }
     
     return $""{firstName} {lastName}"";
-}",
+}", "Format full name with defaults for missing names"),
 
         // Good Example 6: Simple and clean conditional logic
-        @"public string GetAgeCategory(int age)
+        new ProblemDefinition(string.Empty, @"public string GetAgeCategory(int age)
 {
     if (age < 13)
     {
@@ -380,10 +392,10 @@ a[j]=a[j+1];a[j+1]=temp;
     {
         return ""Senior"";
     }
-}",
+}", "Add GetAgeCategory mapping ages to categories"),
 
         // Good Example 7: Well-structured class with proper encapsulation
-        @"public class BankAccount
+        new ProblemDefinition(string.Empty, @"public class BankAccount
 {
     private decimal balance;
     
@@ -405,25 +417,28 @@ a[j]=a[j+1];a[j+1]=temp;
     {
         return balance;
     }
-}"
+}" , "Add BankAccount with Deposit validation and GetBalance")
     };
 
     public static string GetRandomProblem()
     {
-        return _problems[_random.Next(_problems.Length)];
+        return _problems[_random.Next(_problems.Length)].Updated;
     }
 
     public static CodeReviewProblem GetRandomProblemWithId()
     {
         var index = _random.Next(_problems.Length);
+        var def = _problems[index];
         return new CodeReviewProblem
         {
             Id = $"cs_easy_{index + 1:D3}",
-            Problem = _problems[index],
-            Language = Language.CSharp
+            Problem = def.Updated,
+            Language = Language.CSharp,
+            Original = def.Original ?? string.Empty,
+            Purpose = def.Purpose ?? string.Empty
         };
     }
 
     public static int Count => _problems.Length;
-    public static string GetProblemByIndex(int index) => _problems[index];
+    public static string GetProblemByIndex(int index) => _problems[index].Updated;
 }

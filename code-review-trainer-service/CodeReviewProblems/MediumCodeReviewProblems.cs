@@ -5,10 +5,22 @@ public static class MediumCodeReviewProblems
 {
     private static readonly Random _random = new Random();
 
-    private static readonly string[] _problems = new string[]
+    private static readonly ProblemDefinition[] _problems = new ProblemDefinition[]
     {
+        // Patch example: original vs patched (Medium C#)
+        new ProblemDefinition(@"public bool IsEven(int n)
+{
+    return n % 2 == 0;
+}", @"public bool IsEven(int value)
+{
+    if (value % 2 == 1)
+    {
+        return true;
+    }
+    return false;
+}", "Refactor parameter name and conditional logic for clarity"),
         // Problem 1: Compilation error - missing semicolon and spelling error in comment
-        @"public class UserManager
+        new ProblemDefinition(string.Empty, @"public class UserManager
 {
     // Retreives user information from the databas
     public User GetUser(int userId)
@@ -16,10 +28,10 @@ public static class MediumCodeReviewProblems
         var user = Database.FindUser(userId)
         return user;
     }
-}",
+}", "Add UserManager class scaffold."),
 
         // Problem 2: Type mismatch compilation error and logic issue
-        @"public class Calculator
+        new ProblemDefinition(string.Empty, @"public class Calculator
 {
     public string CalculatePercentage(int value, int total)
     {
@@ -30,10 +42,10 @@ public static class MediumCodeReviewProblems
         double percentage = (value / total) * 100;
         return percentage;
     }
-}",
+}", "Add Calculator.CalculatePercentage implementation."),
 
         // Problem 3: Spelling error in variable name and off-by-one error
-        @"public List<string> GetSubstring(string text, int maxLenght)
+        new ProblemDefinition(string.Empty, @"public List<string> GetSubstring(string text, int maxLenght)
 {
     var results = new List<string>();
     for (int i = 0; i <= text.Length - maxLenght; i++)
@@ -41,10 +53,10 @@ public static class MediumCodeReviewProblems
         results.Add(text.Substring(i, maxLenght));
     }
     return results;
-}",
+}", "Add substring extraction helper."),
 
         // Problem 4: Compilation error - undefined variable and logical issue
-        @"public bool ValidateInput(string input)
+        new ProblemDefinition(string.Empty, @"public bool ValidateInput(string input)
 {
     if (string.IsNullOrEmpty(input))
     {
@@ -60,10 +72,10 @@ public static class MediumCodeReviewProblems
         }
     }
     return true;
-}",
+}", "Implement input validation routine."),
 
         // Problem 5: Subtle null reference potential and spelling error
-        @"public class OrderProcessor
+        new ProblemDefinition(string.Empty, @"public class OrderProcessor
 {
     // Proccess orders and calculate totals
     public decimal ProcessOrder(Order order)
@@ -75,37 +87,37 @@ public static class MediumCodeReviewProblems
         }
         return total;
     }
-}",
+}", "Add OrderProcessor.ProcessOrder implementation."),
 
         // Problem 6: Resource leak - missing using statement
-        @"public string ReadFileContent(string filePath)
+        new ProblemDefinition(string.Empty, @"public string ReadFileContent(string filePath)
 {
     var reader = new StreamReader(filePath);
     string content = reader.ReadToEnd();
     return content;
-}",
+}", "Add ReadFileContent helper."),
 
         // Problem 7: Compilation error and infinite loop potential
-        @"public void PrintNumbers(int count)
+        new ProblemDefinition(string.Empty, @"public void PrintNumbers(int count)
 {
     int i = 0
     while (i < count)
     {
         Console.WriteLine(i);
     }
-}",
+}", "Add PrintNumbers method."),
 
         // Problem 8: Type mismatch and spelling error in string
-        @"public int GetUserAge(string birthDate)
+        new ProblemDefinition(string.Empty, @"public int GetUserAge(string birthDate)
 {
     DateTime birth = DateTime.Parse(birthDate);
     TimeSpan age = DateTime.Now - birth;
     Console.WriteLine(""User is approximatly "" + age.Days / 365 + "" years old"");
     return age.Days / 365;
-}",
+}", "Add GetUserAge method."),
 
         // Problem 9: Compilation error - wrong collection type and logic issue
-        @"public Dictionary<string, int> CountWords(string text)
+        new ProblemDefinition(string.Empty, @"public Dictionary<string, int> CountWords(string text)
 {
     var wordCount = new List<string, int>();
     string[] words = text.Split(' ');
@@ -122,10 +134,10 @@ public static class MediumCodeReviewProblems
         }
     }
     return wordCount;
-}",
+}", "Add CountWords utility."),
 
         // Problem 10: Subtle array bounds issue and spelling error
-        @"public class ArrayProcessor
+        new ProblemDefinition(string.Empty, @"public class ArrayProcessor
 {
     // Proceses array elements
     public int FindMaxIndex(int[] numbers)
@@ -140,10 +152,10 @@ public static class MediumCodeReviewProblems
         }
         return maxIndex;
     }
-}",
+}", "Add ArrayProcessor.FindMaxIndex implementation."),
 
         // Problem 11: Compilation error - missing return type and logic issue
-        @"public class StringUtils
+        new ProblemDefinition(string.Empty, @"public class StringUtils
 {
     public ReverseString(string input)
     {
@@ -158,10 +170,10 @@ public static class MediumCodeReviewProblems
         }
         return new string(chars);
     }
-}",
+}", "Add ReverseString method."),
 
         // Problem 12: Potential division by zero and spelling error
-        @"public class MathOperations
+        new ProblemDefinition(string.Empty, @"public class MathOperations
 {
     // Calcualtes the average of numbers
     public double CalculateAverage(List<int> numbers)
@@ -173,10 +185,10 @@ public static class MediumCodeReviewProblems
         }
         return sum / numbers.Count;
     }
-}",
+}", "Add MathOperations.CalculateAverage implementation."),
 
         // Problem 13: Compilation error and concurrency issue
-        @"public class Counter
+        new ProblemDefinition(string.Empty, @"public class Counter
 {
     private int count = 0;
     
@@ -189,10 +201,10 @@ public static class MediumCodeReviewProblems
     {
         return count;
     }
-}",
+}", "Add Counter with increment and retrieval."),
 
         // Problem 14: Subtle logic error and spelling mistake
-        @"public bool IsPalindrome(string text)
+        new ProblemDefinition(string.Empty, @"public bool IsPalindrome(string text)
 {
     // Check if text is a palindrom
     text = text.ToLower().Replace("" "", """");
@@ -205,10 +217,10 @@ public static class MediumCodeReviewProblems
         }
     }
     return true;
-}",
+}", "Add IsPalindrome utility."),
 
         // Problem 15: Memory leak potential and compilation error
-        @"public class EventPublisher
+        new ProblemDefinition(string.Empty, @"public class EventPublisher
 {
     public event EventHandler DataChanged;
     
@@ -218,10 +230,10 @@ public static class MediumCodeReviewProblems
             Console.WriteLine($""Subscriber {subscriber} notified"");
         }
     }
-}",
+}", "Add EventPublisher with DataChanged event."),
 
         // Problem 16: Type casting issue and spelling error
-        @"public class NumberProcessor
+        new ProblemDefinition(string.Empty, @"public class NumberProcessor
 {
     // Converts string to integar
     public int ConvertToInteger(object value)
@@ -229,10 +241,10 @@ public static class MediumCodeReviewProblems
         string strValue = (string)value;
         return int.Parse(strValue);
     }
-}",
+}", "Add NumberProcessor.ConvertToInteger."),
 
         // Problem 17: Compilation error and performance issue
-        @"public string ConcatenateStrings(List<string> strings)
+        new ProblemDefinition(string.Empty, @"public string ConcatenateStrings(List<string> strings)
 {
     string result = """"
     foreach (string str in strings)
@@ -240,10 +252,10 @@ public static class MediumCodeReviewProblems
         result += str;
     }
     return result;
-}",
+}", "Add ConcatenateStrings helper."),
 
         // Problem 18: Subtle boundary condition and spelling error
-        @"public class DateUtils
+        new ProblemDefinition(string.Empty, @"public class DateUtils
 {
     // Calcuates days between two dates
     public int DaysBetween(DateTime start, DateTime end)
@@ -251,19 +263,19 @@ public static class MediumCodeReviewProblems
         TimeSpan difference = end - start;
         return (int)difference.TotalDays;
     }
-}",
+}", "Add DateUtils.DaysBetween utility."),
 
         // Problem 19: Compilation error and resource management
-        @"public void WriteToFile(string fileName, string content)
+        new ProblemDefinition(string.Empty, @"public void WriteToFile(string fileName, string content)
 {
     FileStream stream = new FileStream(fileName, FileMode.Create);
     StreamWriter writer = new StreamWriter(stream);
     writer.Write(content);
     writer.Flush();
-}",
+}", "Add WriteToFile helper."),
 
         // Problem 20: Logic error and spelling mistake in comment
-        @"public class Validator
+        new ProblemDefinition(string.Empty, @"public class Validator
 {
     // Validates email adress format
     public bool IsValidEmail(string email)
@@ -273,10 +285,10 @@ public static class MediumCodeReviewProblems
             
         return email.Contains(""@"") && email.Contains(""."");
     }
-}",
+}", "Add Validator.IsValidEmail implementation."),
 
         // Problem 21: Compilation error and algorithm issue
-        @"public int BinarySearch(int[] array, int target)
+        new ProblemDefinition(string.Empty, @"public int BinarySearch(int[] array, int target)
 {
     int left = 0;
     int right = array.Length;
@@ -298,10 +310,10 @@ public static class MediumCodeReviewProblems
         }
     }
     return -1;
-}",
+}", "Add BinarySearch implementation."),
 
         // Problem 22: Exception handling issue and spelling error
-        @"public class DatabaseManager
+        new ProblemDefinition(string.Empty, @"public class DatabaseManager
 {
     // Retreive data from databse
     public DataTable GetData(string query)
@@ -324,10 +336,10 @@ public static class MediumCodeReviewProblems
             return null;
         }
     }
-}",
+}", "Add DatabaseManager.GetData method."),
 
         // Problem 23: Compilation error and logic flaw
-        @"public List<T> FilterItems<T>(List<T> items, Func<T, bool> predicate)
+        new ProblemDefinition(string.Empty, @"public List<T> FilterItems<T>(List<T> items, Func<T, bool> predicate)
 {
     var result = new List<T>();
     for (int i = 0; i < items.Count; i++)
@@ -338,10 +350,10 @@ public static class MediumCodeReviewProblems
         }
     }
     return result;
-}",
+}", "Add FilterItems generic helper."),
 
         // Problem 24: Subtle threading issue and spelling error
-        @"public class Cache
+        new ProblemDefinition(string.Empty, @"public class Cache
 {
     private Dictionary<string, object> cache = new Dictionary<string, object>();
     
@@ -359,10 +371,10 @@ public static class MediumCodeReviewProblems
     {
         cache[key] = value;
     }
-}",
+}", "Add Cache simple in-memory store."),
 
         // Problem 25: Compilation error and performance issue
-        @"public bool ContainsDuplicate(List<int> numbers)
+        new ProblemDefinition(string.Empty, @"public bool ContainsDuplicate(List<int> numbers)
 {
     for (int i = 0; i < numbers.Count; i++)
     {
@@ -375,12 +387,12 @@ public static class MediumCodeReviewProblems
         }
     }
     return false;
-}",
+}", "Add ContainsDuplicate check."),
 
         // === GOOD CODE EXAMPLES (no issues) ===
         
         // Good Example 1: Proper error handling and resource management
-        @"public class FileProcessor
+        new ProblemDefinition(string.Empty, @"public class FileProcessor
 {
     public async Task<string> ReadFileAsync(string filePath)
     {
@@ -399,10 +411,10 @@ public static class MediumCodeReviewProblems
             return await reader.ReadToEndAsync();
         }
     }
-}",
+}", "Add FileProcessor.ReadFileAsync example."),
 
         // Good Example 2: Thread-safe implementation with proper validation
-        @"public class ThreadSafeCounter
+        new ProblemDefinition(string.Empty, @"public class ThreadSafeCounter
 {
     private readonly object lockObject = new object();
     private int count = 0;
@@ -430,10 +442,10 @@ public static class MediumCodeReviewProblems
             count = 0;
         }
     }
-}",
+}", "Add ThreadSafeCounter example."),
 
         // Good Example 3: Proper null checking and input validation
-        @"public class StringUtilities
+        new ProblemDefinition(string.Empty, @"public class StringUtilities
 {
     public static bool IsValidEmail(string email)
     {
@@ -468,10 +480,10 @@ public static class MediumCodeReviewProblems
         int maxLength = Math.Min(length, input.Length - startIndex);
         return input.Substring(startIndex, maxLength);
     }
-}",
+}", "Add StringUtilities example."),
 
         // Good Example 4: Efficient algorithm with proper error handling
-        @"public class SearchUtilities
+        new ProblemDefinition(string.Empty, @"public class SearchUtilities
 {
     public static int BinarySearch<T>(T[] array, T target) where T : IComparable<T>
     {
@@ -509,10 +521,10 @@ public static class MediumCodeReviewProblems
         
         return -1;
     }
-}",
+}", "Add SearchUtilities.BinarySearch example."),
 
         // Good Example 5: Proper resource management and async patterns
-        @"public class DatabaseService
+        new ProblemDefinition(string.Empty, @"public class DatabaseService
 {
     private readonly string connectionString;
     
@@ -568,25 +580,28 @@ public static class MediumCodeReviewProblems
             }
         }
     }
-}"
+}", "Add DatabaseService.GetUsersAsync example."),
     };
 
     public static string GetRandomProblem()
     {
-        return _problems[_random.Next(_problems.Length)];
+        return _problems[_random.Next(_problems.Length)].Updated;
     }
 
     public static CodeReviewProblem GetRandomProblemWithId()
     {
         var index = _random.Next(_problems.Length);
+        var def = _problems[index];
         return new CodeReviewProblem
         {
             Id = $"cs_medium_{index + 1:D3}",
-            Problem = _problems[index],
-            Language = Language.CSharp
+            Problem = def.Updated,
+            Language = Language.CSharp,
+            Original = def.Original ?? string.Empty,
+            Purpose = def.Purpose ?? string.Empty
         };
     }
 
     public static int Count => _problems.Length;
-    public static string GetProblemByIndex(int index) => _problems[index];
+    public static string GetProblemByIndex(int index) => _problems[index].Updated;
 }

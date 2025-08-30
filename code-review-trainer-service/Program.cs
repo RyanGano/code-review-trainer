@@ -132,45 +132,38 @@ app.MapGet("/tests/", (DifficultyLevel? level, Language language) =>
         return Results.Ok(Enum.GetNames<DifficultyLevel>());
     }
 
-    // Return a random problem for Easy level
-    if (level == DifficultyLevel.Easy)
+    // Select a random problem from the appropriate list. Each language-specific
+    // problem list may contain 'patch' style entries where Original is non-empty.
+    CodeReviewProblem? randomProblem = level.Value switch
     {
-        CodeReviewProblem randomProblem = language switch
+        DifficultyLevel.Easy => language switch
         {
             Language.JavaScript => EasyJavaScriptCodeReviewProblems.GetRandomProblemWithId(),
             Language.TypeScript => EasyTypeScriptCodeReviewProblems.GetRandomProblemWithId(),
             _ => EasyCodeReviewProblems.GetRandomProblemWithId()
-        };
-
-        return Results.Ok(new
-        {
-            level = level.ToString(),
-            language = language.ToString(),
-            problem = randomProblem.Problem,
-            id = randomProblem.Id
-        });
-    }
-
-    // Return a random problem for Medium level
-    if (level == DifficultyLevel.Medium)
-    {
-        CodeReviewProblem randomProblem = language switch
+        },
+        DifficultyLevel.Medium => language switch
         {
             Language.JavaScript => MediumJavaScriptCodeReviewProblems.GetRandomProblemWithId(),
             Language.TypeScript => MediumTypeScriptCodeReviewProblems.GetRandomProblemWithId(),
             _ => MediumCodeReviewProblems.GetRandomProblemWithId()
-        };
+        },
+        _ => null
+    };
 
-        return Results.Ok(new
-        {
-            level = level.ToString(),
-            language = language.ToString(),
-            problem = randomProblem.Problem,
-            id = randomProblem.Id
-        });
+    if (randomProblem == null)
+    {
+        return Results.BadRequest(new { error = "Unsupported difficulty level" });
     }
 
-    return Results.Ok($"Test level: {level}");
+    return Results.Ok(new
+    {
+        level = level.ToString(),
+        language = language.ToString(),
+        problem = new { original = randomProblem.Original, patched = randomProblem.Problem },
+        id = randomProblem.Id,
+        purpose = randomProblem.Purpose
+    });
 })
 .WithName("GetTests")
 .RequireAuthorization();
@@ -194,10 +187,6 @@ app.MapPost("/tests/{id}", async (string id, ReviewSubmission submission, IProbl
 // (title, category/severity, and explanation). Example field name: "itemText".
 app.MapPost("/tests/{id}/explain", async (string id, ExplainRequest body, IProblemRepository repo, ChatClient? chat, IOptions<AzureOpenAISettings> options) =>
 {
-    // Parameters:
-    //  - id: the test/problem id
-    //  - body.ItemText: the full text of the item to explain (from the UI)
-
     var problem = repo.Get(id);
     if (problem == null)
     {

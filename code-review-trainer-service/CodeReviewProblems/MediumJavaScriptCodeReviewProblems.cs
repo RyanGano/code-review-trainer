@@ -4,10 +4,19 @@ public static class MediumJavaScriptCodeReviewProblems
 {
     private static readonly Random _random = new Random();
 
-    private static readonly string[] _problems = new string[]
+    private static readonly ProblemDefinition[] _problems = new ProblemDefinition[]
     {
+        // Patch example: original vs patched (Medium JS)
+        new ProblemDefinition(@"function isPositive(n) {
+    return n > 0;
+}", @"function isPositive(n) {
+    if (n > 0) {
+        return false;
+    }
+    return true;
+}", "Refactor conditional structure for readability"),
         // Problem 1: Complex async/await misuse and error propagation
-        @"async function processUserOrders(userId) {
+        new ProblemDefinition(string.Empty,@"async function processUserOrders(userId) {
     const user = await fetchUser(userId);
     const orders = await fetchOrders(user.id);
     
@@ -19,10 +28,10 @@ public static class MediumJavaScriptCodeReviewProblems
     }
     
     return 'Processing complete';
-}",
+}", "Add processUserOrders function"),
 
         // Problem 2: Prototype pollution vulnerability and type coercion
-        @"function mergeObjects(target, source) {
+        new ProblemDefinition(string.Empty,@"function mergeObjects(target, source) {
     for (let key in source) {
         if (source[key] && typeof source[key] == 'object') {
             target[key] = target[key] || {};
@@ -32,10 +41,10 @@ public static class MediumJavaScriptCodeReviewProblems
         }
     }
     return target;
-}",
+}", "Add mergeObjects utility"),
 
         // Problem 3: Inefficient DOM manipulation and memory leaks
-        @"class TodoList {
+        new ProblemDefinition(string.Empty,@"class TodoList {
     constructor() {
         this.items = [];
         this.container = document.getElementById('todoContainer');
@@ -60,10 +69,10 @@ public static class MediumJavaScriptCodeReviewProblems
         this.items = this.items.filter(item => item.id !== id);
         this.renderAll();
     }
-}",
+}", "Add TodoList class with render and remove functionality"),
 
         // Problem 4: Race condition and improper state management
-        @"class DataCache {
+        new ProblemDefinition(string.Empty,@"class DataCache {
     constructor() {
         this.cache = new Map();
         this.loading = new Set();
@@ -87,20 +96,20 @@ public static class MediumJavaScriptCodeReviewProblems
         
         return data;
     }
-}",
+}", "Add DataCache with basic loading and cache logic"),
 
         // Problem 5: Security issues with eval and XSS potential
-        @"function executeUserScript(userCode, context) {
-    const script = '\\n        with (context) {\\n            ' + userCode + '\\n        }\\n    ';
+        new ProblemDefinition(string.Empty,@"function executeUserScript(userCode, context) {
+    const script = '\n        with (context) {\n            ' + userCode + '\n        }\n    ';
     return eval(script);
 }
 
 function displayUserContent(content) {
     document.getElementById('content').innerHTML = content;
-}",
+}", "Add executeUserScript and displayUserContent functions"),
 
         // Problem 6: Improper error boundaries and resource cleanup
-        @"class FileProcessor {
+        new ProblemDefinition(string.Empty,@"class FileProcessor {
     constructor() {
         this.activeConnections = [];
     }
@@ -122,10 +131,10 @@ function displayUserContent(content) {
     async openConnection() {
         return fetch('/api/connection', { method: 'POST' });
     }
-}",
+}", "Add FileProcessor with connection lifecycle"),
 
         // Problem 7: Inefficient array operations and O(n²) complexity
-        @"function findDuplicates(arrays) {
+        new ProblemDefinition(string.Empty,@"function findDuplicates(arrays) {
     const allItems = [];
     
     for (let array of arrays) {
@@ -144,10 +153,10 @@ function displayUserContent(content) {
     }
     
     return duplicates;
-}",
+}", "Add findDuplicates utility"),
 
         // Problem 8: Improper this binding and closure issues
-        @"class EventEmitter {
+        new ProblemDefinition(string.Empty,@"class EventEmitter {
     constructor() {
         this.events = {};
         this.maxListeners = 10;
@@ -172,10 +181,10 @@ function displayUserContent(content) {
             });
         }
     }
-}",
+}", "Add EventEmitter class with on and emit"),
 
         // Problem 9: SQL injection-like NoSQL injection and improper validation
-        @"function searchUsers(query) {
+        new ProblemDefinition(string.Empty,@"function searchUsers(query) {
     const searchCriteria = JSON.parse(query);
     
     return database.collection('users').find({
@@ -191,10 +200,10 @@ function updateUserRole(userId, role) {
         { _id: userId },
         { $set: eval('({' + role + '})') }
     );
-}",
+}", "Add searchUsers and updateUserRole utilities"),
 
         // Problem 10: Promise chain errors and unhandled rejections
-        @"function processWorkflow(data) {
+        new ProblemDefinition(string.Empty,@"function processWorkflow(data) {
     return validateInput(data)
         .then(validated => {
             return transformData(validated);
@@ -212,25 +221,28 @@ function updateUserRole(userId, role) {
         .catch(error => {
             sendNotification('error');
         });
-}"
+}", "Add processWorkflow promise chain")
     };
 
     public static string GetRandomProblem()
     {
-        return _problems[_random.Next(_problems.Length)];
+        return _problems[_random.Next(_problems.Length)].Updated;
     }
 
     public static CodeReviewProblem GetRandomProblemWithId()
     {
         var index = _random.Next(_problems.Length);
+        var def = _problems[index];
         return new CodeReviewProblem
         {
             Id = $"js_medium_{index + 1:D3}",
-            Problem = _problems[index],
-            Language = Language.JavaScript
+            Problem = def.Updated,
+            Language = Language.JavaScript,
+            Original = def.Original ?? string.Empty,
+            Purpose = def.Purpose ?? string.Empty
         };
     }
 
     public static int Count => _problems.Length;
-    public static string GetProblemByIndex(int index) => _problems[index];
+    public static string GetProblemByIndex(int index) => _problems[index].Updated;
 }
