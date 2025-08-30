@@ -206,11 +206,32 @@ app.MapPost("/tests/{id}/explain", async (string id, ExplainRequest body, IProbl
 
     var system = new SystemChatMessage("You are a helpful, patient senior engineer. Return ONLY valid JSON (no markdown, no backticks, no commentary) using the schema: { \"explanation\": string, \"examples\": string (optional) }.");
 
+    // Determine fence language for syntax highlighting based on problem id prefix (cs/js/ts).
+    var codeFenceLanguage = "csharp";
+    try
+    {
+        var idParts = id.Split('_');
+        if (idParts.Length >= 1)
+        {
+            codeFenceLanguage = idParts[0].ToLowerInvariant() switch
+            {
+                "cs" => "csharp",
+                "js" => "javascript",
+                "ts" => "typescript",
+                _ => codeFenceLanguage
+            };
+        }
+    }
+    catch
+    {
+        // keep default if parsing fails
+    }
+
     var userBuilder = $@"You recently reviewed this code and gave this feedback:
 {body.ItemText}
 
 Here is the original code:
-```csharp
+```{codeFenceLanguage}
 {code}
 ```
 
