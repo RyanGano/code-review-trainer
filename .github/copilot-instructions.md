@@ -167,8 +167,8 @@ curl -w "Status: %{http_code}" http://localhost:5137/user
 - **Authentication**: Microsoft Entra ID with JWT Bearer tokens
 - **Key Files**:
   - `Program.cs` - Main API configuration and endpoints
-  - `CodeReviewProblems/EasyCodeReviewProblems.cs` - Easy difficulty problems
-  - `CodeReviewProblems/MediumCodeReviewProblems.cs` - Medium difficulty problems
+  - `CodeReviewProblems/EasyCSharpCodeReviewProblems.cs` - Easy difficulty problems (C#)
+  - `CodeReviewProblems/MediumCSharpCodeReviewProblems.cs` - Medium difficulty problems (C#)
   - `appsettings.json` - Configuration with Azure Key Vault integration
 - **Endpoints**:
   - `GET /` - Health check (public)

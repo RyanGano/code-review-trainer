@@ -140,13 +140,13 @@ app.MapGet("/tests/", (DifficultyLevel? level, Language language) =>
         {
             Language.JavaScript => EasyJavaScriptCodeReviewProblems.GetRandomProblemWithId(),
             Language.TypeScript => EasyTypeScriptCodeReviewProblems.GetRandomProblemWithId(),
-            _ => EasyCodeReviewProblems.GetRandomProblemWithId()
+            _ => EasyCSharpCodeReviewProblems.GetRandomProblemWithId()
         },
         DifficultyLevel.Medium => language switch
         {
             Language.JavaScript => MediumJavaScriptCodeReviewProblems.GetRandomProblemWithId(),
             Language.TypeScript => MediumTypeScriptCodeReviewProblems.GetRandomProblemWithId(),
-            _ => MediumCodeReviewProblems.GetRandomProblemWithId()
+            _ => MediumCSharpCodeReviewProblems.GetRandomProblemWithId()
         },
         _ => null
     };

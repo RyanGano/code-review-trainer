@@ -13,7 +13,7 @@ public class CodeReviewProblem
 }
 
 // Static class containing easy-level code review problems
-public static class EasyCodeReviewProblems
+public static class EasyCSharpCodeReviewProblems
 {
     private static readonly Random _random = new Random();
 

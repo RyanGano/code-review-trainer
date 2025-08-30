@@ -1,7 +1,7 @@
 namespace code_review_trainer_service.CodeReviewProblems;
 
 // Static class containing medium-level code review problems
-public static class MediumCodeReviewProblems
+public static class MediumCSharpCodeReviewProblems
 {
     private static readonly Random _random = new Random();
 

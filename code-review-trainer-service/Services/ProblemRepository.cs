@@ -40,10 +40,10 @@ public class ProblemRepository : IProblemRepository
 
     return (language, difficulty) switch
     {
-      (Language.CSharp, DifficultyLevel.Easy) when index < EasyCodeReviewProblems.Count =>
-        (id, EasyCodeReviewProblems.GetProblemByIndex(index)),
-      (Language.CSharp, DifficultyLevel.Medium) when index < MediumCodeReviewProblems.Count =>
-        (id, MediumCodeReviewProblems.GetProblemByIndex(index)),
+      (Language.CSharp, DifficultyLevel.Easy) when index < EasyCSharpCodeReviewProblems.Count =>
+        (id, EasyCSharpCodeReviewProblems.GetProblemByIndex(index)),
+      (Language.CSharp, DifficultyLevel.Medium) when index < MediumCSharpCodeReviewProblems.Count =>
+        (id, MediumCSharpCodeReviewProblems.GetProblemByIndex(index)),
       (Language.JavaScript, DifficultyLevel.Easy) when index < EasyJavaScriptCodeReviewProblems.Count =>
         (id, EasyJavaScriptCodeReviewProblems.GetProblemByIndex(index)),
       (Language.JavaScript, DifficultyLevel.Medium) when index < MediumJavaScriptCodeReviewProblems.Count =>
