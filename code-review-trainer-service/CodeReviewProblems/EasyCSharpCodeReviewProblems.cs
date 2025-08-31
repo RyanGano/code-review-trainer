@@ -1,8 +1,5 @@
 namespace code_review_trainer_service.CodeReviewProblems;
 
-// CodeReviewProblem was moved to CodeReviewProblem.cs
-
-// Static class containing easy-level code review problems
 public sealed class EasyCSharpCodeReviewProblems : CodeReviewProblems
 {
     private static readonly ProblemDefinition[] _problems = new ProblemDefinition[]

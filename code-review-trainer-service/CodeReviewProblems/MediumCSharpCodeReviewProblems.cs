@@ -1,10 +1,9 @@
 namespace code_review_trainer_service.CodeReviewProblems;
 
-// Static class containing medium-level code review problems
 public sealed class MediumCSharpCodeReviewProblems : CodeReviewProblems
 {
-    private static readonly ProblemDefinition[] _problems = new ProblemDefinition[]
-    {
+        private static readonly ProblemDefinition[] _problems = new ProblemDefinition[]
+        {
         // Patch example: original vs patched (Medium C#)
     new ProblemDefinition("Refactor parameter name and conditional logic for clarity",
          @"-public bool IsEven(int n)
@@ -609,10 +608,10 @@ public sealed class MediumCSharpCodeReviewProblems : CodeReviewProblems
 +        }
 +    }
 +}"),
-    };
+        };
 
-    public MediumCSharpCodeReviewProblems()
-        : base(_problems, Language.CSharp, "cs_medium", DifficultyLevel.Medium)
-    {
-    }
+        public MediumCSharpCodeReviewProblems()
+            : base(_problems, Language.CSharp, "cs_medium", DifficultyLevel.Medium)
+        {
+        }
 }

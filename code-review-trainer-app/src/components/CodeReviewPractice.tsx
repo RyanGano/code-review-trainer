@@ -577,7 +577,6 @@ const CodeReviewPractice = () => {
                                 (Possible: {i.possibleScore})
                               </span>
                             )}
-                            {/* Explain this button */}
                             <div className="explain-row">
                               <button
                                 className={`explain-button ${
