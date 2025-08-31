@@ -146,25 +146,11 @@ app.MapGet("/tests/", (DifficultyLevel? level, Language language) =>
         return Results.BadRequest(new { error = "No problems available for selected provider" });
     }
 
-    // If the provider supplied a unified patch string, return it as `problem.patch` so the frontend
-    // can render a single unified diff view. Otherwise, return structured original/patched fields.
-    if (!string.IsNullOrWhiteSpace(randomProblem.Patch))
-    {
-        return Results.Ok(new
-        {
-            level = level.ToString(),
-            language = language.ToString(),
-            problem = new { patch = randomProblem.Patch },
-            id = randomProblem.Id,
-            purpose = randomProblem.Purpose
-        });
-    }
-
     return Results.Ok(new
     {
         level = level.ToString(),
-        language = language.ToString(),
-        problem = new { patched = randomProblem.Problem, patch = randomProblem.Patch },
+        language = randomProblem.Language.ToString(),
+        patch = randomProblem.Patch,
         id = randomProblem.Id,
         purpose = randomProblem.Purpose
     });
@@ -179,7 +165,7 @@ app.MapPost("/tests/{id}", async (string id, ReviewSubmission submission, IProbl
     {
         return Results.NotFound(new { error = "Problem not found" });
     }
-    var (probId, code, purpose) = problem.Value;
+    var (probId, code, purpose, language) = problem.Value;
     var result = await model.ReviewAsync(new CodeReviewRequest(probId, code, submission.review, purpose));
     return Results.Ok(result);
 })
@@ -197,7 +183,7 @@ app.MapPost("/tests/{id}/explain", async (string id, ExplainRequest body, IProbl
     {
         return Results.NotFound(new { error = "Problem not found" });
     }
-    var (probId, code, purpose) = problem.Value;
+    var (probId, code, purpose, language) = problem.Value;
 
     // If ChatClient or configuration missing, return fallback placeholder
     var aiSettings = options?.Value;
@@ -212,26 +198,14 @@ app.MapPost("/tests/{id}/explain", async (string id, ExplainRequest body, IProbl
 
     var system = new SystemChatMessage("You are a helpful, patient senior engineer. Return ONLY valid JSON (no markdown, no backticks, no commentary) using the schema: { \"explanation\": string, \"examples\": string (optional) }.");
 
-    // Determine fence language for syntax highlighting based on problem id prefix (cs/js/ts).
-    var codeFenceLanguage = "csharp";
-    try
+    // Determine fence language for syntax highlighting based on problem language.
+    var codeFenceLanguage = language switch
     {
-        var idParts = id.Split('_');
-        if (idParts.Length >= 1)
-        {
-            codeFenceLanguage = idParts[0].ToLowerInvariant() switch
-            {
-                "cs" => "csharp",
-                "js" => "javascript",
-                "ts" => "typescript",
-                _ => codeFenceLanguage
-            };
-        }
-    }
-    catch
-    {
-        // keep default if parsing fails
-    }
+        Language.CSharp => "csharp",
+        Language.JavaScript => "javascript",
+        Language.TypeScript => "typescript",
+        _ => "csharp"
+    };
 
     var userBuilder = $@"You recently reviewed this code and gave this feedback:
 {body.ItemText}

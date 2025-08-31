@@ -4,7 +4,7 @@ namespace code_review_trainer_service.Services;
 
 public interface IProblemRepository
 {
-  (string Id, string Code, string Purpose)? Get(string id);
+  (string Id, string Code, string Purpose, Language Language)? Get(string id);
 }
 
 public class ProblemRepository : IProblemRepository
@@ -16,7 +16,7 @@ public class ProblemRepository : IProblemRepository
     _providers = providers;
   }
 
-  public (string Id, string Code, string Purpose)? Get(string id)
+  public (string Id, string Code, string Purpose, Language Language)? Get(string id)
   {
     if (string.IsNullOrWhiteSpace(id)) return null;
 
@@ -48,6 +48,6 @@ public class ProblemRepository : IProblemRepository
     var provider = _providers.FirstOrDefault(p => p.Language == language && p.Difficulty == difficulty);
     if (provider == null) return null;
     if (index < 0 || index >= provider.Count) return null;
-    return (id, provider.GetProblemByIndex(index), provider.GetPurposeByIndex(index));
+    return (id, provider.GetProblemByIndex(index), provider.GetPurposeByIndex(index), language.Value);
   }
 }

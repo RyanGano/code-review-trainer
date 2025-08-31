@@ -45,14 +45,13 @@ interface CodeReviewModelResult {
 interface CodeReviewTest {
   level: string;
   language?: string;
-  // The backend returns either structured original/patched fields or a unified patch
-  problem: { original: string; patched: string } | { patch?: string };
+  patch?: string;
   purpose?: string;
   id: string;
 }
 
 const CodeReviewPractice = () => {
-  // Backend now always returns a structured patch object; no runtime guard needed.
+  // Backend always returns a patch string
 
   const { instance, accounts } = useMsal();
   const [currentTest, setCurrentTest] = useState<CodeReviewTest | null>(null);
@@ -196,24 +195,7 @@ const CodeReviewPractice = () => {
     fetchCodeReviewTest,
   ]);
 
-  // Current test patch: prefer structured original/patched when present; otherwise expose patch string
-  const currentPatch = (() => {
-    if (!currentTest) return null;
-    const p = currentTest.problem;
-    if (
-      p &&
-      typeof (p as { original?: unknown }).original === "string" &&
-      typeof (p as { patched?: unknown }).patched === "string"
-    ) {
-      const pp = p as { original: string; patched: string; patch?: string };
-      return { original: pp.original, patched: pp.patched, patch: pp.patch };
-    }
-    if (p && typeof (p as { patch?: unknown }).patch === "string") {
-      const pp = p as { patch: string };
-      return { original: "", patched: "", patch: pp.patch };
-    }
-    return { original: "", patched: "", patch: undefined };
-  })();
+  const currentPatch = currentTest?.patch ?? null;
 
   const handleSubmitReview = async () => {
     if (!currentTest || !reviewComments.trim() || accounts.length === 0) {
@@ -417,12 +399,9 @@ const CodeReviewPractice = () => {
           <div className="code-section">
             <h3>Code to Review:</h3>
             <div className="code-viewer-container">
-              {/* Server now always returns a structured patch (original + patched) */}
+              {/* Server always returns a unified patch string */}
               <UnifiedMergeView
-                original={currentPatch?.original ?? ""}
-                patched={currentPatch?.patched ?? ""}
-                // If the server returned a unified patch string, forward it as `patch`.
-                patch={currentPatch?.patch ?? null}
+                patch={currentPatch}
                 language={currentTest?.language || selectedLanguage}
                 purpose={currentTest?.purpose}
               />

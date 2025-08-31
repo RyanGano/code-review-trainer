@@ -1,6 +1,5 @@
 namespace code_review_trainer_service.CodeReviewProblems;
 
-// Base class that holds problem definitions and shared helper methods.
 public abstract class CodeReviewProblems : Services.IProblemProvider
 {
   protected readonly ProblemDefinition[] Problems;
@@ -25,9 +24,8 @@ public abstract class CodeReviewProblems : Services.IProblemProvider
       return new CodeReviewProblem
       {
         Id = $"{IdPrefix}_000",
-        Problem = string.Empty,
-        Language = Language,
-        Purpose = string.Empty
+        Purpose = string.Empty,
+        Language = Language
       };
     }
 
@@ -36,10 +34,9 @@ public abstract class CodeReviewProblems : Services.IProblemProvider
     return new CodeReviewProblem
     {
       Id = $"{IdPrefix}_{index + 1:D3}",
-      Problem = def.Patch ?? string.Empty,
-      Language = Language,
       Patch = def.Patch,
-      Purpose = def.Purpose ?? string.Empty
+      Purpose = def.Purpose ?? string.Empty,
+      Language = Language
     };
   }
 
