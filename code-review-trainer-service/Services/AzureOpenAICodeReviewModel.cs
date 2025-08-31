@@ -45,7 +45,13 @@ Your analysis should:
 4. Keep the issuesDetected array comprehensive - do not truncate
 5. Provide detailed feedback in the summary
 
-IMPORTANT: For scoring, include a numeric ""possibleScore"" for each item in ""issuesDetected"". Do NOT include any overall numeric totals in the model output; the server will compute totals. If you include any totals, ensure they never exceed the sum of the per-issue possibleScore values plus 2 (two points reserved for general review quality).
+IMPORTANT: For scoring, include a numeric ""possibleScore"" for each item in ""issuesDetected"". Use these values based on severity:
+- critical: 3 points
+- high: 3 points  
+- medium: 2 points
+- low: 1 point
+- trivial: 1 point
+Do NOT use values outside this range. If unsure about severity, default to medium (2 points). Do NOT include any overall numeric totals in the model output; the server will compute totals. If you include any totals, ensure they never exceed the sum of the per-issue possibleScore values plus 2 (two points reserved for general review quality).
   MUST include a boolean field in the JSON root named ""reviewQualityBonusGranted"": true or false indicating whether the reviewer earned the +2 general review quality bonus. This field is REQUIRED and must always be present (set true when the review is clear and actionable, otherwise set false). Do NOT omit this field.
 
   MUST include a boolean field in the JSON root named ""spellingProblemsDetected"": true or false indicating whether the user's review contains multiple spelling/typo issues. This field is REQUIRED and must always be present (set true when the model detected spelling/typo problems in the user's review or parsed matched points).
@@ -427,17 +433,20 @@ Return only the JSON matching the schema described in the user prompt. Do not ad
     var schema = "{{ problemId, issuesDetected:[{{id,category,title,explanation,severity,possibleScore}}], matchedUserPoints:[{{excerpt,matchedIssueIds,accuracy}}], missedCriticalIssueIds:[], reviewQualityBonusGranted, spellingProblemsDetected, summary, recommendedCode }}";
     return $@"ProblemId: {req.ProblemId}
 
-OriginalCode:
+Patch:
 ```{language}
 {truncatedCode}
 ```
 
+Patch Purpose (Commit Message):
+{req.PatchPurpose}
+
 UserReview:
 {truncatedReview}
 
-Conduct a comprehensive code review analysis for this {(language == "javascript" ? "JavaScript" : (language == "typescript" ? "TypeScript" : "C#"))} code:
-1. Perform your own thorough review of the code
-2. Identify all issues in the code (populate issuesDetected with comprehensive list - do not truncate)
+Conduct a comprehensive code review analysis for this {(language == "javascript" ? "JavaScript" : (language == "typescript" ? "TypeScript" : "C#"))} patch:
+1. Perform your own thorough review of the patch
+2. Identify all issues in the patch (populate issuesDetected with comprehensive list - do not truncate)
 3. CAREFULLY analyze what the user found correctly - look for ANY mention of issues even if phrased differently than you would phrase them:
    - Input validation mentioned as: 'add validation', 'validate that text is not null', 'don't allow negative numbers', 'check parameters', etc.
    - Error handling mentioned as: 'handle exceptions', 'try-catch', 'error checking', 'what if this fails', etc.

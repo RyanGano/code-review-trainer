@@ -27,7 +27,6 @@ public abstract class CodeReviewProblems : Services.IProblemProvider
         Id = $"{IdPrefix}_000",
         Problem = string.Empty,
         Language = Language,
-        Original = string.Empty,
         Purpose = string.Empty
       };
     }
@@ -37,9 +36,9 @@ public abstract class CodeReviewProblems : Services.IProblemProvider
     return new CodeReviewProblem
     {
       Id = $"{IdPrefix}_{index + 1:D3}",
-      Problem = def.Updated,
+      Problem = def.Patch ?? string.Empty,
       Language = Language,
-      Original = def.Original ?? string.Empty,
+      Patch = def.Patch,
       Purpose = def.Purpose ?? string.Empty
     };
   }
@@ -49,7 +48,13 @@ public abstract class CodeReviewProblems : Services.IProblemProvider
   public string GetProblemByIndex(int index)
   {
     if (index < 0 || index >= Problems.Length) return string.Empty;
-    return Problems[index].Updated;
+    return Problems[index].Patch ?? string.Empty;
+  }
+
+  public string GetPurposeByIndex(int index)
+  {
+    if (index < 0 || index >= Problems.Length) return string.Empty;
+    return Problems[index].Purpose ?? string.Empty;
   }
 
   // IProblemProvider implementation
@@ -57,5 +62,6 @@ public abstract class CodeReviewProblems : Services.IProblemProvider
   Language Services.IProblemProvider.Language => Language;
   int Services.IProblemProvider.Count => Count;
   string Services.IProblemProvider.GetProblemByIndex(int index) => GetProblemByIndex(index);
+  string Services.IProblemProvider.GetPurposeByIndex(int index) => GetPurposeByIndex(index);
   CodeReviewProblem Services.IProblemProvider.GetRandomProblemWithId() => GetRandomProblemWithId();
 }

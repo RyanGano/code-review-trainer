@@ -45,8 +45,8 @@ interface CodeReviewModelResult {
 interface CodeReviewTest {
   level: string;
   language?: string;
-  // The backend now always returns a structured patch object
-  problem: { original: string; patched: string };
+  // The backend returns either structured original/patched fields or a unified patch
+  problem: { original: string; patched: string } | { patch?: string };
   purpose?: string;
   id: string;
 }
@@ -196,11 +196,24 @@ const CodeReviewPractice = () => {
     fetchCodeReviewTest,
   ]);
 
-  // Current test patch (server always returns structured patch)
-  const currentPatch =
-    (currentTest
-      ? (currentTest.problem as { original: string; patched: string })
-      : null) || null;
+  // Current test patch: prefer structured original/patched when present; otherwise expose patch string
+  const currentPatch = (() => {
+    if (!currentTest) return null;
+    const p = currentTest.problem;
+    if (
+      p &&
+      typeof (p as { original?: unknown }).original === "string" &&
+      typeof (p as { patched?: unknown }).patched === "string"
+    ) {
+      const pp = p as { original: string; patched: string; patch?: string };
+      return { original: pp.original, patched: pp.patched, patch: pp.patch };
+    }
+    if (p && typeof (p as { patch?: unknown }).patch === "string") {
+      const pp = p as { patch: string };
+      return { original: "", patched: "", patch: pp.patch };
+    }
+    return { original: "", patched: "", patch: undefined };
+  })();
 
   const handleSubmitReview = async () => {
     if (!currentTest || !reviewComments.trim() || accounts.length === 0) {
@@ -426,6 +439,8 @@ const CodeReviewPractice = () => {
               <UnifiedMergeView
                 original={currentPatch?.original ?? ""}
                 patched={currentPatch?.patched ?? ""}
+                // If the server returned a unified patch string, forward it as `patch`.
+                patch={currentPatch?.patch ?? null}
                 language={currentTest?.language || selectedLanguage}
                 purpose={currentTest?.purpose}
               />

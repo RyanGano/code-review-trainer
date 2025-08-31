@@ -1,6 +1,6 @@
 namespace code_review_trainer_service.Services;
 
-public record CodeReviewRequest(string ProblemId, string Code, string UserReview);
+public record CodeReviewRequest(string ProblemId, string Code, string UserReview, string PatchPurpose);
 
 public record CodeReviewIssue(
     string Id,

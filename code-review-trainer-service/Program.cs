@@ -146,11 +146,25 @@ app.MapGet("/tests/", (DifficultyLevel? level, Language language) =>
         return Results.BadRequest(new { error = "No problems available for selected provider" });
     }
 
+    // If the provider supplied a unified patch string, return it as `problem.patch` so the frontend
+    // can render a single unified diff view. Otherwise, return structured original/patched fields.
+    if (!string.IsNullOrWhiteSpace(randomProblem.Patch))
+    {
+        return Results.Ok(new
+        {
+            level = level.ToString(),
+            language = language.ToString(),
+            problem = new { patch = randomProblem.Patch },
+            id = randomProblem.Id,
+            purpose = randomProblem.Purpose
+        });
+    }
+
     return Results.Ok(new
     {
         level = level.ToString(),
         language = language.ToString(),
-        problem = new { original = randomProblem.Original, patched = randomProblem.Problem },
+        problem = new { patched = randomProblem.Problem, patch = randomProblem.Patch },
         id = randomProblem.Id,
         purpose = randomProblem.Purpose
     });
@@ -165,7 +179,8 @@ app.MapPost("/tests/{id}", async (string id, ReviewSubmission submission, IProbl
     {
         return Results.NotFound(new { error = "Problem not found" });
     }
-    var result = await model.ReviewAsync(new CodeReviewRequest(problem.Value.Id, problem.Value.Code, submission.review));
+    var (probId, code, purpose) = problem.Value;
+    var result = await model.ReviewAsync(new CodeReviewRequest(probId, code, submission.review, purpose));
     return Results.Ok(result);
 })
 .WithName("SubmitReview")
@@ -182,6 +197,7 @@ app.MapPost("/tests/{id}/explain", async (string id, ExplainRequest body, IProbl
     {
         return Results.NotFound(new { error = "Problem not found" });
     }
+    var (probId, code, purpose) = problem.Value;
 
     // If ChatClient or configuration missing, return fallback placeholder
     var aiSettings = options?.Value;
@@ -192,7 +208,7 @@ app.MapPost("/tests/{id}/explain", async (string id, ExplainRequest body, IProbl
     }
 
     // Build prompt using original code and item text. Include the full original code.
-    string code = problem.Value.Code ?? string.Empty;
+    string codeText = code ?? string.Empty;
 
     var system = new SystemChatMessage("You are a helpful, patient senior engineer. Return ONLY valid JSON (no markdown, no backticks, no commentary) using the schema: { \"explanation\": string, \"examples\": string (optional) }.");
 
@@ -222,7 +238,7 @@ app.MapPost("/tests/{id}/explain", async (string id, ExplainRequest body, IProbl
 
 Here is the original code:
 ```{codeFenceLanguage}
-{code}
+{codeText}
 ```
 
 Please do the following:

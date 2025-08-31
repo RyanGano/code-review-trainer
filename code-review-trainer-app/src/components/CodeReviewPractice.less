@@ -109,6 +109,62 @@
   }
 }
 
+.patch-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0 12px;
+
+  label {
+    font-weight: bold;
+    margin-right: 6px;
+  }
+
+  button {
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    background: white;
+    cursor: pointer;
+    font-size: 13px;
+  }
+
+  button.active {
+    background: #007bff;
+    color: white;
+    border-color: #0069d9;
+  }
+}
+
+.merge-single-editor {
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.unified-diff {
+  font-family: monospace;
+  white-space: pre-wrap;
+  background: #f8f9fa;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.unified-line.removed {
+  background: rgba(220, 53, 69, 0.08); /* light red */
+  color: #a71d2a;
+}
+
+.unified-line.added {
+  background: rgba(40, 167, 69, 0.08); /* light green */
+  color: #165b2e;
+}
+
+.unified-line.equal {
+  background: transparent;
+  color: inherit;
+}
+
 .review-section {
   margin-bottom: 20px;
 }
@@ -526,6 +582,26 @@
   gap: 12px;
 }
 
+/* Stacked variant for Top & Bottom view */
+.merge-editors.stacked {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.merge-editors.stacked .editor-pane {
+  /* Allow stacked panes to share available space but stay large enough to show code.
+     Use a sensible flex-basis so each pane displays content, allow shrinking, and
+     cap the height so panes don't become overly tall on large screens. */
+  
+  max-height: 60vh;
+  height: auto;
+}
+
+.merge-editors.stacked .editor-pane .cm-scroller {
+  max-height: 100%;
+}
+
 .editor-pane { flex: 1; }
 .pane-title { font-weight: bold; margin-bottom: 6px; }
 
@@ -748,4 +824,8 @@
   .toggle-recommended-code {
     margin-left: 0; /* ensure flush left */
   }
+}
+
+.merge-editors.stacked .pane-title {
+  margin-bottom: 4px;
 }

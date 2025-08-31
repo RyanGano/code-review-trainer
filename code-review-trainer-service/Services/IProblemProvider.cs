@@ -8,5 +8,6 @@ public interface IProblemProvider
   Language Language { get; }
   int Count { get; }
   string GetProblemByIndex(int index);
+  string GetPurposeByIndex(int index);
   CodeReviewProblem GetRandomProblemWithId();
 }

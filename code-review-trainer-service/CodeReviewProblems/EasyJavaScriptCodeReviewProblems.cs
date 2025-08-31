@@ -5,96 +5,108 @@ public sealed class EasyJavaScriptCodeReviewProblems : CodeReviewProblems
     private static readonly ProblemDefinition[] _problems = new ProblemDefinition[]
     {
         // Patch example: original vs patched (Easy JS)
-        new ProblemDefinition(@"function sum(a, b) {
-    return a + b;
-}", @"function sum(x, y) {
-    var total = x - y;
-    return total;
-}", "Rename parameters and refactor operator usage"),
+    new ProblemDefinition("Rename parameters and refactor operator usage",
+        @"-function sum(a, b) {
++function sum(x, y) {
+-    return a + b;
++    var total = x - y;
++    return total;
+ }"),
+
         // Problem 1: Missing semicolon and var keyword misuse
-        new ProblemDefinition(string.Empty,@"function calculateTotal(items) {
-    var total = 0
-    for (var i = 0; i < items.length; i++) {
-        total += items[i].price;
-    }
-    return total;
-}", "Add calculateTotal function to sum item prices"),
+    new ProblemDefinition("Add calculateTotal function to sum item prices",
+            @"+function calculateTotal(items) {
++    var total = 0
++    for (var i = 0; i < items.length; i++) {
++        total += items[i].price;
++    }
++    return total;
++}"),
 
         // Problem 2: Using == instead of === and no return statement
-        new ProblemDefinition(string.Empty,@"function isValidAge(age) {
-    if (age == 18) {
-        console.log('Valid age');
-    }
-}", "Add isValidAge function"),
+    new ProblemDefinition("Add isValidAge function",
+            @"+function isValidAge(age) {
++    if (age == 18) {
++        console.log('Valid age');
++    }
+}"),
 
         // Problem 3: Variable scope issue and undefined variable
-        new ProblemDefinition(string.Empty,@"function processData() {
-    for (var i = 0; i < 5; i++) {
-        var result = i * 2;
-    }
-    console.log(result);
-    console.log(counter);
-}", "Add processData function"),
+    new ProblemDefinition("Add processData function",
+            @"+function processData() {
++    for (var i = 0; i < 5; i++) {
++        var result = i * 2;
++    }
++    console.log(result);
++    console.log(counter);
++}"),
 
         // Problem 4: Array modification during iteration
-        new ProblemDefinition(string.Empty,@"function removeEvenNumbers(numbers) {
-    for (let i = 0; i < numbers.length; i++) {
-        if (numbers[i] % 2 === 0) {
-            numbers.splice(i, 1);
-        }
-    }
-    return numbers;
-}", "Add removeEvenNumbers function"),
+    new ProblemDefinition("Add removeEvenNumbers function",
+            @"+function removeEvenNumbers(numbers) {
++    for (let i = 0; i < numbers.length; i++) {
++        if (numbers[i] % 2 === 0) {
++            numbers.splice(i, 1);
++        }
++    }
++    return numbers;
++}"),
 
         // Problem 5: No input validation
-        new ProblemDefinition(string.Empty,@"function divide(a, b) {
-    return a / b;
-}", "Add divide function"),
+    new ProblemDefinition("Add divide function",
+            @"+function divide(a, b) {
++    return a / b;
++}"),
 
         // Problem 6: Callback hell and missing error handling
-        new ProblemDefinition(string.Empty,@"function loadUserData(userId) {
-    fetchUser(userId, function(user) {
-        fetchProfile(user.id, function(profile) {
-            fetchPreferences(profile.id, function(prefs) {
-                console.log(prefs);
-            });
-        });
-    });
-}", "Add loadUserData function"),
+    new ProblemDefinition("Add loadUserData function",
+            @"+function loadUserData(userId) {
++    fetchUser(userId, function(user) {
++        fetchProfile(user.id, function(profile) {
++            fetchPreferences(profile.id, function(prefs) {
++                console.log(prefs);
++            });
++        });
++    });
++}"),
 
         // Problem 7: Memory leak potential with event listeners
-        new ProblemDefinition(string.Empty,@"function setupButton() {
-    const button = document.getElementById('myButton');
-    button.addEventListener('click', function() {
-        console.log('Button clicked');
-    });
-}", "Add setupButton that registers click handler"),
+    new ProblemDefinition("Add setupButton that registers click handler",
+            @"+function setupButton() {
++    const button = document.getElementById('myButton');
++    button.addEventListener('click', function() {
++        console.log('Button clicked');
++    });
++}"),
 
         // Problem 8: Not handling async operation properly
-        new ProblemDefinition(string.Empty,@"function getData() {
-    let result;
-    fetch('/api/data')
-        .then(response => response.json())
-        .then(data => {
-            result = data;
-        });
-    return result;
-}", "Add getData function using promise chain"),
+    new ProblemDefinition("Add getData function using promise chain",
+            @"+function getData() {
++    let result;
++    fetch('/api/data')
++        .then(response => response.json())
++        .then(data => {
++            result = data;
++        });
++    return result;
++}"),
 
         // Problem 9: Mutating function parameters
-        new ProblemDefinition(string.Empty,@"function updatePrices(products, discount) {
-    for (let product of products) {
-        product.price = product.price * (1 - discount);
-    }
-    return products;
-}", "Add updatePrices function"),
+    new ProblemDefinition("Add updatePrices function",
+            @"+function updatePrices(products, discount) {
++    for (let product of products) {
++        product.price = product.price * (1 - discount);
++    }
++    return products;
++}"),
 
         // Problem 10: Poor variable naming and no error handling
-        new ProblemDefinition(string.Empty,@"function calc(x, y, z) {
-    const a = x + y;
-    const b = a * z;
-    return b / a;
-}", "Add calc function")
+    new ProblemDefinition("Add calc function",
+            @"+function calc(x, y, z) {
++    const a = x + y;
++    const b = a * z;
++    return b / a;
++}")
     };
 
     // Providers are constructed by DI; no static instance is required.
