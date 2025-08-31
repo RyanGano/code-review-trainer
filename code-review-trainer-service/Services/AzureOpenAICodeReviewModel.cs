@@ -51,8 +51,8 @@ IMPORTANT: For scoring, include a numeric ""possibleScore"" for each item in ""i
 - medium: 2 points
 - low: 1 point
 - trivial: 1 point
-Do NOT use values outside this range. If unsure about severity, default to medium (2 points). Do NOT include any overall numeric totals in the model output; the server will compute totals. If you include any totals, ensure they never exceed the sum of the per-issue possibleScore values plus 2 (two points reserved for general review quality).
-  MUST include a boolean field in the JSON root named ""reviewQualityBonusGranted"": true or false indicating whether the reviewer earned the +2 general review quality bonus. This field is REQUIRED and must always be present (set true when the review is clear and actionable, otherwise set false). Do NOT omit this field.
+Do NOT use values outside this range. If unsure about severity, default to medium (2 points). Do NOT include any overall numeric totals in the model output; the server will compute totals.
+  MUST include a boolean field in the JSON root named ""reviewQualityBonusGranted"": true or false indicating whether the reviewer wrote a clear and actionable review. This field is REQUIRED and must always be present (set true when the review is clear and actionable, otherwise set false). Do NOT omit this field.
 
   MUST include a boolean field in the JSON root named ""spellingProblemsDetected"": true or false indicating whether the user's review contains multiple spelling/typo issues. This field is REQUIRED and must always be present (set true when the model detected spelling/typo problems in the user's review or parsed matched points).
 
@@ -278,10 +278,7 @@ Return only the JSON matching the schema described in the user prompt. Do not ad
       if (matchCount >= 2) modelIndicatedSpelling = true;
     }
 
-    // Compute empirical scoring: sum possible for all detected issues, and user-earned score from matched points
-    // Base possible total is the sum of per-issue possible scores. The +2
-    // review-quality bonus is not included in this value; it is reported via
-    // ReviewQualityBonusGranted and may be added to the user's score only.
+    // Base possible total is the sum of per-issue possible scores.
     var issuesList = issues ?? new List<CodeReviewIssue>();
     var matchedList = matched ?? new List<CodeReviewMatchedUserPoint>();
     int possibleTotal = issuesList.Sum(i => i.PossibleScore);
@@ -328,12 +325,11 @@ Return only the JSON matching the schema described in the user prompt. Do not ad
       var negationKeywordsForFlag = new[] { "lack", "lacks", "missing", "missed", "no", "not", "doesn't", "didn't", "without", "low", "poor", "insufficient" };
       bool hasNegationForFlag = negationKeywordsForFlag.Any(k => sForFlag.Contains(k));
 
-      var positiveIndicators = new[] { "earned 2 additional points", "earning 2 additional points", "clear and actionable", "clear, actionable", "actionable feedback", "actionable", "good", "well" };
+      var positiveIndicators = new[] { "clear and actionable", "clear, actionable", "actionable feedback", "actionable", "good", "well" };
       bool hasPositiveIndicator = positiveIndicators.Any(p => sForFlag.Contains(p));
 
       if (!hasNegationForFlag || hasPositiveIndicator)
       {
-        userTotal += 2;
         awardedReviewBonus = true;
       }
       else
@@ -347,13 +343,6 @@ Return only the JSON matching the schema described in the user prompt. Do not ad
     {
       var s = summary.ToLowerInvariant();
 
-      // Exact phrase fallback (as requested in prompt):
-      if (!awardedReviewBonus && s.Contains("earned 2 additional points for a clear and actionable review"))
-      {
-        userTotal += 2;
-        awardedReviewBonus = true;
-      }
-
       // Last-resort fallback: keyword-based detection of clarity/actionability.
       // Only award if the summary indicates positive clarity/actionability (no nearby negation cues).
       if (!awardedReviewBonus)
@@ -364,7 +353,6 @@ Return only the JSON matching the schema described in the user prompt. Do not ad
         bool hasActionable = positiveActionablePhrases.Any(p => s.Contains(p));
         if (hasActionable && !hasNegation)
         {
-          userTotal += 2;
           awardedReviewBonus = true;
         }
       }
@@ -381,7 +369,6 @@ Return only the JSON matching the schema described in the user prompt. Do not ad
         // If the summary explicitly says 'Overall, ...' along with clear+actionable, honor the positive signal
         if (mentionsClear && mentionsActionable && (!hasNegation || s.Contains("overall")))
         {
-          userTotal += 2;
           awardedReviewBonus = true;
           _logger.LogInformation("Awarding review quality bonus based on permissive check (clear+actionable) for summary: {Summary}", summary);
         }
@@ -399,6 +386,7 @@ Return only the JSON matching the schema described in the user prompt. Do not ad
     possibleTotal = Math.Max(0, possibleTotal);
     userTotal = Math.Max(0, userTotal);
 
+    // Cap userTotal to possibleTotal
     if (userTotal > possibleTotal) userTotal = possibleTotal;
 
     return new CodeReviewModelResult(problemId, issuesList, matchedList, missed, summary, raw ?? string.Empty, recommendedCode, false, null, modelIndicatedSpelling, awardedReviewBonus, UserScore: userTotal, PossibleScore: possibleTotal);

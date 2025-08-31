@@ -265,7 +265,7 @@ const CodeReviewPractice = () => {
     fetchCodeReviewTest();
   };
 
-  // Displayed possible score should reflect AI-detected items when available
+  // Displayed possible score reflects AI-detected items when available
   // (so the UI shows the per-issue totals like 10). If issues aren't present,
   // fall back to the backend-provided possibleScore.
   const getDisplayedPossibleScore = (r: CodeReviewModelResult | null) => {
@@ -279,28 +279,10 @@ const CodeReviewPractice = () => {
     return typeof r.possibleScore === "number" ? r.possibleScore : 0;
   };
 
-  // Displayed user score will generally come from the server (authoritative).
-  // However, when the UI chooses to show the per-issue possible total (above),
-  // subtract the review-quality bonus from the displayed user score so the
-  // fraction matches the listed issues. The badge still indicates the bonus.
+  // Displayed user score comes from the server (authoritative)
   const getDisplayedUserScore = (r: CodeReviewModelResult | null) => {
     if (!r) return 0;
-
-    // Prefer the server-provided userScore when available
-    const serverUser = typeof r.userScore === "number" ? r.userScore : 0;
-    const hasIssues = r.issuesDetected && r.issuesDetected.length > 0;
-
-    // If we are showing per-issue possible totals, subtract the review-quality
-    // bonus from the displayed user score so the fraction aligns with the
-    // listed issue totals (the UI still shows a badge for the bonus).
-    if (hasIssues) {
-      const bonus = r.reviewQualityBonusGranted ? 2 : 0;
-      const adjusted = Math.max(0, serverUser - bonus);
-      return adjusted;
-    }
-
-    // No per-issue list present: just show the authoritative server user score.
-    return serverUser;
+    return typeof r.userScore === "number" ? r.userScore : 0;
   };
 
   // Prefer machine-readable flag from server indicating spelling problems.
