@@ -2,8 +2,8 @@ namespace code_review_trainer_service.CodeReviewProblems;
 
 public sealed class EasyJavaScriptCodeReviewProblems : CodeReviewProblems
 {
-    private static readonly ProblemDefinition[] _problems = new ProblemDefinition[]
-    {
+        private static readonly ProblemDefinition[] _problems = new ProblemDefinition[]
+        {
         // Patch example: original vs patched (Easy JS)
     new ProblemDefinition("Rename parameters and refactor operator usage",
         @"-function sum(a, b) {
@@ -11,7 +11,7 @@ public sealed class EasyJavaScriptCodeReviewProblems : CodeReviewProblems
 -    return a + b;
 +    var total = x - y;
 +    return total;
- }"),
++}"),
 
         // Problem 1: Missing semicolon and var keyword misuse
     new ProblemDefinition("Add calculateTotal function to sum item prices",
@@ -29,7 +29,7 @@ public sealed class EasyJavaScriptCodeReviewProblems : CodeReviewProblems
 +    if (age == 18) {
 +        console.log('Valid age');
 +    }
-}"),
++}"),
 
         // Problem 3: Variable scope issue and undefined variable
     new ProblemDefinition("Add processData function",
@@ -107,12 +107,12 @@ public sealed class EasyJavaScriptCodeReviewProblems : CodeReviewProblems
 +    const b = a * z;
 +    return b / a;
 +}")
-    };
+        };
 
-    // Providers are constructed by DI; no static instance is required.
+        // Providers are constructed by DI; no static instance is required.
 
-    public EasyJavaScriptCodeReviewProblems()
-        : base(_problems, Language.JavaScript, "js_easy", DifficultyLevel.Easy)
-    {
-    }
+        public EasyJavaScriptCodeReviewProblems()
+            : base(_problems, Language.JavaScript, "js_easy", DifficultyLevel.Easy)
+        {
+        }
 }
