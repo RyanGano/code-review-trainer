@@ -28,10 +28,15 @@ public sealed class MediumCSharpCodeReviewProblems : CodeReviewProblems
 +    }
 +}"),
 
-        // Problem 2: Type mismatch compilation error and logic issue
-    new ProblemDefinition("Add Calculator.CalculatePercentage implementation.",
-            @"+public class Calculator
-+{
+        // Problem 2: Type mismatch compilation error and logic issue - assignment instead of comparison, wrong return type
+    new ProblemDefinition("Refactor Calculator.CalculatePercentage to handle edge cases",
+            @" public class Calculator
+ {
+-    public double CalculatePercentage(int value, int total)
+-    {
+-        if (total == 0) return 0.0;
+-        return (double)value / total * 100.0;
+-    }
 +    public string CalculatePercentage(int value, int total)
 +    {
 +        if (total = 0)
@@ -41,24 +46,44 @@ public sealed class MediumCSharpCodeReviewProblems : CodeReviewProblems
 +        double percentage = (value / total) * 100;
 +        return percentage;
 +    }
-+}"),
+ }"),
 
-        // Problem 3: Spelling error in variable name and off-by-one error
-    new ProblemDefinition("Add substring extraction helper.",
-            @"+public List<string> GetSubstring(string text, int maxLenght)
-+{
+        // Problem 3: Spelling error in variable name and off-by-one error - incorrect substring bounds
+    new ProblemDefinition("Optimize substring extraction for better performance",
+            @" public List<string> GetSubstring(string text, int maxLength)
+ {
+-    var results = new List<string>();
+-    for (int i = 0; i < text.Length - maxLength; i++)
+-    {
+-        results.Add(text.Substring(i, maxLength));
+-    }
+-    return results;
 +    var results = new List<string>();
 +    for (int i = 0; i <= text.Length - maxLenght; i++)
 +    {
 +        results.Add(text.Substring(i, maxLenght));
 +    }
 +    return results;
-+}"),
+ }"),
 
-        // Problem 4: Compilation error - undefined variable and logical issue
-    new ProblemDefinition("Implement input validation routine.",
-            @"+public bool ValidateInput(string input)
-+{
+        // Problem 4: Compilation error - undefined variable and logical issue - wrong variable name in loop
+    new ProblemDefinition("Enhance input validation with additional checks",
+            @" public bool ValidateInput(string input)
+ {
+-    if (string.IsNullOrEmpty(input))
+-    {
+-        return false;
+-    }
+-    
+-    // Check if input contains only letters
+-    foreach (char c in input)
+-    {
+-        if (!char.IsLetter(c))
+-        {
+-            return false;
+-        }
+-    }
+-    return true;
 +    if (string.IsNullOrEmpty(input))
 +    {
 +        return false;
@@ -73,12 +98,26 @@ public sealed class MediumCSharpCodeReviewProblems : CodeReviewProblems
 +        }
 +    }
 +    return true;
-+}"),
+ }"),
 
-        // Problem 5: Subtle null reference potential and spelling error
-    new ProblemDefinition("Add OrderProcessor.ProcessOrder implementation.",
-            @"+public class OrderProcessor
-+{
+        // Problem 5: Subtle null reference potential and spelling error - no null check for order.Items
+    new ProblemDefinition("Simplify order processing logic",
+            @" public class OrderProcessor
+ {
+-    public decimal ProcessOrder(Order order)
+-    {
+-        if (order == null || order.Items == null)
+-        {
+-            return 0;
+-        }
+-        
+-        decimal total = 0;
+-        foreach (var item in order.Items)
+-        {
+-            total += item.Price * item.Quantity;
+-        }
+-        return total;
+-    }
 +    // Proccess orders and calculate totals
 +    public decimal ProcessOrder(Order order)
 +    {
@@ -89,43 +128,69 @@ public sealed class MediumCSharpCodeReviewProblems : CodeReviewProblems
 +        }
 +        return total;
 +    }
-+}"),
+ }"),
 
-        // Problem 6: Resource leak - missing using statement
-    new ProblemDefinition("Add ReadFileContent helper.",
-            @"+public string ReadFileContent(string filePath)
-+{
+        // Problem 6: Resource leak - missing using statement and dispose
+    new ProblemDefinition("Optimize file reading performance",
+            @" public string ReadFileContent(string filePath)
+ {
+-    using (var reader = new StreamReader(filePath))
+-    {
+-        return reader.ReadToEnd();
+-    }
 +    var reader = new StreamReader(filePath);
 +    string content = reader.ReadToEnd();
 +    return content;
-+}"),
+ }"),
 
-        // Problem 7: Compilation error and infinite loop potential
-    new ProblemDefinition("Add PrintNumbers method.",
-            @"+public void PrintNumbers(int count)
-+{
+        // Problem 7: Compilation error and infinite loop potential - missing semicolon and increment
+    new ProblemDefinition("Improve number printing with better formatting",
+            @" public void PrintNumbers(int count)
+ {
+-    for (int i = 0; i < count; i++)
+-    {
+-        Console.WriteLine(i);
+-    }
 +    int i = 0
 +    while (i < count)
 +    {
 +        Console.WriteLine(i);
 +    }
-+}"),
+ }"),
 
-        // Problem 8: Type mismatch and spelling error in string
-    new ProblemDefinition("Add GetUserAge method.",
-            @"+public int GetUserAge(string birthDate)
-+{
+        // Problem 8: Type mismatch and spelling error in string - wrong calculation and spelling
+    new ProblemDefinition("Enhance age calculation with better precision",
+            @" public int GetUserAge(string birthDate)
+ {
+-    DateTime birth = DateTime.Parse(birthDate);
+-    TimeSpan age = DateTime.Now - birth;
+-    return (int)(age.TotalDays / 365.25);
 +    DateTime birth = DateTime.Parse(birthDate);
 +    TimeSpan age = DateTime.Now - birth;
 +    Console.WriteLine(""User is approximatly "" + age.Days / 365 + "" years old"");
 +    return age.Days / 365;
-+}"),
+ }"),
 
-        // Problem 9: Compilation error - wrong collection type and logic issue
-    new ProblemDefinition("Add CountWords utility.",
-            @"+public Dictionary<string, int> CountWords(string text)
-+{
-+    var wordCount = new List<string, int>();
+        // Problem 9: Compilation error - wrong collection type and logic issue - wrong generic parameters
+    new ProblemDefinition("Optimize word counting algorithm",
+            @" public Dictionary<string, int> CountWords(string text)
+ {
+-    var wordCount = new Dictionary<string, int>();
+-    string[] words = text.Split(' ');
+-    
+-    foreach (string word in words)
+-    {
+-        if (wordCount.ContainsKey(word))
+-        {
+-            wordCount[word]++;
+-        }
+-        else
+-        {
+-            wordCount[word] = 1;
+-        }
+-    }
+-    return wordCount;
++    var wordCount = new Dictionary<string>();
 +    string[] words = text.Split(' ');
 +    
 +    foreach (string word in words)
@@ -140,12 +205,29 @@ public sealed class MediumCSharpCodeReviewProblems : CodeReviewProblems
 +        }
 +    }
 +    return wordCount;
-+}"),
+ }"),
 
-        // Problem 10: Subtle array bounds issue and spelling error
-    new ProblemDefinition("Add ArrayProcessor.FindMaxIndex implementation.",
-            @"+public class ArrayProcessor
-+{
+        // Problem 10: Subtle array bounds issue and spelling error - no bounds check for empty array
+    new ProblemDefinition("Improve array processing efficiency",
+            @" public class ArrayProcessor
+ {
+-    public int FindMaxIndex(int[] numbers)
+-    {
+-        if (numbers == null || numbers.Length == 0)
+-        {
+-            return -1;
+-        }
+-        
+-        int maxIndex = 0;
+-        for (int i = 1; i < numbers.Length; i++)
+-        {
+-            if (numbers[i] > numbers[maxIndex])
+-            {
+-                maxIndex = i;
+-            }
+-        }
+-        return maxIndex;
+-    }
 +    // Proceses array elements
 +    public int FindMaxIndex(int[] numbers)
 +    {
@@ -159,12 +241,28 @@ public sealed class MediumCSharpCodeReviewProblems : CodeReviewProblems
 +        }
 +        return maxIndex;
 +    }
-+}"),
+ }"),
 
-        // Problem 11: Compilation error - missing return type and logic issue
-    new ProblemDefinition("Add ReverseString method.",
-            @"+public class StringUtils
-+{
+        // Problem 11: Compilation error - missing return type and logic issue - wrong method signature
+    new ProblemDefinition("Refactor string reversal for better readability",
+            @" public class StringUtils
+ {
+-    public static string ReverseString(string input)
+-    {
+-        if (string.IsNullOrEmpty(input))
+-        {
+-            return input;
+-        }
+-        
+-        char[] chars = input.ToCharArray();
+-        for (int i = 0; i < chars.Length / 2; i++)
+-        {
+-            char temp = chars[i];
+-            chars[i] = chars[chars.Length - 1 - i];
+-            chars[chars.Length - 1 - i] = temp;
+-        }
+-        return new string(chars);
+-    }
 +    public ReverseString(string input)
 +    {
 +        if (input == null) return null;
@@ -178,12 +276,26 @@ public sealed class MediumCSharpCodeReviewProblems : CodeReviewProblems
 +        }
 +        return new string(chars);
 +    }
-+}"),
+ }"),
 
-        // Problem 12: Potential division by zero and spelling error
-    new ProblemDefinition("Add MathOperations.CalculateAverage implementation.",
-            @"+public class MathOperations
-+{
+        // Problem 12: Potential division by zero and spelling error - no check for empty list
+    new ProblemDefinition("Streamline average calculation",
+            @" public class MathOperations
+ {
+-    public double CalculateAverage(List<int> numbers)
+-    {
+-        if (numbers == null || numbers.Count == 0)
+-        {
+-            return 0.0;
+-        }
+-        
+-        int sum = 0;
+-        foreach (int number in numbers)
+-        {
+-            sum += number;
+-        }
+-        return (double)sum / numbers.Count;
+-    }
 +    // Calcualtes the average of numbers
 +    public double CalculateAverage(List<int> numbers)
 +    {
@@ -194,12 +306,30 @@ public sealed class MediumCSharpCodeReviewProblems : CodeReviewProblems
 +        }
 +        return sum / numbers.Count;
 +    }
-+}"),
+ }"),
 
-        // Problem 13: Compilation error and concurrency issue
-    new ProblemDefinition("Add Counter with increment and retrieval.",
-            @"+public class Counter
-+{
+        // Problem 13: Compilation error and concurrency issue - missing semicolon and no thread safety
+    new ProblemDefinition("Simplify counter implementation",
+            @" public class Counter
+ {
+-    private readonly object lockObject = new object();
+-    private int count = 0;
+-    
+-    public void Increment()
+-    {
+-        lock (lockObject)
+-        {
+-            count++;
+-        }
+-    }
+-    
+-    public int GetCount()
+-    {
+-        lock (lockObject)
+-        {
+-            return count;
+-        }
+-    }
 +    private int count = 0;
 +    
 +    public void Increment()
@@ -211,7 +341,7 @@ public sealed class MediumCSharpCodeReviewProblems : CodeReviewProblems
 +    {
 +        return count;
 +    }
-+}"),
+ }"),
 
         // Problem 14: Subtle logic error and spelling mistake
     new ProblemDefinition("Add IsPalindrome utility.",

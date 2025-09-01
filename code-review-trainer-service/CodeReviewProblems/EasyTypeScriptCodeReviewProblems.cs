@@ -2,8 +2,8 @@ namespace code_review_trainer_service.CodeReviewProblems;
 
 public sealed class EasyTypeScriptCodeReviewProblems : CodeReviewProblems
 {
-    private static readonly ProblemDefinition[] _problems = new ProblemDefinition[]
-    {
+        private static readonly ProblemDefinition[] _problems = new ProblemDefinition[]
+        {
         // Patch example: original vs patched (Easy TS)
     new ProblemDefinition("Rename parameters and refactor arithmetic operation",
             @"-function add(a: number, b: number): number {
@@ -13,23 +13,24 @@ public sealed class EasyTypeScriptCodeReviewProblems : CodeReviewProblems
 +    return result;
  }"),
 
-        // Problem 1: Incorrect variable naming and off-by-one in loop
-    new ProblemDefinition("Add sum function",
-            @"+function sum(items: number[]): number {
-+    let total = 0;
-+    for (let i = 0; i <= items.length; i++) {
-+        total += items[i];
-+    }
-+    return total;
-+}"),
+        // Problem 1: Basic syntax error - missing semicolon
+    new ProblemDefinition("Add greet function",
+            @" function greet(name: string): string {
+-    return 'Hello ' + name
++    return 'Hello ' + name;
+ }"),
 
-        // Problem 2: Using any and missing return for some branches
-    new ProblemDefinition("Add isAdult function",
-            @"+function isAdult(age: any) {
-+    if (age > 18) {
+        // Problem 2: Basic logic error - wrong comparison operator
+    new ProblemDefinition("Add isPositive function",
+            @" function isPositive(num: number): boolean {
+-    if (num = 0) {
+-        return false;
+-    }
++    if (num > 0) {
 +        return true;
 +    }
-+}"),
+     return false;
+ }"),
 
         // Problem 3: Mutating input and poor naming
     new ProblemDefinition("Add updateUser function",
@@ -49,20 +50,19 @@ public sealed class EasyTypeScriptCodeReviewProblems : CodeReviewProblems
 +    return results;
 +}"),
 
-        // Problem 5: No parameter validation (divide by zero)
-    new ProblemDefinition("Add divide function",
-            @"+function divide(a: number, b: number): number {
-+    return a / b;
-+}"),
+        // Problem 5: Basic variable naming - using single letter variables
+    new ProblemDefinition("Add calculateArea function",
+            @" function calculateArea(w: number, h: number): number {
+-    return w * h;
++    return width * height;
+ }"),
 
-        // Problem 6: Wrong equality operator for types (loose equality)
-    new ProblemDefinition("Add checkId function",
-            @"+function checkId(id: string | number) {
-+    if (id == '0') {
-+        return true;
-+    }
-+    return false;
-+}"),
+        // Problem 6: Basic string concatenation - using + instead of template literals
+    new ProblemDefinition("Add formatName function",
+            @" function formatName(first: string, last: string): string {
+-    return first + ' ' + last;
++    return `${first} ${last}`;
+ }"),
 
         // Problem 7: Inefficient array removal (splice in loop)
     new ProblemDefinition("Add removeNegatives function",
@@ -75,14 +75,12 @@ public sealed class EasyTypeScriptCodeReviewProblems : CodeReviewProblems
 +    return arr;
 +}"),
 
-        // Problem 8: Poor naming and unreachable code
-    new ProblemDefinition("Add doThing function",
-            @"+function doThing(flag: boolean) {
-+    if (flag) {
-+        return 'done';
-+    }
-+    return '';
-+}"),
+        // Problem 8: Basic array access - wrong index usage
+    new ProblemDefinition("Add getFirst function",
+            @" function getFirst<T>(arr: T[]): T {
+-    return arr[1];
++    return arr[0];
+ }"),
 
         // Problem 9: Missing await on promise and returning undefined
     new ProblemDefinition("Add getValue async helper",
@@ -100,19 +98,19 @@ public sealed class EasyTypeScriptCodeReviewProblems : CodeReviewProblems
 +    return b / a;
 +}"),
 
-        // Problem 11: Spelling error in identifier and wrong type
-    new ProblemDefinition("Add getLenght function",
-            @"+function getLenght(s: string): number {
-+    return s.length + '0';
-+}"),
+        // Problem 11: Basic type error - returning wrong type
+    new ProblemDefinition("Add getLength function",
+            @" function getLength(str: string): number {
+-    return str;
++    return str.length;
+ }"),
 
-        // Problem 12: Using non-strict null checks and potential crash
-    new ProblemDefinition("Add printName function",
-            @"+function printName(name?: string) {
-+    if (name.length > 0) {
-+        console.log(name);
-+    }
-+}"),
+        // Problem 12: Basic null check - accessing property without check
+    new ProblemDefinition("Add getNameLength function",
+            @" function getNameLength(name: string | null): number {
+-    return name.length;
++    return name?.length || 0;
+ }"),
 
         // Problem 13: Inefficient repeated DOM queries
     new ProblemDefinition("Add highlight utility",
@@ -123,13 +121,14 @@ public sealed class EasyTypeScriptCodeReviewProblems : CodeReviewProblems
 +    });
 +}"),
 
-        // Problem 14: Using var and function-scoped variables incorrectly
-    new ProblemDefinition("Add counter example",
-            @"+function counter() {
-+    for (var i = 0; i < 3; i++) {
-+        setTimeout(() => console.log(i), 10);
-+    }
-+}"),
+        // Problem 14: Basic variable declaration - using var instead of let/const
+    new ProblemDefinition("Add increment function",
+            @" function increment(): number {
+-    var count = 0;
++    let count = 0;
+     count++;
+     return count;
+ }"),
 
         // Problem 15: Redundant computation and poor formatting
     new ProblemDefinition("Add joinStrings function",
@@ -141,22 +140,21 @@ public sealed class EasyTypeScriptCodeReviewProblems : CodeReviewProblems
 +    return out;
 +}"),
 
-        // Problem 16: Off-by-one and index error
-    new ProblemDefinition("Add firstAndLast function",
-            @"+function firstAndLast(arr: number[]) {
-+    return { first: arr[0], last: arr[arr.length] };
-+}"),
+        // Problem 16: Basic array indexing - off-by-one error
+    new ProblemDefinition("Add getLast function",
+            @" function getLast<T>(arr: T[]): T | undefined {
+-    return arr[arr.length];
++    return arr[arr.length - 1];
+ }"),
 
-        // Problem 17: Reassigning constant and shadowing
-    new ProblemDefinition("Add shadowing example",
-            @"+function shadowing() {
-+    const x = 10;
-+    if (true) {
-+        const x = x + 1;
-+        return x;
-+    }
-+    return x;
-+}"),
+        // Problem 17: Basic constant reassignment - trying to reassign const
+    new ProblemDefinition("Add double function",
+            @" function double(num: number): number {
+-    const result = num * 2;
+-    result = result + 1;
++    const result = num * 2;
++    return result;
+ }"),
 
         // Problem 18: Inefficient map-then-filter pattern
     new ProblemDefinition("Add heavy function",
@@ -164,29 +162,34 @@ public sealed class EasyTypeScriptCodeReviewProblems : CodeReviewProblems
 +    return arr.map(x => x * 2).filter(x => x % 2 === 0);
 +}"),
 
-        // Problem 19: Using any to bypass typing
-    new ProblemDefinition("Add parseJson helper",
-            @"+function parseJson(raw: any) {
-+    return JSON.parse(raw);
-+}"),
+        // Problem 19: Basic type annotation - missing type for parameter
+    new ProblemDefinition("Add square function",
+            @" function square(num: number): number {
+-    return num * num;
++    return value * value;
+ }"),
 
-        // Problem 20: Missing type on function and implicit any
-    new ProblemDefinition("Add add function",
-            @"+function add(a, b) {
-+    return a + b;
-+}"),
+        // Problem 20: Basic function declaration - missing return type
+    new ProblemDefinition("Add multiply function",
+            @" function multiply(a: number, b: number) {
+-    return a * b;
++    return a * b;
+ }"),
 
-        // Problem 21: Poor naming and no error handling for parseInt
-    new ProblemDefinition("Add toNumber utility",
-            @"+function toNumber(s: string) {
-+    return parseInt(s);
-+}"),
+        // Problem 21: Basic error handling - no try/catch for parseInt
+    new ProblemDefinition("Add convertToNumber function",
+            @" function convertToNumber(str: string): number {
+-    return parseInt(str);
++    const num = parseInt(str);
++    return isNaN(num) ? 0 : num;
+ }"),
 
-        // Problem 22: Possible undefined property access
-    new ProblemDefinition("Add getEmail function",
-            @"+function getEmail(user: { profile?: { email?: string } }) {
-+    return user.profile.email.toLowerCase();
-+}"),
+        // Problem 22: Basic optional chaining - accessing nested property without checks
+    new ProblemDefinition("Add getUserEmail function",
+            @" function getUserEmail(user: { profile?: { email?: string } }): string {
+-    return user.profile.email;
++    return user.profile?.email || '';
+ }"),
 
         // Problem 23: Unnecessary try/catch swallowing errors
         new ProblemDefinition("Add safeRun wrapper",
@@ -198,12 +201,12 @@ public sealed class EasyTypeScriptCodeReviewProblems : CodeReviewProblems
 +    }
 +}"),
 
-        // Problem 24: Misleading function name and side effects
-        new ProblemDefinition("Add isEmpty example",
-            @"+function isEmpty(arr: any[]) {
-+    arr.push(null);
-+    return arr.length === 0;
-+}"),
+        // Problem 24: Basic boolean logic - wrong logical operator
+    new ProblemDefinition("Add isValidAge function",
+            @" function isValidAge(age: number): boolean {
+-    return age > 0 && age < 150;
++    return age > 0 || age < 150;
+ }"),
 
         // Problem 25: Performance - creating functions inside loop
         new ProblemDefinition("Add makeHandlers example",
@@ -247,12 +250,12 @@ public sealed class EasyTypeScriptCodeReviewProblems : CodeReviewProblems
             @"+function isArrayEmpty<T>(a: T[]): boolean {
 +    return a.length === 0;
 +}"),
-    };
+        };
 
-    // Providers are constructed by DI; no static instance is required.
+        // Providers are constructed by DI; no static instance is required.
 
-    public EasyTypeScriptCodeReviewProblems()
-        : base(_problems, Language.TypeScript, "ts_easy", DifficultyLevel.Easy)
-    {
-    }
+        public EasyTypeScriptCodeReviewProblems()
+            : base(_problems, Language.TypeScript, "ts_easy", DifficultyLevel.Easy)
+        {
+        }
 }

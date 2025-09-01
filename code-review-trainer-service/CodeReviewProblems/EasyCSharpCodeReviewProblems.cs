@@ -15,306 +15,216 @@ public sealed class EasyCSharpCodeReviewProblems : CodeReviewProblems
 
  }"),
 
-        // Problem 1: Bad variable names + confusing logic
-    new ProblemDefinition("Add a Calculator class", @"+public class Calculator
-+{
-+    public int x(int a, int b)
-+    {
-+        int z = a + b;
-+        if (z > 10)
-+        {
-+            z = z - 1;
-+        }
-+        else
-+        {
-+            z = z + 1;
-+        }
-+        return z;
+        // Problem 1: Basic syntax error - missing semicolon
+    new ProblemDefinition("Add greet function",
+            @" public string GreetUser(string name) {
+-    return ""Hello "" + name
++    return ""Hello "" + name;
+ }"),
+
+        // Problem 2: Basic logic error - wrong comparison operator
+    new ProblemDefinition("Add isPositive function",
+            @" public bool IsPositive(int number) {
+-    if (number = 0) {
+-        return false;
+-    }
++    if (number > 0) {
++        return true;
 +    }
-+}"),
+     return false;
+ }"),
 
-    // Problem 2: Unreachable code + bad formatting
-    new ProblemDefinition("Process an order with validation",
-            @"+public void ProcessOrder(bool isValid)
-+{
-+if(isValid==true){
-+Console.WriteLine(""Processing order..."");
-+return;
-+Console.WriteLine(""Order processed successfully"");
-+}
-+else{
-+Console.WriteLine(""Invalid order"");
-+}") ,
+        // Problem 3: Basic variable naming - using single letter variables
+    new ProblemDefinition("Add calculateArea function",
+            @" public double CalculateRectangleArea(double w, double h) {
+-    return w * h;
++    return width * height;
+ }"),
 
-    // Problem 3: Bad variable names + failing logic
-    new ProblemDefinition("Implement an age check",
-            @"+public bool CheckAge(int age)
-+{
-+    int x = 18;
-+    if (age > x)
-+    {
-+        return false;
-+    }
-+    return true;
-+}") ,
+        // Problem 4: Basic string concatenation - using + instead of string interpolation
+    new ProblemDefinition("Add formatName function",
+            @" public string FormatFullName(string first, string last) {
+-    return first + "" "" + last;
++    return $""{first} {last}"";
+ }"),
 
-    // Problem 4: Bad formatting + confusing logic
-    new ProblemDefinition("Calculate discount based on customer type",
-        @"+public string GetDiscount(double price,int customerType){
-+double d=0.0;
-+if(customerType==1){d=0.1;}else if(customerType==2){d=0.15;}else{d=0.05;}
-+return (price*d).ToString();
-+}"),
+        // Problem 5: Basic array access - wrong index usage
+    new ProblemDefinition("Add getFirst function",
+            @" public int GetFirstElement(int[] numbers) {
+-    return numbers[1];
++    return numbers[0];
+ }"),
 
-    // Problem 5: Bad variable names + unreachable code
-    new ProblemDefinition("Print numbers from 1 to 5",
-            @"+public void PrintNumbers()
-+{
-+    int i = 1;
-+    while (i <= 5)
-+    {
-+        Console.WriteLine(i);
-+        i++;
-+        break;
-+        Console.WriteLine($""New value: {i}"");
-+    }
-+}"),
+        // Problem 6: Basic type error - returning wrong type
+    new ProblemDefinition("Add getLength function",
+            @" public int GetStringLength(string text) {
+-    return text;
++    return text.Length;
+ }"),
 
-    // Problem 6: Failing logic + bad formatting
-    new ProblemDefinition("Find maximum value in an array",
-        @"+public int FindMax(int[]arr){
-+int max=arr[0];
-+for(int i=1;i<arr.Length;i++){
-+if(arr[i]>max){
-+max=arr[i];
-+}
-+}
-+return max;
-+}"),
+        // Problem 7: Basic null check - accessing property without check
+    new ProblemDefinition("Add getNameLength function",
+            @" public int GetNameLength(string name) {
+-    return name.Length;
++    return name?.Length ?? 0;
+ }"),
 
-    // Problem 7: Confusing logic + bad variable names
-    new ProblemDefinition("Check if a number is even",
-            @"+public bool IsEven(int num)
-+{
-+    bool x = false;
-+    if (num % 2 == 1)
-+    {
-+        x = true;
-+    }
-+    return x;
-+}"),
+        // Problem 8: Basic variable declaration - using var instead of explicit type
+    new ProblemDefinition("Add increment function",
+            @" public int IncrementValue(int value) {
+-    var result = value + 1;
++    int result = value + 1;
+     return result;
+ }"),
 
-    // Problem 8: Bad variable names + bad formatting
-    new ProblemDefinition("Process and print a string if present",
-        @"+public void DoSomething(string s){
-+if(s!=null&&s.Length>0){
-+string t=s.ToUpper();
-+Console.WriteLine(t);
-+}
-+}"),
+        // Problem 9: Basic array indexing - off-by-one error
+    new ProblemDefinition("Add getLast function",
+            @" public int GetLastElement(int[] numbers) {
+-    return numbers[numbers.Length];
++    return numbers[numbers.Length - 1];
+ }"),
 
-    // Problem 9: Unreachable code + confusing logic
-    new ProblemDefinition("Calculate a value based on x and y",
-            @"+public int Calculate(int x, int y)
-+{
-+    if (x > 0)
-+    {
-+        return x + y;
-+    }
-+    if (x <= 0)
-+    {
-+        return x - y;
+        // Problem 10: Basic constant reassignment - trying to reassign const
+    new ProblemDefinition("Add double function",
+            @" public int DoubleValue(int value) {
+-    const int result = value * 2;
+-    result = result + 1;
++    const int result = value * 2;
++    return result;
+ }"),
+
+        // Problem 11: Basic function declaration - missing return type
+    new ProblemDefinition("Add multiply function",
+            @" public int Multiply(int a, int b) {
+-    return a * b;
++    return a * b;
+ }"),
+
+        // Problem 12: Basic error handling - no try/catch for potential exception
+    new ProblemDefinition("Add convertToNumber function",
+            @" public int ConvertToInt(string text) {
+-    return int.Parse(text);
++    if (int.TryParse(text, out int result)) {
++        return result;
 +    }
 +    return 0;
-+}"),
+ }"),
 
-    // Problem 10: Bad variable names + failing logic
-    new ProblemDefinition("Compute area given a radius",
-            @"+public double CalculateArea(double r)
-+{
-+    double pi = 3.14;
-+    double a = pi * r;
-+    return a;
-+}"),
+        // Problem 13: Basic boolean logic - wrong logical operator
+    new ProblemDefinition("Add isValidAge function",
+            @" public bool IsValidAge(int age) {
+-    return age > 0 && age < 150;
++    return age > 0 || age < 150;
+ }"),
 
-    // Problem 11: Bad formatting + confusing logic
-    new ProblemDefinition("Validate password length",
-        @"+public bool ValidatePassword(string pwd){
-+return pwd.Length>=8&&pwd.Length<=20?true:false;
-+}"),
+        // Problem 14: Basic array access - off-by-one error
+    new ProblemDefinition("Get last element from array",
+            @" public string GetLastElement(string[] items) {
+-    return items[items.Length - 1];
++    return items[items.Length];
+ }"),
 
-    // Problem 12: Bad variable names + unreachable code
-    new ProblemDefinition("Compare two integers and print relationship",
-            @"+public void Method1()
-+{
-+    int a = 5;
-+    int b = 10;
-+    if (a < b)
-+    {
-+        Console.WriteLine(""a is smaller"");
-+        return;
+        // Problem 15: Basic string concatenation - missing space
+    new ProblemDefinition("Format full name from first and last",
+            @" public string FormatFullName(string firstName, string lastName) {
+-    return firstName + "" "" + lastName;
++    return firstName + lastName;
+ }"),
+
+        // Problem 16: Basic null check - missing null check
+    new ProblemDefinition("Get string length safely",
+            @" public int GetStringLength(string text) {
+-    if (text != null) {
+-        return text.Length;
+-    }
+-    return 0;
++    return text.Length;
+ }"),
+
+        // Problem 17: Basic loop - off-by-one in condition
+    new ProblemDefinition("Sum all elements in array",
+            @" public int SumArray(int[] numbers) {
+-    int sum = 0;
+-    for (int i = 0; i < numbers.Length; i++) {
+-        sum += numbers[i];
+-    }
+-    return sum;
++    int sum = 0;
++    for (int i = 0; i <= numbers.Length; i++) {
++        sum += numbers[i];
 +    }
-+    if (b > a)
-+    {
-+        Console.WriteLine(""b is greater"");
++    return sum;
+ }"),
+
+        // Problem 18: Basic even check - wrong modulo operator
+    new ProblemDefinition("Check if number is even",
+            @" public bool IsEven(int number) {
+-    return number % 2 == 0;
++    return number / 2 == 0;
+ }"),
+
+        // Problem 19: Basic comparison - wrong operator
+    new ProblemDefinition("Check if person is adult",
+            @" public bool IsAdult(int age) {
+-    return age >= 18;
++    return age > 18;
+ }"),
+
+        // Problem 20: Basic calculation - wrong arithmetic operator
+    new ProblemDefinition("Calculate rectangle area",
+            @" public int CalculateArea(int width, int height) {
+-    return width * height;
++    return width + height;
+ }"),
+
+        // Problem 21: Basic string comparison - wrong operator
+    new ProblemDefinition("Check if strings are equal",
+            @" public bool AreEqual(string a, string b) {
+-    return a == b;
++    return a.Equals(b);
+ }"),
+
+        // Problem 22: Basic boolean logic - wrong negation
+    new ProblemDefinition("Check if user is logged in",
+            @" public bool IsLoggedIn(bool hasSession) {
+-    return hasSession;
++    return !hasSession;
+ }"),
+
+        // Problem 23: Basic absolute value - wrong logic
+    new ProblemDefinition("Get absolute value",
+            @" public int GetAbsolute(int number) {
+-    return Math.Abs(number);
++    return number < 0 ? -number : number;
+ }"),
+
+        // Problem 24: Basic string reversal - off-by-one in loop
+    new ProblemDefinition("Reverse string",
+            @" public string ReverseString(string input) {
+-    char[] chars = input.ToCharArray();
+-    Array.Reverse(chars);
+-    return new string(chars);
++    string result = """";
++    for (int i = input.Length - 1; i >= 0; i--) {
++        result += input[i];
 +    }
-+}"),
++    return result;
+ }"),
 
-    // Problem 13: Failing logic + bad formatting
-    new ProblemDefinition("Format a full name from first and last",
-        @"+public string FormatName(string firstName,string lastName){
-+if(firstName==null)firstName="""";
-+if(lastName==null)lastName="""";
-+return firstName+"" ""+lastName;
-+}"),
-
-    // Problem 14: Confusing logic + bad variable names
-    new ProblemDefinition("Count non-null items in a list",
-            @"+public int CountItems(List<string> items)
-+{
-+    int c = 0;
-+    foreach (var i in items)
-+    {
-+        if (i != null)
-+        {
-+            c--;
+        // Problem 25: Basic sorting - wrong comparison operator
+    new ProblemDefinition("Sort array in ascending order",
+            @" public void SortArray(int[] numbers) {
+-    Array.Sort(numbers);
++    for (int i = 0; i < numbers.Length - 1; i++) {
++        for (int j = i + 1; j < numbers.Length; j++) {
++            if (numbers[i] > numbers[j]) {
++                int temp = numbers[i];
++                numbers[i] = numbers[j];
++                numbers[j] = temp;
++            }
 +        }
 +    }
-+    return c;
-+}"),
-
-    // Problem 15: Bad variable names + bad formatting
-    new ProblemDefinition("Update an existing record's fields",
-        @"+public void UpdateRecord(int id,string name,double salary){
-+var r=GetRecord(id);
-+if(r!=null){
-+r.Name=name;r.Salary=salary;
-+SaveRecord(r);
-+}
-+}"),
-
-    // Problem 16: Unreachable code + failing logic
-    new ProblemDefinition("Perform integer division with zero check",
-            @"+public int Divide(int x, int y)
-+{
-+    if (y == 0)
-+    {
-+        throw new DivideByZeroException();
-+        Console.WriteLine(""Division by zero attempted"");
-+    }
-+    return x / y;
-+}"),
-
-    // Problem 17: Bad variable names + confusing logic
-    new ProblemDefinition("Validate sign logic for an integer",
-            @"+public bool IsValid(int n)
-+{
-+    bool r = true;
-+    if (n > 0)
-+    {
-+        r = false;
-+    }
-+    if (n <= 0)
-+    {
-+        r = true;
-+    }
-+    return !r;
-+}"),
-
-    // Problem 18: Bad formatting + failing logic
-    new ProblemDefinition("Return even numbers from an array",
-        @"+public List<int>GetEvenNumbers(int[]numbers){
-+List<int>result=new List<int>();
-+for(int i=0;i<=numbers.Length;i++){
-+result.Add(numbers[i]);
-+}
-+return result;
-+}"),
-
-    // Problem 19: Confusing logic + unreachable code
-    new ProblemDefinition("Determine letter grade from score",
-            @"+public string GetGrade(int score)
-+{
-+    if (score >= 90) return ""A"";
-+    else if (score >= 80) return ""B"";
-+    else if (score >= 70) return ""C"";
-+    else if (score >= 60) return ""D"";
-+    else return ""F"";
-+    
-+    Console.WriteLine(""Grade calculated"");
-+}"),
-
-    // Problem 20: Bad variable names + bad formatting
-    new ProblemDefinition("Calculate tax amount given rate and amount",
-        @"+public double CalcTax(double amt,double rate){
-+double t=amt*rate/100;
-+return t>0?t:0;
-+}"),
-
-    // Problem 21: Failing logic + confusing logic
-    new ProblemDefinition("Check if a number is prime",
-            @"+public bool IsPrime(int number)
-+{
-+    if (number <= 1) return true;
-+    for (int i = 2; i < number; i++)
-+    {
-+        if (number % i == 0)
-+        {
-+            return false;
-+        }
-+    }
-+    return true;
-+}"),
-
-    // Problem 22: Bad variable names + unreachable code
-    new ProblemDefinition("Process data once with loop",
-            @"+public void ProcessData()
-+{
-+    bool f = true;
-+    while (f)
-+    {
-+        Console.WriteLine(""Processing..."");
-+        f = false;
-+        break;
-+        Console.WriteLine(""Done processing"");
-+    }
-+}"),
-
-    // Problem 23: Bad formatting + confusing logic
-    new ProblemDefinition("Return absolute value of an integer",
-        @"+public int GetAbsolute(int num){
-+if(num<0){
-+return num*-1;
-+}else{
-+return num>0?num:1;
-+}
-+}"),
-
-    // Problem 24: Bad variable names + failing logic
-    new ProblemDefinition("Reverse a string",
-            @"+public string ReverseString(string str)
-+{
-+    string r = """";
-+    for (int i = str.Length; i >= 0; i--)
-+    {
-+        r += str[i];
-+    }
-+    return r;
-+}"),
-
-    // Problem 25: Multiple issues - bad names, formatting, logic
-    new ProblemDefinition("Implement bubble sort",
-        @"+public void BubbleSort(int[]a){
-+int n=a.Length;
-+for(int i=0;i<n-1;i++){
-+for(int j=0;j<n-i-1;j++){
-+if(a[j]<a[j+1]){
-+int temp=a[j];
-+a[j]=a[j+1];a[j+1]=temp;
-+}
-+}
-+}
-+}"),
+ }"),
 
         // === GOOD CODE EXAMPLES (no issues to fix) ===
         // Good Example 1: Well-written calculator with proper naming and formatting
