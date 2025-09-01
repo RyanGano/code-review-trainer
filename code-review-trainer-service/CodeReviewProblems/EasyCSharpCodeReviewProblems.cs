@@ -226,6 +226,28 @@ public sealed class EasyCSharpCodeReviewProblems : CodeReviewProblems
 +    }
  }"),
 
+        // Problem 26: Compilation error - undefined variable (typo in loop variable name)
+
+    new ProblemDefinition("Fix typo in input validation loop variable",
+            @" public bool ValidateInput(string input)
+ {
+     if (string.IsNullOrEmpty(input))
+     {
+         return false;
+     }
+     
+     // Check if input contains only letters
+     foreach (char c in input)
+     {
+-        if (!char.IsLetter(c))
++        if (!char.IsLetter(ch))
+         {
+             return false;
+         }
+     }
+     return true;
+ }"),
+
         // === GOOD CODE EXAMPLES (no issues to fix) ===
         // Good Example 1: Well-written calculator with proper naming and formatting
     new ProblemDefinition("Add Calculator class with Add and Multiply methods",

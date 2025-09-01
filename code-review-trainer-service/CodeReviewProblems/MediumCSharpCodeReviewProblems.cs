@@ -66,40 +66,6 @@ public sealed class MediumCSharpCodeReviewProblems : CodeReviewProblems
 +    return results;
  }"),
 
-        // Problem 4: Compilation error - undefined variable and logical issue - wrong variable name in loop
-    new ProblemDefinition("Enhance input validation with additional checks",
-            @" public bool ValidateInput(string input)
- {
--    if (string.IsNullOrEmpty(input))
--    {
--        return false;
--    }
--    
--    // Check if input contains only letters
--    foreach (char c in input)
--    {
--        if (!char.IsLetter(c))
--        {
--            return false;
--        }
--    }
--    return true;
-+    if (string.IsNullOrEmpty(input))
-+    {
-+        return false;
-+    }
-+    
-+    // Check if input contains only letters
-+    foreach (char c in input)
-+    {
-+        if (!char.IsLetter(ch))
-+        {
-+            return false;
-+        }
-+    }
-+    return true;
- }"),
-
         // Problem 5: Subtle null reference potential and spelling error - no null check for order.Items
     new ProblemDefinition("Simplify order processing logic",
             @" public class OrderProcessor
