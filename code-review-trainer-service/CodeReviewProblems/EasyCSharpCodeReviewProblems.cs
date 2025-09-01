@@ -87,17 +87,15 @@ public sealed class EasyCSharpCodeReviewProblems : CodeReviewProblems
         // Problem 10: Basic constant reassignment - trying to reassign const
     new ProblemDefinition("Add double function",
             @" public int DoubleValue(int value) {
--    const int result = value * 2;
+     const int result = value * 2;
 -    result = result + 1;
-+    const int result = value * 2;
 +    return result;
  }"),
 
         // Problem 11: Basic function declaration - missing return type
     new ProblemDefinition("Add multiply function",
             @" public int Multiply(int a, int b) {
--    return a * b;
-+    return a * b;
+     return a * b;
  }"),
 
         // Problem 12: Basic error handling - no try/catch for potential exception
@@ -144,16 +142,12 @@ public sealed class EasyCSharpCodeReviewProblems : CodeReviewProblems
         // Problem 17: Basic loop - off-by-one in condition
     new ProblemDefinition("Sum all elements in array",
             @" public int SumArray(int[] numbers) {
--    int sum = 0;
+     int sum = 0;
 -    for (int i = 0; i < numbers.Length; i++) {
--        sum += numbers[i];
--    }
--    return sum;
-+    int sum = 0;
 +    for (int i = 0; i <= numbers.Length; i++) {
-+        sum += numbers[i];
-+    }
-+    return sum;
+         sum += numbers[i];
+     }
+     return sum;
  }"),
 
         // Problem 18: Basic even check - wrong modulo operator
