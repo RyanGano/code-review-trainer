@@ -166,7 +166,7 @@ app.MapPost("/tests/{id}", async (string id, ReviewSubmission submission, IProbl
         return Results.NotFound(new { error = "Problem not found" });
     }
     var (probId, code, purpose, language) = problem.Value;
-    var result = await model.ReviewAsync(new CodeReviewRequest(probId, code, submission.review, purpose));
+    var result = await model.ReviewAsync(new CodeReviewRequest(probId, code, submission.review, purpose, submission.isShippableAsIs));
     return Results.Ok(result);
 })
 .WithName("SubmitReview")
@@ -270,5 +270,5 @@ Return ONLY a single JSON object matching the schema: {{ ""explanation"": string
 
 app.Run();
 
-public record ReviewSubmission(string review);
+public record ReviewSubmission(string review, bool? isShippableAsIs = null);
 public record ExplainRequest(string ItemText);

@@ -1,6 +1,6 @@
 namespace code_review_trainer_service.Services;
 
-public record CodeReviewRequest(string ProblemId, string Code, string UserReview, string PatchPurpose);
+public record CodeReviewRequest(string ProblemId, string Code, string UserReview, string PatchPurpose, bool? UserShippabilityAssessment = null);
 
 public record CodeReviewIssue(
     string Id,
@@ -30,7 +30,8 @@ public record CodeReviewModelResult(
     bool SpellingProblemsDetected,
     bool ReviewQualityBonusGranted,
     int UserScore,
-    int PossibleScore
+    int PossibleScore,
+    bool IsShippableAsIs
 );
 
 public interface ICodeReviewModel

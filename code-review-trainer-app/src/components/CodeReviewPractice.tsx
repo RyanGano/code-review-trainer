@@ -40,6 +40,7 @@ interface CodeReviewModelResult {
   userScore?: number;
   possibleScore?: number;
   reviewQualityBonusGranted?: boolean;
+  isShippableAsIs?: boolean;
 }
 
 interface CodeReviewTest {
@@ -61,6 +62,9 @@ const CodeReviewPractice = () => {
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("Easy");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("CSharp");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittingButton, setSubmittingButton] = useState<
+    "approve" | "reject" | null
+  >(null);
   const [submissionResult, setSubmissionResult] =
     useState<CodeReviewModelResult | null>(null);
   interface ExplainResponse {
@@ -197,7 +201,10 @@ const CodeReviewPractice = () => {
 
   const currentPatch = currentTest?.patch ?? null;
 
-  const handleSubmitReview = async () => {
+  const handleSubmitReview = async (
+    isShippableAsIs: boolean,
+    buttonType: "approve" | "reject"
+  ) => {
     if (!currentTest || !reviewComments.trim() || accounts.length === 0) {
       return;
     }
@@ -208,6 +215,7 @@ const CodeReviewPractice = () => {
         : reviewComments;
 
     setIsSubmitting(true);
+    setSubmittingButton(buttonType);
     setError(null);
 
     try {
@@ -221,7 +229,10 @@ const CodeReviewPractice = () => {
             Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ review: finalReview.trim() }),
+          body: JSON.stringify({
+            review: finalReview.trim(),
+            isShippableAsIs: isShippableAsIs,
+          }),
         }
       );
 
@@ -240,6 +251,7 @@ const CodeReviewPractice = () => {
       setError(error instanceof Error ? error.message : String(error));
     } finally {
       setIsSubmitting(false);
+      setSubmittingButton(null);
     }
   };
 
@@ -492,15 +504,34 @@ const CodeReviewPractice = () => {
           </div>
 
           <div className="submit-section">
-            <button
-              onClick={handleSubmitReview}
-              disabled={!reviewComments.trim() || isSubmitting}
-              className={`submit-button ${
-                reviewComments.trim() && !isSubmitting ? "enabled" : "disabled"
-              }`}
-            >
-              {isSubmitting ? "Submitting…" : "Submit Review"}
-            </button>
+            <div className="submit-buttons">
+              <button
+                onClick={() => handleSubmitReview(true, "approve")}
+                disabled={!reviewComments.trim() || isSubmitting}
+                className={`submit-button approve-button ${
+                  reviewComments.trim() && !isSubmitting
+                    ? "enabled"
+                    : "disabled"
+                }`}
+              >
+                {submittingButton === "approve" && isSubmitting
+                  ? "Submitting…"
+                  : "✅ Approve with Comment"}
+              </button>
+              <button
+                onClick={() => handleSubmitReview(false, "reject")}
+                disabled={!reviewComments.trim() || isSubmitting}
+                className={`submit-button reject-button ${
+                  reviewComments.trim() && !isSubmitting
+                    ? "enabled"
+                    : "disabled"
+                }`}
+              >
+                {submittingButton === "reject" && isSubmitting
+                  ? "Submitting…"
+                  : "🔧 Reject with Comment"}
+              </button>
+            </div>
             {isSubmitting && (
               <div className="loading-indicator">
                 Please wait while we evaluate your review…
