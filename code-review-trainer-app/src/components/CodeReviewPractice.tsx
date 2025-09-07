@@ -438,7 +438,7 @@ const CodeReviewPractice = () => {
               />
             </div>
             {/* Recommended code displayed under the original code viewer for easy comparison */}
-            {submissionResult && (
+            {!isSubmitting && submissionResult && (
               <div className="recommended-code-section below-code">
                 {submissionResult.recommendedCode &&
                 submissionResult.recommendedCode.length > 0 ? (
@@ -558,7 +558,7 @@ const CodeReviewPractice = () => {
             )}
           </div>
 
-          {submissionResult && (
+          {!isSubmitting && submissionResult && (
             <div className="submission-result">
               <h4>Review Evaluation</h4>
               {submissionResult.isFallback && (
