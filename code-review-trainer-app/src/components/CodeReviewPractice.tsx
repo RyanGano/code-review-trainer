@@ -65,6 +65,7 @@ const CodeReviewPractice = () => {
   const [submittingButton, setSubmittingButton] = useState<
     "approve" | "reject" | null
   >(null);
+  const [userDecision, setUserDecision] = useState<boolean | null>(null);
   const [submissionResult, setSubmissionResult] =
     useState<CodeReviewModelResult | null>(null);
   interface ExplainResponse {
@@ -165,6 +166,7 @@ const CodeReviewPractice = () => {
       const testData = await testResponse.json();
       setCurrentTest(testData);
       setReviewComments("");
+      setUserDecision(null);
       // Clear previous submission results and any per-issue explanations
       setSubmissionResult(null);
       setExplanations({});
@@ -216,6 +218,7 @@ const CodeReviewPractice = () => {
 
     setIsSubmitting(true);
     setSubmittingButton(buttonType);
+    setUserDecision(isShippableAsIs);
     setError(null);
 
     try {
@@ -257,6 +260,7 @@ const CodeReviewPractice = () => {
 
   const handleNewTest = () => {
     fetchCodeReviewTest();
+    setUserDecision(null);
   };
 
   // Displayed possible score reflects AI-detected items when available
@@ -579,6 +583,21 @@ const CodeReviewPractice = () => {
                   >
                     <span className="negative-symbol">✖</span>
                     <span className="negative-text">Has spelling errors</span>
+                  </div>
+                )}
+                {userDecision !== null && submissionResult.isShippableAsIs !== undefined && userDecision === submissionResult.isShippableAsIs && (
+                  <div
+                    className="judgment-badge"
+                    title={
+                      userDecision
+                        ? "Your approval matches the AI's assessment! Great judgment!"
+                        : "Your rejection matches the AI's assessment! Great judgment!"
+                    }
+                    aria-label={"Judgment match badge"}
+                    role="img"
+                  >
+                    <span className="judgment-symbol">🎯</span>
+                    <span className="judgment-text">Judgment Match</span>
                   </div>
                 )}
               </div>
