@@ -51,6 +51,20 @@ interface CodeReviewTest {
   id: string;
 }
 
+// Helper function to get display-friendly language name
+const getDisplayLanguage = (language: string) => {
+  switch (language) {
+    case "CSharp":
+      return "C#";
+    case "JavaScript":
+      return "JavaScript";
+    case "TypeScript":
+      return "TypeScript";
+    default:
+      return language;
+  }
+};
+
 const CodeReviewPractice = () => {
   // Backend always returns a patch string
 
@@ -302,19 +316,6 @@ const CodeReviewPractice = () => {
         </p>
 
         <div className="common-selection">
-          <label htmlFor="difficulty-select">Difficulty Level:</label>
-          <select
-            id="difficulty-select"
-            value={selectedDifficulty}
-            onChange={(e) => setSelectedDifficulty(e.target.value)}
-            className="common-dropdown"
-          >
-            <option value="Easy">Easy</option>
-            <option value="Medium">Medium</option>
-          </select>
-        </div>
-
-        <div className="common-selection">
           <label htmlFor="language-select">Language:</label>
           <select
             id="language-select"
@@ -325,6 +326,19 @@ const CodeReviewPractice = () => {
             <option value="CSharp">C#</option>
             <option value="JavaScript">JavaScript</option>
             <option value="TypeScript">TypeScript</option>
+          </select>
+        </div>
+
+        <div className="common-selection">
+          <label htmlFor="difficulty-select">Difficulty Level:</label>
+          <select
+            id="difficulty-select"
+            value={selectedDifficulty}
+            onChange={(e) => setSelectedDifficulty(e.target.value)}
+            className="common-dropdown"
+          >
+            <option value="Easy">Easy</option>
+            <option value="Medium">Medium</option>
           </select>
         </div>
 
@@ -367,22 +381,9 @@ const CodeReviewPractice = () => {
     <div className="code-review-practice">
       <div className="practice-header">
         <h2>
-          Code Review Practice - {currentTest?.level || selectedDifficulty}{" "}
-          Level - {currentTest?.language || selectedLanguage}
+          Code Review Practice - {getDisplayLanguage(currentTest?.language || selectedLanguage)} - {currentTest?.level || selectedDifficulty} Level
         </h2>
         <div className="header-controls">
-          <div className="common-selection">
-            <label htmlFor="difficulty-select-active">Difficulty:</label>
-            <select
-              id="difficulty-select-active"
-              value={selectedDifficulty}
-              onChange={(e) => setSelectedDifficulty(e.target.value)}
-              className="common-dropdown"
-            >
-              <option value="Easy">Easy</option>
-              <option value="Medium">Medium</option>
-            </select>
-          </div>
           <div className="common-selection">
             <label htmlFor="language-select-active">Language:</label>
             <select
@@ -394,6 +395,18 @@ const CodeReviewPractice = () => {
               <option value="CSharp">C#</option>
               <option value="JavaScript">JavaScript</option>
               <option value="TypeScript">TypeScript</option>
+            </select>
+          </div>
+          <div className="common-selection">
+            <label htmlFor="difficulty-select-active">Difficulty:</label>
+            <select
+              id="difficulty-select-active"
+              value={selectedDifficulty}
+              onChange={(e) => setSelectedDifficulty(e.target.value)}
+              className="common-dropdown"
+            >
+              <option value="Easy">Easy</option>
+              <option value="Medium">Medium</option>
             </select>
           </div>
           <button onClick={handleNewTest} disabled={isLoading}>
@@ -585,21 +598,23 @@ const CodeReviewPractice = () => {
                     <span className="negative-text">Has spelling errors</span>
                   </div>
                 )}
-                {userDecision !== null && submissionResult.isShippableAsIs !== undefined && userDecision === submissionResult.isShippableAsIs && (
-                  <div
-                    className="judgment-badge"
-                    title={
-                      userDecision
-                        ? "Your approval matches the AI's assessment! Great judgment!"
-                        : "Your rejection matches the AI's assessment! Great judgment!"
-                    }
-                    aria-label={"Judgment match badge"}
-                    role="img"
-                  >
-                    <span className="judgment-symbol">🎯</span>
-                    <span className="judgment-text">Judgment Match</span>
-                  </div>
-                )}
+                {userDecision !== null &&
+                  submissionResult.isShippableAsIs !== undefined &&
+                  userDecision === submissionResult.isShippableAsIs && (
+                    <div
+                      className="judgment-badge"
+                      title={
+                        userDecision
+                          ? "Your approval matches the AI's assessment! Great judgment!"
+                          : "Your rejection matches the AI's assessment! Great judgment!"
+                      }
+                      aria-label={"Judgment match badge"}
+                      role="img"
+                    >
+                      <span className="judgment-symbol">🎯</span>
+                      <span className="judgment-text">Judgment Match</span>
+                    </div>
+                  )}
               </div>
               {submissionResult.summary && (
                 <div>
