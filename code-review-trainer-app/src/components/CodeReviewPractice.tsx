@@ -381,7 +381,9 @@ const CodeReviewPractice = () => {
     <div className="code-review-practice">
       <div className="practice-header">
         <h2>
-          Code Review Practice - {getDisplayLanguage(currentTest?.language || selectedLanguage)} - {currentTest?.level || selectedDifficulty} Level
+          Code Review Practice -{" "}
+          {getDisplayLanguage(currentTest?.language || selectedLanguage)} -{" "}
+          {currentTest?.level || selectedDifficulty} Level
         </h2>
         <div className="header-controls">
           <div className="common-selection">
