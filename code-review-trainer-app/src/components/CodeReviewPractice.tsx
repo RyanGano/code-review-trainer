@@ -5,6 +5,7 @@ import { apiConfig } from "../authConfig";
 import CodeMirror from "@uiw/react-codemirror";
 import { csharp } from "@replit/codemirror-lang-csharp";
 import { javascript } from "@codemirror/lang-javascript";
+import { oneDark } from "@codemirror/theme-one-dark";
 import { BinocularsFill } from "react-bootstrap-icons";
 import UnifiedMergeView from "./UnifiedMergeView";
 import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
@@ -107,6 +108,8 @@ const CodeReviewPractice = () => {
   const [showRecommendedCode, setShowRecommendedCode] = useState(false);
   // Track if we're on a small screen for responsive button text
   const isSmallScreen = useIsSmallScreen();
+  // Detect dark mode
+  const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
   const MAX_REVIEW_LENGTH = 2500;
   const WARNING_THRESHOLD = 2200;
@@ -414,7 +417,11 @@ const CodeReviewPractice = () => {
               <option value="Medium">Medium</option>
             </select>
           </div>
-          <button onClick={handleNewTest} disabled={isLoading}>
+          <button
+            onClick={handleNewTest}
+            disabled={isLoading}
+            className="button-secondary"
+          >
             {isLoading ? (
               <>
                 Getting sample… <span className="spinner" aria-hidden="true" />
@@ -476,6 +483,7 @@ const CodeReviewPractice = () => {
                             ? javascript()
                             : csharp(),
                         ]}
+                        theme={isDark ? oneDark : undefined}
                         editable={false}
                         basicSetup={{
                           lineNumbers: true,

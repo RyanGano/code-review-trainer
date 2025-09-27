@@ -22,7 +22,9 @@ const SignInButton = () => {
 
   return (
     <div className="button-group">
-      <button onClick={handleSignIn}>Sign in</button>
+      <button className="sign-in-link" onClick={handleSignIn}>
+        Sign in
+      </button>
     </div>
   );
 };

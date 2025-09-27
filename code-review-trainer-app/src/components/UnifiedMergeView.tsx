@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { csharp } from "@replit/codemirror-lang-csharp";
 import { javascript } from "@codemirror/lang-javascript";
+import { oneDark } from "@codemirror/theme-one-dark";
 import { ViewPlugin, Decoration, EditorView } from "@codemirror/view";
 import type { DecorationSet } from "@codemirror/view";
 import { RangeSetBuilder } from "@codemirror/state";
@@ -15,6 +16,8 @@ interface Props {
 
 export default function UnifiedMergeView({ patch, language, purpose }: Props) {
   const hasPatch = !!patch && patch.trim().length > 0;
+  // Detect dark mode
+  const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
   const langExtension =
     language === "JavaScript" || language === "TypeScript"
@@ -204,6 +207,7 @@ export default function UnifiedMergeView({ patch, language, purpose }: Props) {
                       diffLineHighlighter,
                       diffAwareTheme,
                     ]}
+                    theme={isDark ? oneDark : undefined}
                     editable={false}
                     basicSetup={{ lineNumbers: true }}
                   />
@@ -223,6 +227,7 @@ export default function UnifiedMergeView({ patch, language, purpose }: Props) {
                       diffLineHighlighter,
                       diffAwareTheme,
                     ]}
+                    theme={isDark ? oneDark : undefined}
                     editable={false}
                     basicSetup={{ lineNumbers: true }}
                   />
@@ -245,6 +250,7 @@ export default function UnifiedMergeView({ patch, language, purpose }: Props) {
                       diffLineHighlighter,
                       diffAwareTheme,
                     ]}
+                    theme={isDark ? oneDark : undefined}
                     editable={false}
                     basicSetup={{ lineNumbers: true }}
                   />
@@ -264,6 +270,7 @@ export default function UnifiedMergeView({ patch, language, purpose }: Props) {
                       diffLineHighlighter,
                       diffAwareTheme,
                     ]}
+                    theme={isDark ? oneDark : undefined}
                     editable={false}
                     basicSetup={{ lineNumbers: true }}
                   />
@@ -279,6 +286,7 @@ export default function UnifiedMergeView({ patch, language, purpose }: Props) {
                   diffLineHighlighter,
                   diffAwareTheme,
                 ]}
+                theme={isDark ? oneDark : undefined}
                 editable={false}
                 basicSetup={{ lineNumbers: true }}
               />

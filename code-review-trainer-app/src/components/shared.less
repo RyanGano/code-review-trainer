@@ -1,18 +1,18 @@
+@import '../design-system.less';
+
 // Shared component styles
 
 // Profile component styles
 .profile-container {
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  margin: 10px 0;
+  &:extend(.card-base);
+  margin: var(--spacing-sm) 0;
 
   .profile-field {
-    margin-bottom: 15px;
+    margin-bottom: var(--spacing-lg);
   }
 
   .error-message {
-    color: red;
+    color: var(--color-danger);
   }
 
   .claims-list {
@@ -29,44 +29,45 @@
 
 // Patch purpose styling used in UnifiedMergeView
 .patch-purpose {
-  margin-bottom: 18px; /* add space between purpose and following element */
-  font-size: 16px; /* increase text size to stand out more */
+  margin-bottom: var(--spacing-2xl);
+  font-size: var(--font-size-base);
   line-height: 1.35;
-  color: #2f3840;
+  color: var(--color-text-primary);
+  text-align: left;
 
   strong {
-    font-weight: 700;
-    margin-right: 8px;
-    font-size: 16px;
+    font-weight: var(--font-weight-bold);
+    margin-right: var(--spacing-xs);
+    font-size: var(--font-size-base);
   }
 
   em {
     font-style: italic;
-    color: #2b3a40;
-    font-size: 16px;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-base);
   }
 }
 
 @media (prefers-color-scheme: dark) {
   .profile-container {
-    border: 1px solid #222;
-    background-color: #121212;
-    color: #e6e6e6;
+    background-color: var(--color-gray-900);
+    border-color: var(--color-gray-700);
+    color: var(--color-text-primary);
 
     .profile-field {
-      color: #e6e6e6;
+      color: var(--color-text-primary);
     }
   }
 
   .patch-purpose {
-    color: #e6e6e6;
+    color: var(--color-text-primary);
 
     strong {
-      color: #ffffff;
+      color: white;
     }
 
     em {
-      color: #cccccc;
+      color: var(--color-text-secondary);
     }
   }
 }
