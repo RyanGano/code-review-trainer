@@ -1,7 +1,7 @@
 #root {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 4rem 2rem 2rem;
   text-align: center;
   line-height: 1.6;
 }
@@ -9,9 +9,13 @@
 .app-header {
   position: fixed;
   top: 0;
+  left: 0;
   right: 0;
   padding: 1rem 2rem;
   z-index: 100;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  justify-content: flex-end;
   
   .auth-controls {
     display: flex;
@@ -21,6 +25,20 @@
     .welcome-text {
       font-size: 0.9rem;
       color: #333;
+    }
+    
+    button {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.8rem;
+      border: 1px solid #ccc;
+      background: #f9f9f9;
+      color: #333;
+      border-radius: 4px;
+      cursor: pointer;
+      
+      &:hover {
+        background: #e9e9e9;
+      }
     }
   }
 }
@@ -33,9 +51,21 @@
   }
 
   .app-header {
+    background: rgba(15, 15, 15, 0.95);
+    
     .auth-controls {
       .welcome-text {
         color: #e6e6e6; /* ensure welcome text is visible on dark header */
+      }
+      
+      button {
+        border-color: #555;
+        background: #333;
+        color: #e6e6e6;
+        
+        &:hover {
+          background: #444;
+        }
       }
     }
   }
@@ -185,6 +215,20 @@
   }
   
   #root {
-    padding: 1rem;
+    padding: 4rem 1rem 1rem;
+  }
+  
+  .app-header .auth-controls button {
+    border: none;
+    background: none;
+    color: #646cff;
+    text-decoration: underline;
+    padding: 0;
+    font-size: 0.9rem;
+    
+    &:hover {
+      color: #61dafb;
+      text-decoration: none;
+    }
   }
 }
