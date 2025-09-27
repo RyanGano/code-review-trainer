@@ -7,6 +7,7 @@ import { csharp } from "@replit/codemirror-lang-csharp";
 import { javascript } from "@codemirror/lang-javascript";
 import { BinocularsFill } from "react-bootstrap-icons";
 import UnifiedMergeView from "./UnifiedMergeView";
+import { useIsSmallScreen } from "../hooks/useIsSmallScreen";
 
 import "./CodeReviewPractice.less";
 
@@ -104,6 +105,8 @@ const CodeReviewPractice = () => {
   const [autoFetchAttempted, setAutoFetchAttempted] = useState(false);
   // Show/hide state for recommended code snippet
   const [showRecommendedCode, setShowRecommendedCode] = useState(false);
+  // Track if we're on a small screen for responsive button text
+  const isSmallScreen = useIsSmallScreen();
 
   const MAX_REVIEW_LENGTH = 2500;
   const WARNING_THRESHOLD = 2200;
@@ -535,6 +538,8 @@ const CodeReviewPractice = () => {
               >
                 {submittingButton === "approve" && isSubmitting
                   ? "Submitting…"
+                  : isSmallScreen
+                  ? "✅ Approve"
                   : "✅ Approve with Comment"}
               </button>
               <button
@@ -548,6 +553,8 @@ const CodeReviewPractice = () => {
               >
                 {submittingButton === "reject" && isSubmitting
                   ? "Submitting…"
+                  : isSmallScreen
+                  ? "🔧 Reject"
                   : "🔧 Reject with Comment"}
               </button>
             </div>
