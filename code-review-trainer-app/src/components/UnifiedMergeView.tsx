@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { csharp } from "@replit/codemirror-lang-csharp";
 import { javascript } from "@codemirror/lang-javascript";
-import { ViewPlugin, Decoration } from "@codemirror/view";
+import { ViewPlugin, Decoration, EditorView } from "@codemirror/view";
 import type { DecorationSet } from "@codemirror/view";
 import { RangeSetBuilder } from "@codemirror/state";
 
@@ -20,6 +20,20 @@ export default function UnifiedMergeView({ patch, language, purpose }: Props) {
     language === "JavaScript" || language === "TypeScript"
       ? javascript()
       : csharp();
+
+  // Create a theme extension that provides consistent syntax highlighting for all diff lines
+  const diffAwareTheme = useMemo(
+    () =>
+      EditorView.theme({
+        // Apply consistent syntax highlighting colors to all unified diff lines
+        ".unified-line .ͼb": { color: "#60a5fa" }, // Type color: light blue (consistent across all lines)
+        ".unified-line .ͼc": { color: "#fbbf24" }, // Keywords: yellow
+        ".unified-line .ͼd": { color: "#34d399" }, // Strings: green
+        ".unified-line .ͼe": { color: "#9ca3af" }, // Comments: gray
+        ".unified-line .ͼf": { color: "#e5e7eb" }, // Variables: light gray
+      }),
+    []
+  );
 
   const unifiedLines = useMemo(() => {
     const lines: { text: string; cls: string }[] = [];
@@ -185,7 +199,11 @@ export default function UnifiedMergeView({ patch, language, purpose }: Props) {
                 ) : (
                   <CodeMirror
                     value={reconstructed.originalText}
-                    extensions={[langExtension, diffLineHighlighter]}
+                    extensions={[
+                      langExtension,
+                      diffLineHighlighter,
+                      diffAwareTheme,
+                    ]}
                     editable={false}
                     basicSetup={{ lineNumbers: true }}
                   />
@@ -200,7 +218,11 @@ export default function UnifiedMergeView({ patch, language, purpose }: Props) {
                 ) : (
                   <CodeMirror
                     value={reconstructed.newText}
-                    extensions={[langExtension, diffLineHighlighter]}
+                    extensions={[
+                      langExtension,
+                      diffLineHighlighter,
+                      diffAwareTheme,
+                    ]}
                     editable={false}
                     basicSetup={{ lineNumbers: true }}
                   />
@@ -218,7 +240,11 @@ export default function UnifiedMergeView({ patch, language, purpose }: Props) {
                 ) : (
                   <CodeMirror
                     value={reconstructed.originalText}
-                    extensions={[langExtension, diffLineHighlighter]}
+                    extensions={[
+                      langExtension,
+                      diffLineHighlighter,
+                      diffAwareTheme,
+                    ]}
                     editable={false}
                     basicSetup={{ lineNumbers: true }}
                   />
@@ -233,7 +259,11 @@ export default function UnifiedMergeView({ patch, language, purpose }: Props) {
                 ) : (
                   <CodeMirror
                     value={reconstructed.newText}
-                    extensions={[langExtension, diffLineHighlighter]}
+                    extensions={[
+                      langExtension,
+                      diffLineHighlighter,
+                      diffAwareTheme,
+                    ]}
                     editable={false}
                     basicSetup={{ lineNumbers: true }}
                   />
@@ -244,7 +274,11 @@ export default function UnifiedMergeView({ patch, language, purpose }: Props) {
             <div className="merge-single-editor">
               <CodeMirror
                 value={unifiedDisplayText}
-                extensions={[langExtension, diffLineHighlighter]}
+                extensions={[
+                  langExtension,
+                  diffLineHighlighter,
+                  diffAwareTheme,
+                ]}
                 editable={false}
                 basicSetup={{ lineNumbers: true }}
               />
