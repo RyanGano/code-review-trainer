@@ -14,7 +14,7 @@ function App() {
   const { accounts, instance } = useMsal();
 
   const handleSignIn = () => {
-    instance.loginPopup(loginRequest).catch(e => {
+    instance.loginPopup(loginRequest).catch((e) => {
       console.log(e);
     });
   };
@@ -26,9 +26,11 @@ function App() {
           <UnauthenticatedTemplate>
             <SignInButton />
           </UnauthenticatedTemplate>
-          
+
           <AuthenticatedTemplate>
-            <span className="welcome-text">Welcome {accounts[0]?.name || "User"}</span>
+            <span className="welcome-text">
+              Welcome {accounts[0]?.name || "User"}
+            </span>
             <SignOutButton />
           </AuthenticatedTemplate>
         </div>
@@ -39,8 +41,8 @@ function App() {
         <p className="tagline">Master the art of code review in the AI era</p>
       </header>
 
-      <main className="content">
-        <section className="description">
+      <main>
+        <section className="description content">
           <UnauthenticatedTemplate>
             <p>
               In an environment where coding is increasingly done by AI models
@@ -62,31 +64,31 @@ function App() {
               <div className="feature">
                 <h3>📋 Review Mock Pull Requests</h3>
                 <p>
-                  Practice on realistic pull requests designed to test your review
-                  abilities.
+                  Practice on realistic pull requests designed to test your
+                  review abilities.
                 </p>
               </div>
 
               <div className="feature">
                 <h3>📈 Get AI Feedback</h3>
                 <p>
-                  Receive detailed AI-powered evaluation of your reviews with tips
-                  for improvement and insights you may have missed.
+                  Receive detailed AI-powered evaluation of your reviews with
+                  tips for improvement and insights you may have missed.
                 </p>
               </div>
             </div>
 
             <div className="auth-warning">
               <p>
-                <button className="sign-in-link" onClick={handleSignIn}>Sign in</button> to get started
+                <button className="sign-in-link" onClick={handleSignIn}>
+                  Sign in
+                </button>{" "}
+                to get started
               </p>
             </div>
           </UnauthenticatedTemplate>
 
           <AuthenticatedTemplate>
-            <div className="cta">
-              <CodeReviewPractice />
-            </div>
             <ProfileData />
           </AuthenticatedTemplate>
 
@@ -99,6 +101,12 @@ function App() {
             </p>
           </footer>
         </section>
+
+        <AuthenticatedTemplate>
+          <div className="cta">
+            <CodeReviewPractice />
+          </div>
+        </AuthenticatedTemplate>
       </main>
     </>
   );
