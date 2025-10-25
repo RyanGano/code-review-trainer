@@ -831,16 +831,51 @@ public sealed class MediumTypeScriptCodeReviewProblems : CodeReviewProblems
  }"),
 
         // Good examples
-    new ProblemDefinition("Add safeAdd function",
-@"+function safeAdd(a: number, b: number): number { return a + b; }"),
-    new ProblemDefinition("Add fetchJson async function",
-@"+async function fetchJson(url: string): Promise<any> { const r = await fetch(url); return r.json(); }"),
-    new ProblemDefinition("Add pick utility",
-@"+function pick<T>(arr: T[], i: number): T | undefined { return arr[i]; }"),
-    new ProblemDefinition("Add formatName function",
-@"+function formatName(first: string, last: string) { return `${first} ${last}`; }"),
-    new ProblemDefinition("Add noop function",
-@"+function noop() { }"),
+    new ProblemDefinition("Add safeAdd function with input validation",
+@"+function safeAdd(a: number, b: number): number {
++    if (typeof a !== 'number' || typeof b !== 'number') {
++        throw new Error('Both arguments must be numbers');
++    }
++    return a + b;
++}"),
+    new ProblemDefinition("Add fetchJson async function with error handling",
+@"+async function fetchJson(url: string): Promise<any> {
++    try {
++        const response = await fetch(url);
++        if (!response.ok) {
++            throw new Error(`HTTP error! status: ${response.status}`);
++        }
++        return await response.json();
++    } catch (error) {
++        console.error('Failed to fetch JSON:', error);
++        throw error;
++    }
++}"),
+    new ProblemDefinition("Add pick utility with bounds checking",
+@"+function pick<T>(arr: T[], index: number): T | undefined {
++    if (!Array.isArray(arr)) {
++        throw new Error('First argument must be an array');
++    }
++    if (index < 0 || index >= arr.length) {
++        return undefined;
++    }
++    return arr[index];
++}"),
+    new ProblemDefinition("Add formatName function with proper validation",
+@"+function formatName(first: string, last: string): string {
++    if (!first?.trim() || !last?.trim()) {
++        throw new Error('Both first and last names are required');
++    }
++    return `${first.trim()} ${last.trim()}`;
++}"),
+    new ProblemDefinition("Add noop function with JSDoc documentation",
+@"+/**
++ * A no-operation function that does nothing.
++ * Useful as a default callback or placeholder.
++ */
++function noop(): void {
++    // This function intentionally does nothing
++}"),
     };
 
     // Providers are constructed by DI; no static instance is required.
