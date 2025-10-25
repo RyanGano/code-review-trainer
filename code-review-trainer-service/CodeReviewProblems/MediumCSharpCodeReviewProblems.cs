@@ -311,20 +311,20 @@ public sealed class MediumCSharpCodeReviewProblems : CodeReviewProblems
 
         // Problem 14: Subtle logic error and spelling mistake
     new ProblemDefinition("Add IsPalindrome utility.",
-            @"public bool IsPalindrome(string text)
-{
-    // Check if text is a palindrom
-    text = text.ToLower().Replace("" "", """");
-    
-    for (int i = 0; i < text.Length / 2; i++)
-    {
-        if (text[i] != text[text.Length - i])
-        {
-            return false;
-        }
-    }
-    return true;
-}"),
+            @"+public bool IsPalindrome(string text)
++{
++    // Check if text is a palindrom
++    text = text.ToLower().Replace("" "", """");
++    
++    for (int i = 0; i < text.Length / 2; i++)
++    {
++        if (text[i] != text[text.Length - i])
++        {
++            return false;
++        }
++    }
++    return true;
++}"),
 
         // Problem 15: Memory leak potential and compilation error
     new ProblemDefinition("Add EventPublisher with DataChanged event.",

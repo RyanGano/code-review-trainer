@@ -832,15 +832,15 @@ public sealed class MediumTypeScriptCodeReviewProblems : CodeReviewProblems
 
         // Good examples
     new ProblemDefinition("Add safeAdd function",
-@"function safeAdd(a: number, b: number): number { return a + b; }"),
+@"+function safeAdd(a: number, b: number): number { return a + b; }"),
     new ProblemDefinition("Add fetchJson async function",
-@"async function fetchJson(url: string): Promise<any> { const r = await fetch(url); return r.json(); }"),
+@"+async function fetchJson(url: string): Promise<any> { const r = await fetch(url); return r.json(); }"),
     new ProblemDefinition("Add pick utility",
-@"function pick<T>(arr: T[], i: number): T | undefined { return arr[i]; }"),
+@"+function pick<T>(arr: T[], i: number): T | undefined { return arr[i]; }"),
     new ProblemDefinition("Add formatName function",
-@"function formatName(first: string, last: string) { return `${first} ${last}`; }"),
+@"+function formatName(first: string, last: string) { return `${first} ${last}`; }"),
     new ProblemDefinition("Add noop function",
-@"function noop() { }"),
+@"+function noop() { }"),
     };
 
     // Providers are constructed by DI; no static instance is required.

@@ -94,9 +94,9 @@ public sealed class EasyCSharpCodeReviewProblems : CodeReviewProblems
 
         // Problem 11: Basic function declaration - missing return type
     new ProblemDefinition("Add multiply function",
-            @" public int Multiply(int a, int b) {
-     return a * b;
- }"),
+            @"+public int Multiply(int a, int b) {
++    return a * b;
++}"),
 
         // Problem 12: Basic error handling - no try/catch for potential exception
     new ProblemDefinition("Add convertToNumber function",
