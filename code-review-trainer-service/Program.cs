@@ -112,7 +112,7 @@ app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/", () => "I'm ALIVE!");
+app.MapMethods("/", new[] { "GET", "HEAD" }, () => "I'm ALIVE!");
 
 app.MapGet("/user", (HttpContext context) =>
 {
