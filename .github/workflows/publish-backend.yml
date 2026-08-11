@@ -13,6 +13,13 @@ on:
 permissions:
   contents: read
 
+# Serialise runs per ref. cancel-in-progress is deliberately false: this
+# workflow deploys to Azure App Service, and cancelling mid-deploy can leave the
+# app in a partially-updated state.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: windows-latest
