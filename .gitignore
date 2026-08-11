@@ -306,8 +306,9 @@ node_modules/
 dist/
 *.tsbuildinfo
 
-# Package manager lock files - prefer yarn.lock
-package-lock.json
+# Package manager lock files - package-lock.json IS committed (npm is the
+# project's package manager); only the old yarn lockfile is kept out.
+yarn.lock
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
