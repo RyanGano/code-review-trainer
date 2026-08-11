@@ -35,7 +35,7 @@ This repository contains both the backend service and frontend application for t
 
 - .NET SDK (latest LTS version)
 - Node.js (latest LTS version)
-- npm or yarn package manager
+- npm (this project uses npm; yarn and pnpm are blocked — see [Package manager](#package-manager))
 
 ### Installation
 
@@ -57,7 +57,7 @@ This repository contains both the backend service and frontend application for t
 3. Set up the frontend application:
    ```bash
    cd ../code-review-trainer-app
-   yarn install
+   npm install
    ```
 
 ### Running the Application
@@ -75,7 +75,7 @@ The API will be available at `http://localhost:5000` (or as configured).
 
 ```bash
 cd code-review-trainer-app
-yarn dev [--host]
+npm run dev -- [--host]
 ```
 
 The application will be available at `http://localhost:3000` (or as configured).
@@ -93,10 +93,29 @@ dotnet test
 
 ```bash
 cd code-review-trainer-app
-yarn test
+npm test
 ```
 
-**Note**: No tests are implemented yet. Test infrastructure will be added as the project develops.
+**Note**: No tests are implemented yet. Test infrastructure will be added as the project develops. There is currently no `test` script in `package.json`, so the command above will not run anything.
+
+## Package manager
+
+This project uses **npm**. `package-lock.json` is committed; `yarn.lock` is ignored.
+
+Running `yarn` or `pnpm` fails immediately with an explanatory message. That is deliberate:
+
+- yarn 1.x is unmaintained and emits `DEP0169` / `DEP0040` deprecation warnings from its own code on Node 22, which cannot be fixed.
+- Azure Static Web Apps (Oryx) chooses its package manager by inspecting the committed lockfile. A stray `yarn.lock` would change what actually gets deployed, not just what you install locally.
+
+The guard lives in `code-review-trainer-app/scripts/ensure-npm.cjs` and is wired to `preinstall`/`prebuild` and to yarn's `yarn-path`. If you ever need to switch package managers deliberately, the message lists every file to change.
+
+| Instead of | Use |
+| --- | --- |
+| `yarn install` | `npm install` (or `npm ci` in CI) |
+| `yarn add X` / `yarn add -D X` | `npm install X` / `npm install -D X` |
+| `yarn remove X` | `npm uninstall X` |
+| `yarn dev` | `npm run dev` |
+| `yarn dev --host` | `npm run dev -- --host` (note the `--`) |
 
 ## Contributing
 
