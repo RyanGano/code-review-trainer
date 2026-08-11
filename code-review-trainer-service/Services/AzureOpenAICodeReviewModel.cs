@@ -542,7 +542,7 @@ Return ONLY RAW JSON (no markdown fences) matching schema: {schema}";
     return string.Join("\n", lines);
   }
 
-  private static string Truncate(string s, int max) => s.Length <= max ? s : s.Substring(0, max) + "\n/* truncated */";
+  private static string Truncate(string s, int max) => s.Length <= max ? s : s[..max] + "\n/* truncated */";
 
   private CodeReviewModelResult Fallback(string problemId, string reason, string? details = null, string? raw = null) =>
     new(
@@ -573,17 +573,17 @@ Return ONLY RAW JSON (no markdown fences) matching schema: {schema}";
       var firstNewline = content.IndexOf('\n');
       if (firstNewline > -1)
       {
-        var header = content.Substring(0, firstNewline).Trim(); // e.g., ```json
+        var header = content[..firstNewline].Trim(); // e.g., ```json
         if (header.StartsWith("```"))
         {
-          content = content.Substring(firstNewline + 1);
+          content = content[(firstNewline + 1)..];
         }
       }
       // Remove trailing fence
       var fenceIndex = content.LastIndexOf("```", StringComparison.Ordinal);
       if (fenceIndex >= 0)
       {
-        content = content.Substring(0, fenceIndex);
+        content = content[..fenceIndex];
       }
     }
     // Trim and attempt to isolate JSON object
@@ -592,7 +592,7 @@ Return ONLY RAW JSON (no markdown fences) matching schema: {schema}";
     var lastBrace = content.LastIndexOf('}');
     if (firstBrace >= 0 && lastBrace > firstBrace)
     {
-      content = content.Substring(firstBrace, lastBrace - firstBrace + 1);
+      content = content[firstBrace..(lastBrace + 1)];
     }
     return content.Trim();
   }
@@ -616,7 +616,7 @@ Return ONLY RAW JSON (no markdown fences) matching schema: {schema}";
     int first = content.IndexOf('{');
     int last = content.LastIndexOf('}');
     if (first < 0 || last <= first) return null;
-    var candidate = content.Substring(first, last - first + 1).Trim();
+    var candidate = content[first..(last + 1)].Trim();
     return candidate;
   }
 
@@ -632,7 +632,7 @@ Return ONLY RAW JSON (no markdown fences) matching schema: {schema}";
     {
       if (candidate[i] == '}' || candidate[i] == ']')
       {
-        var sub = candidate.Substring(0, i + 1);
+        var sub = candidate[..(i + 1)];
         if (IsBracesBalanced(sub)) return sub;
       }
     }
