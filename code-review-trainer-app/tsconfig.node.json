@@ -20,7 +20,8 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "noImplicitOverride": true
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true
   },
   "include": ["vite.config.ts"]
 }
