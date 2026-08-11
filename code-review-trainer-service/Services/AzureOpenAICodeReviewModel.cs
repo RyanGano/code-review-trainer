@@ -131,7 +131,7 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
       {
         _logger.LogWarning(ex, "Model returned non-JSON; attempting repair");
         var repaired = TryRepairJson(content);
-        if (repaired != null)
+        if (repaired is not null)
         {
           try
           {
@@ -265,7 +265,7 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
         matchCount += CountOccurrences(normRaw, kw);
       }
 
-      if (issues != null)
+      if (issues is not null)
       {
         foreach (var issue in issues)
         {
@@ -274,7 +274,7 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
         }
       }
 
-      if (matched != null)
+      if (matched is not null)
       {
         foreach (var mpt in matched)
         {
@@ -304,7 +304,7 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
         if (string.IsNullOrWhiteSpace(mid)) continue;
         if (awardedIssueIds.Contains(mid)) continue;
         var issue = issuesList.FirstOrDefault(i => string.Equals(i.Id, mid, StringComparison.OrdinalIgnoreCase));
-        if (issue == null) continue;
+        if (issue is null) continue;
 
         // Determine award multiplier: only award if accuracy not explicitly 'incorrect' or 'false'
         bool award = !accuracyNormalized.Contains("incorrect") && !accuracyNormalized.Contains("false") && !accuracyNormalized.Contains("no");
@@ -518,8 +518,8 @@ Return ONLY RAW JSON (no markdown fences) matching schema: {schema}";
 
     // Choose a comment token by language inferred from problemId
     var language = "csharp";
-    if (problemId != null && problemId.StartsWith("js_", StringComparison.OrdinalIgnoreCase)) language = "javascript";
-    else if (problemId != null && problemId.StartsWith("ts_", StringComparison.OrdinalIgnoreCase)) language = "typescript";
+    if (problemId is not null && problemId.StartsWith("js_", StringComparison.OrdinalIgnoreCase)) language = "javascript";
+    else if (problemId is not null && problemId.StartsWith("ts_", StringComparison.OrdinalIgnoreCase)) language = "typescript";
     var commentToken = language switch { "javascript" => "//", "typescript" => "//", _ => "//" };
 
     var lines = code.Replace("\r\n", "\n").Split('\n');
@@ -554,7 +554,7 @@ Return ONLY RAW JSON (no markdown fences) matching schema: {schema}";
   RawModelJson: raw ?? string.Empty,
   RecommendedCode: string.Empty,
   IsFallback: true,
-  Error: reason + (details != null ? ": " + details : string.Empty),
+  Error: reason + (details is not null ? ": " + details : string.Empty),
   SpellingProblemsDetected: false,
   ReviewQualityBonusGranted: false,
   UserScore: 0,
@@ -623,7 +623,7 @@ Return ONLY RAW JSON (no markdown fences) matching schema: {schema}";
   private static string? TryRepairJson(string content)
   {
     var candidate = TryExtractJson(content);
-    if (candidate == null) return null;
+    if (candidate is null) return null;
     // Remove trailing ellipsis if present before final brace
     candidate = candidate.Replace("...\n", "").Replace("...", "");
     if (IsBracesBalanced(candidate)) return candidate;

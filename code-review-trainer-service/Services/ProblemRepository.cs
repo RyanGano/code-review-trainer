@@ -26,7 +26,7 @@ public class ProblemRepository(IEnumerable<IProblemProvider> providers) : IProbl
       _ => (Language?)null
     };
 
-    if (language == null) return null;
+    if (language is null) return null;
 
     var difficulty = parts[1].ToLowerInvariant() switch
     {
@@ -35,13 +35,13 @@ public class ProblemRepository(IEnumerable<IProblemProvider> providers) : IProbl
       _ => (DifficultyLevel?)null
     };
 
-    if (difficulty == null) return null;
+    if (difficulty is null) return null;
 
     if (!int.TryParse(parts[2], out var oneBased) || oneBased <= 0) return null;
     var index = oneBased - 1;
 
     var provider = _providers.FirstOrDefault(p => p.Language == language && p.Difficulty == difficulty);
-    if (provider == null) return null;
+    if (provider is null) return null;
     if (index < 0 || index >= provider.Count) return null;
     return (id, provider.GetProblemByIndex(index), provider.GetPurposeByIndex(index), language.Value);
   }
