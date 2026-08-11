@@ -94,7 +94,7 @@ builder.Services.AddCors(options =>
         }
 
         var configuredOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
-        if (configuredOrigins != null)
+        if (configuredOrigins is not null)
         {
             allowedOrigins.AddRange(configuredOrigins);
         }
@@ -127,7 +127,7 @@ app.MapGet("/user", (HttpContext context) =>
 
 app.MapGet("/tests/", (DifficultyLevel? level, Language language) =>
 {
-    if (level == null)
+    if (level is null)
     {
         return Results.Ok(Enum.GetNames<DifficultyLevel>());
     }
@@ -135,13 +135,13 @@ app.MapGet("/tests/", (DifficultyLevel? level, Language language) =>
     // Resolve providers from DI and pick the matching provider for language+difficulty
     var providers = app.Services.GetServices<IProblemProvider>();
     var provider = providers.FirstOrDefault(p => p.Language == language && p.Difficulty == level.Value);
-    if (provider == null)
+    if (provider is null)
     {
         return Results.BadRequest(new { error = "Unsupported difficulty level or language" });
     }
 
     var randomProblem = provider.GetRandomProblemWithId();
-    if (randomProblem == null)
+    if (randomProblem is null)
     {
         return Results.BadRequest(new { error = "No problems available for selected provider" });
     }
@@ -161,7 +161,7 @@ app.MapGet("/tests/", (DifficultyLevel? level, Language language) =>
 app.MapPost("/tests/{id}", async (string id, ReviewSubmission submission, IProblemRepository repo, ICodeReviewModel model) =>
 {
     var problem = repo.Get(id);
-    if (problem == null)
+    if (problem is null)
     {
         return Results.NotFound(new { error = "Problem not found" });
     }
@@ -179,7 +179,7 @@ app.MapPost("/tests/{id}", async (string id, ReviewSubmission submission, IProbl
 app.MapPost("/tests/{id}/explain", async (string id, ExplainRequest body, IProblemRepository repo, ChatClient? chat, IOptions<AzureOpenAISettings> options) =>
 {
     var problem = repo.Get(id);
-    if (problem == null)
+    if (problem is null)
     {
         return Results.NotFound(new { error = "Problem not found" });
     }
@@ -187,7 +187,7 @@ app.MapPost("/tests/{id}/explain", async (string id, ExplainRequest body, IProbl
 
     // If ChatClient or configuration missing, return fallback placeholder
     var aiSettings = options?.Value;
-    if (chat == null || aiSettings == null || !aiSettings.IsConfigured)
+    if (chat is null || aiSettings is null || !aiSettings.IsConfigured)
     {
         var fallback = "Explanation goes here";
         return Results.Ok(new { explanation = fallback });
