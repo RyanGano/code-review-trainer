@@ -1,7 +1,5 @@
 namespace code_review_trainer_service.CodeReviewProblems;
 
-using System;
-
 public record ProblemDefinition
 {
   public string Purpose { get; init; }
