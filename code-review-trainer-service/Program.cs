@@ -44,7 +44,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         }
         // Accept the bare GUID if config uses api://{guid}
         var canonicalAudience = configuredAudience.StartsWith("api://", StringComparison.OrdinalIgnoreCase)
-            ? configuredAudience.Substring("api://".Length)
+            ? configuredAudience["api://".Length..]
             : configuredAudience;
         options.Audience = canonicalAudience;
         options.TokenValidationParameters = new TokenValidationParameters
@@ -239,7 +239,7 @@ Return ONLY a single JSON object matching the schema: {{ ""explanation"": string
         int last = text.LastIndexOf('}');
         if (first >= 0 && last > first)
         {
-            var candidate = text.Substring(first, last - first + 1).Trim();
+            var candidate = text[first..(last + 1)].Trim();
             try
             {
                 var doc = JsonDocument.Parse(candidate);
