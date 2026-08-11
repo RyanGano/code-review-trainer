@@ -11,7 +11,7 @@ public abstract class CodeReviewProblems : Services.IProblemProvider
 
   protected CodeReviewProblems(ProblemDefinition[] problems, Language language, string idPrefix, DifficultyLevel difficulty)
   {
-    Problems = problems ?? Array.Empty<ProblemDefinition>();
+    Problems = problems ?? [];
     Language = language;
     IdPrefix = idPrefix ?? string.Empty;
     Difficulty = difficulty;

@@ -94,11 +94,11 @@ Paragraph 1 MUST start with ""Summary:"" and include: what the reviewer did well
 Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How to further improve:"" and provide specific, actionable guidance tied to this review's gaps. If the review is already very good and there are no actionable improvements, the second paragraph should still be present but may be a single short line such as: ""How to further improve: keep up the good work"". However, if there ARE spelling, formatting, clarity, or missing-item issues, the second paragraph must contain specific, actionable advice addressing them. Focus on helping the user develop better judgment about what matters in code review.";
       var userPrompt = BuildUserPrompt(request);
 
-      var messages = new List<ChatMessage>
-      {
+      List<ChatMessage> messages =
+      [
         new SystemChatMessage(systemPrompt),
         new UserChatMessage(userPrompt)
-      };
+      ];
 
       var options = new ChatCompletionOptions
       {
@@ -155,7 +155,7 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
 
   private CodeReviewModelResult MapModelJson(string problemId, string raw, JsonElement el)
   {
-    var issues = new List<CodeReviewIssue>();
+    List<CodeReviewIssue> issues = [];
     if (el.TryGetProperty("issuesDetected", out var issuesArr) && issuesArr.ValueKind == JsonValueKind.Array)
     {
       foreach (var i in issuesArr.EnumerateArray())
@@ -194,12 +194,12 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
         issues.Add(new CodeReviewIssue(issueId, category, title, explanation, severity, possibleScore));
       }
     }
-    var matched = new List<CodeReviewMatchedUserPoint>();
+    List<CodeReviewMatchedUserPoint> matched = [];
     if (el.TryGetProperty("matchedUserPoints", out var mup) && mup.ValueKind == JsonValueKind.Array)
     {
       foreach (var m in mup.EnumerateArray())
       {
-        string[] mids = Array.Empty<string>();
+        string[] mids = [];
         if (m.TryGetProperty("matchedIssueIds", out var mi) && mi.ValueKind == JsonValueKind.Array)
         {
           mids = mi.EnumerateArray().Select(AsFlexibleString).ToArray();
@@ -209,7 +209,7 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
         matched.Add(new CodeReviewMatchedUserPoint(excerpt, mids, accuracy));
       }
     }
-    var missed = new List<string>();
+    List<string> missed = [];
     if (el.TryGetProperty("missedCriticalIssueIds", out var mc) && mc.ValueKind == JsonValueKind.Array)
     {
       missed.AddRange(mc.EnumerateArray().Select(AsFlexibleString));
@@ -232,7 +232,7 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
     // If the model did not provide the flag, count spelling/typo cues across
     // summary, raw JSON, detected issues, and matched points and only set the
     // flag when multiple cues appear (threshold=2) to avoid false positives.
-    var spellingKeywords = new[] { "spelling", "spelling error", "misspell", "misspelled", "typo", "typos", "misspelling" };
+    string[] spellingKeywords = ["spelling", "spelling error", "misspell", "misspelled", "typo", "typos", "misspelling"];
     bool modelProvidedSpellingFlag = el.TryGetProperty("spellingProblemsDetected", out var sp2) && sp2.ValueKind == JsonValueKind.True;
     if (modelProvidedSpellingFlag)
     {
@@ -288,8 +288,8 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
     }
 
     // Base possible total is the sum of per-issue possible scores.
-    var issuesList = issues ?? new List<CodeReviewIssue>();
-    var matchedList = matched ?? new List<CodeReviewMatchedUserPoint>();
+    var issuesList = issues ?? [];
+    var matchedList = matched ?? [];
     int possibleTotal = issuesList.Sum(i => i.PossibleScore);
     int userTotal = 0;
 
@@ -299,7 +299,7 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
     {
       // Skip matches with low accuracy or empty matched IDs
       var accuracyNormalized = (m.Accuracy ?? string.Empty).ToLowerInvariant();
-      foreach (var mid in m.MatchedIssueIds ?? Array.Empty<string>())
+      foreach (var mid in m.MatchedIssueIds ?? [])
       {
         if (string.IsNullOrWhiteSpace(mid)) continue;
         if (awardedIssueIds.Contains(mid)) continue;
@@ -331,10 +331,10 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
       // (exact award phrase, clear/actionable mentions, or positive adjectives). Only ignore when
       // there are negative cues and no positive indicators.
       var sForFlag = summary.ToLowerInvariant();
-      var negationKeywordsForFlag = new[] { "lack", "lacks", "missing", "missed", "no", "not", "doesn't", "didn't", "without", "low", "poor", "insufficient" };
+      string[] negationKeywordsForFlag = ["lack", "lacks", "missing", "missed", "no", "not", "doesn't", "didn't", "without", "low", "poor", "insufficient"];
       bool hasNegationForFlag = negationKeywordsForFlag.Any(k => sForFlag.Contains(k));
 
-      var positiveIndicators = new[] { "clear and actionable", "clear, actionable", "actionable feedback", "actionable", "good", "well" };
+      string[] positiveIndicators = ["clear and actionable", "clear, actionable", "actionable feedback", "actionable", "good", "well"];
       bool hasPositiveIndicator = positiveIndicators.Any(p => sForFlag.Contains(p));
 
       if (!hasNegationForFlag || hasPositiveIndicator)
@@ -356,9 +356,9 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
       // Only award if the summary indicates positive clarity/actionability (no nearby negation cues).
       if (!awardedReviewBonus)
       {
-        var negationKeywords = new[] { "lack", "lacks", "missing", "missed", "no", "not", "doesn't", "didn't", "without", "low", "poor", "insufficient" };
+        string[] negationKeywords = ["lack", "lacks", "missing", "missed", "no", "not", "doesn't", "didn't", "without", "low", "poor", "insufficient"];
         bool hasNegation = negationKeywords.Any(k => s.Contains(k));
-        var positiveActionablePhrases = new[] { "clear and actionable", "clear, actionable", "actionable guidance", "actionable suggestions", "actionable items", "actionable feedback", "actionable" };
+        string[] positiveActionablePhrases = ["clear and actionable", "clear, actionable", "actionable guidance", "actionable suggestions", "actionable items", "actionable feedback", "actionable"];
         bool hasActionable = positiveActionablePhrases.Any(p => s.Contains(p));
         if (hasActionable && !hasNegation)
         {
@@ -373,7 +373,7 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
       {
         bool mentionsClear = s.Contains("clear");
         bool mentionsActionable = s.Contains("actionable");
-        var negationKeywords = new[] { "lack", "lacks", "missing", "missed", "no", "not", "doesn't", "didn't", "without", "low", "poor", "insufficient" };
+        string[] negationKeywords = ["lack", "lacks", "missing", "missed", "no", "not", "doesn't", "didn't", "without", "low", "poor", "insufficient"];
         bool hasNegation = negationKeywords.Any(k => s.Contains(k));
         // If the summary explicitly says 'Overall, ...' along with clear+actionable, honor the positive signal
         if (mentionsClear && mentionsActionable && (!hasNegation || s.Contains("overall")))
@@ -547,9 +547,9 @@ Return ONLY RAW JSON (no markdown fences) matching schema: {schema}";
   private CodeReviewModelResult Fallback(string problemId, string reason, string? details = null, string? raw = null) =>
     new(
       ProblemId: problemId,
-      IssuesDetected: Array.Empty<CodeReviewIssue>(),
-      MatchedUserPoints: Array.Empty<CodeReviewMatchedUserPoint>(),
-      MissedCriticalIssueIds: Array.Empty<string>(),
+      IssuesDetected: [],
+      MatchedUserPoints: [],
+      MissedCriticalIssueIds: [],
   Summary: $"Fallback: {reason} {(details ?? string.Empty)}",
   RawModelJson: raw ?? string.Empty,
   RecommendedCode: string.Empty,
