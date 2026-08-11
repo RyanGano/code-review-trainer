@@ -9,11 +9,20 @@ on:
     branches:
       - main
 
+# Least privilege by default; jobs opt into more only if they need it.
+permissions:
+  contents: read
+
 jobs:
   build_and_deploy_job:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
+    permissions:
+      contents: read
+      # Static Web Apps uses repo_token to post the preview-environment comment
+      # on pull requests.
+      pull-requests: write
     steps:
       - uses: actions/checkout@v7
         with:
