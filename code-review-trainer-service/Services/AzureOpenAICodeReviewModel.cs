@@ -9,18 +9,11 @@ namespace code_review_trainer_service.Services;
 /// Calls Azure OpenAI Chat Completions (via SDK) to perform a structured code review.
 /// Required config keys: AzureOpenAI:Endpoint, AzureOpenAI:ApiKey (user-secrets), AzureOpenAI:DeploymentName
 /// </summary>
-public class AzureOpenAICodeReviewModel : ICodeReviewModel
+public class AzureOpenAICodeReviewModel(ChatClient chat, ILogger<AzureOpenAICodeReviewModel> logger, IOptions<AzureOpenAISettings> options) : ICodeReviewModel
 {
-  private readonly ChatClient _chat;
-  private readonly ILogger<AzureOpenAICodeReviewModel> _logger;
-  private readonly AzureOpenAISettings _options;
-
-  public AzureOpenAICodeReviewModel(ChatClient chat, ILogger<AzureOpenAICodeReviewModel> logger, IOptions<AzureOpenAISettings> options)
-  {
-    _chat = chat;
-    _logger = logger;
-    _options = options.Value;
-  }
+  private readonly ChatClient _chat = chat;
+  private readonly ILogger<AzureOpenAICodeReviewModel> _logger = logger;
+  private readonly AzureOpenAISettings _options = options.Value;
 
   public async Task<CodeReviewModelResult> ReviewAsync(CodeReviewRequest request, CancellationToken ct = default)
   {

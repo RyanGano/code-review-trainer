@@ -7,14 +7,9 @@ public interface IProblemRepository
   (string Id, string Code, string Purpose, Language Language)? Get(string id);
 }
 
-public class ProblemRepository : IProblemRepository
+public class ProblemRepository(IEnumerable<IProblemProvider> providers) : IProblemRepository
 {
-  private readonly IEnumerable<IProblemProvider> _providers;
-
-  public ProblemRepository(IEnumerable<IProblemProvider> providers)
-  {
-    _providers = providers;
-  }
+  private readonly IEnumerable<IProblemProvider> _providers = providers;
 
   public (string Id, string Code, string Purpose, Language Language)? Get(string id)
   {
