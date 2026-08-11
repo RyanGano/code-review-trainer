@@ -796,12 +796,12 @@ const CodeReviewPractice = () => {
                               {explanations[i.id] && (
                                 <>
                                   <div className="explanation-text">
-                                    {explanations[i.id].explanation}
+                                    {explanations[i.id]?.explanation}
                                   </div>
-                                  {explanations[i.id].examples && (
+                                  {explanations[i.id]?.examples && (
                                     <div className="explanation-examples">
                                       <strong>Examples:</strong>
-                                      <pre>{explanations[i.id].examples}</pre>
+                                      <pre>{explanations[i.id]?.examples}</pre>
                                     </div>
                                   )}
                                 </>
