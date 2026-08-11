@@ -82,7 +82,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        var allowedOrigins = new List<string>();
+        List<string> allowedOrigins = [];
 
         allowedOrigins.Add("https://zealous-ocean-029a8df1e.2.azurestaticapps.net");
 
@@ -112,7 +112,7 @@ app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapMethods("/", new[] { "GET", "HEAD" }, () => "I'm ALIVE!");
+app.MapMethods("/", ["GET", "HEAD"], () => "I'm ALIVE!");
 
 app.MapGet("/user", (HttpContext context) =>
 {
@@ -223,11 +223,11 @@ Please do the following:
 
 Return ONLY a single JSON object matching the schema: {{ ""explanation"": string, ""examples"": string }}. Do NOT include any markdown or extra text.";
 
-    var messages = new List<ChatMessage>
-    {
+    List<ChatMessage> messages =
+    [
         system,
         new UserChatMessage(userBuilder)
-    };
+    ];
 
     try
     {
