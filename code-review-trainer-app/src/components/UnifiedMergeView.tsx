@@ -4,7 +4,7 @@ import { csharp } from "@replit/codemirror-lang-csharp";
 import { javascript } from "@codemirror/lang-javascript";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { ViewPlugin, Decoration, EditorView } from "@codemirror/view";
-import type { DecorationSet } from "@codemirror/view";
+import type { DecorationSet, ViewUpdate } from "@codemirror/view";
 import { RangeSetBuilder } from "@codemirror/state";
 
 interface Props {
@@ -101,19 +101,16 @@ export default function UnifiedMergeView({ patch, language, purpose }: Props) {
     return ViewPlugin.fromClass(
       class {
         // Decorations set for the plugin
-        decorations: DecorationSet | undefined;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        constructor(view: any) {
-          this.decorations = this.buildDecorations(view as unknown);
+        decorations: DecorationSet;
+        constructor(view: EditorView) {
+          this.decorations = this.buildDecorations(view);
         }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        update(update: any) {
+        update(update: ViewUpdate) {
           if (update.docChanged || update.viewportChanged) {
-            this.decorations = this.buildDecorations(update.view as unknown);
+            this.decorations = this.buildDecorations(update.view);
           }
         }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        buildDecorations(view: any) {
+        buildDecorations(view: EditorView): DecorationSet {
           const builder = new RangeSetBuilder<Decoration>();
           for (const range of view.visibleRanges) {
             let pos = range.from;
@@ -146,8 +143,7 @@ export default function UnifiedMergeView({ patch, language, purpose }: Props) {
         }
       },
       {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        decorations: (v: any) => v.decorations,
+        decorations: (v) => v.decorations,
       }
     );
     // Intentionally no dependencies here; plugin rebuilds when editor content changes
