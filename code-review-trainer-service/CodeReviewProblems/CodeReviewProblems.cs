@@ -7,7 +7,7 @@ public abstract class CodeReviewProblems : Services.IProblemProvider
   protected readonly string IdPrefix;
   protected readonly DifficultyLevel Difficulty;
 
-  private readonly Random _random = new Random();
+  private readonly Random _random = new();
 
   protected CodeReviewProblems(ProblemDefinition[] problems, Language language, string idPrefix, DifficultyLevel difficulty)
   {
