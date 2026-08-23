@@ -16,6 +16,70 @@ public class AzureOpenAICodeReviewModel(ChatClient chat, ILogger<AzureOpenAICode
   private readonly ILogger<AzureOpenAICodeReviewModel> _logger = logger;
   private readonly AzureOpenAISettings _options = options.Value;
 
+  /// <summary>
+  /// Strict schema for the grading response. Structured outputs guarantee the model returns
+  /// parseable JSON in this exact shape rather than relying on the prompt being obeyed.
+  /// </summary>
+  private static readonly ChatResponseFormat GradingResponseFormat =
+    ChatResponseFormat.CreateJsonSchemaFormat(
+      "code_review_grading",
+      BinaryData.FromString("""
+      {
+        "type": "object",
+        "properties": {
+          "problemId": { "type": "string" },
+          "issuesDetected": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "category": { "type": "string" },
+                "title": { "type": "string" },
+                "explanation": { "type": "string" },
+                "severity": { "type": "string", "enum": ["critical", "high", "medium", "low", "trivial"] },
+                "possibleScore": { "type": "integer" }
+              },
+              "required": ["id", "category", "title", "explanation", "severity", "possibleScore"],
+              "additionalProperties": false
+            }
+          },
+          "matchedUserPoints": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "excerpt": { "type": "string" },
+                "matchedIssueIds": { "type": "array", "items": { "type": "string" } },
+                "accuracy": { "type": "string", "enum": ["correct", "partial", "incorrect"] }
+              },
+              "required": ["excerpt", "matchedIssueIds", "accuracy"],
+              "additionalProperties": false
+            }
+          },
+          "missedCriticalIssueIds": { "type": "array", "items": { "type": "string" } },
+          "reviewQualityBonusGranted": { "type": "boolean" },
+          "spellingProblemsDetected": { "type": "boolean" },
+          "summary": { "type": "string" },
+          "recommendedCode": { "type": "string" },
+          "isShippableAsIs": { "type": "boolean" }
+        },
+        "required": [
+          "problemId",
+          "issuesDetected",
+          "matchedUserPoints",
+          "missedCriticalIssueIds",
+          "reviewQualityBonusGranted",
+          "spellingProblemsDetected",
+          "summary",
+          "recommendedCode",
+          "isShippableAsIs"
+        ],
+        "additionalProperties": false
+      }
+      """),
+      jsonSchemaIsStrict: true);
+
   public async Task<CodeReviewModelResult> ReviewAsync(CodeReviewRequest request, CancellationToken ct = default)
   {
     if (!_options.IsConfigured)
@@ -103,7 +167,12 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
 
       var options = new ChatCompletionOptions
       {
-        MaxOutputTokenCount = 1200
+        // Reasoning models spend part of this budget on hidden reasoning tokens before emitting any
+        // visible text, and this prompt also asks for recommendedCode, so 1200 truncates to nothing.
+        MaxOutputTokenCount = 6000,
+        // Without a strict schema the model intermittently emits the two-paragraph summary as two
+        // comma-separated JSON strings ("summary":"para1","para2"), which is not parseable JSON.
+        ResponseFormat = GradingResponseFormat
       };
       // Reasoning-tier models (e.g. gpt-5.6-luna) reject any non-default Temperature/TopP, so both
       // are left unset here and the API default (1.0) is used for every model.
