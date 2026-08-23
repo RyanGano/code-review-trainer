@@ -232,7 +232,7 @@ Return ONLY a single JSON object matching the schema: {{ ""explanation"": string
 
     try
     {
-        var explainOptions = new ChatCompletionOptions { MaxOutputTokenCount = 1200, Temperature = 0.2f };
+        var explainOptions = new ChatCompletionOptions { MaxOutputTokenCount = 1200 };
 #pragma warning disable AOAI001
         explainOptions.SetNewMaxCompletionTokensPropertyEnabled(true);
 #pragma warning restore AOAI001

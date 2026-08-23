@@ -103,10 +103,10 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
 
       var options = new ChatCompletionOptions
       {
-        MaxOutputTokenCount = 1200,
-        Temperature = 0.2f,
-        TopP = 1.0f
+        MaxOutputTokenCount = 1200
       };
+      // Reasoning-tier models (e.g. gpt-5.6-luna) reject any non-default Temperature/TopP, so both
+      // are left unset here and the API default (1.0) is used for every model.
       // Newer models (e.g. gpt-5.6-luna) reject the legacy 'max_tokens' body property and require
       // 'max_completion_tokens' instead; this Azure-exclusive toggle switches which one is sent.
 #pragma warning disable AOAI001
