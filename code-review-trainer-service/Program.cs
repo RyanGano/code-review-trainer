@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using code_review_trainer_service.Services;
 using Azure.Identity;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
+using Azure.AI.OpenAI.Chat;
 using OpenAI.Chat;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
@@ -231,7 +232,11 @@ Return ONLY a single JSON object matching the schema: {{ ""explanation"": string
 
     try
     {
-        var resp = await chat.CompleteChatAsync(messages, new ChatCompletionOptions { MaxOutputTokenCount = 1200, Temperature = 0.2f });
+        var explainOptions = new ChatCompletionOptions { MaxOutputTokenCount = 1200, Temperature = 0.2f };
+#pragma warning disable AOAI001
+        explainOptions.SetNewMaxCompletionTokensPropertyEnabled(true);
+#pragma warning restore AOAI001
+        var resp = await chat.CompleteChatAsync(messages, explainOptions);
         var text = resp.Value?.Content?.FirstOrDefault()?.Text ?? string.Empty;
 
         // Try to extract a JSON object from the model's response

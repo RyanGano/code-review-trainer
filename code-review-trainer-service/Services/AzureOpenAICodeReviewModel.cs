@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Azure.AI.OpenAI.Chat;
 using OpenAI.Chat;
 using Microsoft.Extensions.Options;
 
@@ -106,6 +107,11 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
         Temperature = 0.2f,
         TopP = 1.0f
       };
+      // Newer models (e.g. gpt-5.6-luna) reject the legacy 'max_tokens' body property and require
+      // 'max_completion_tokens' instead; this Azure-exclusive toggle switches which one is sent.
+#pragma warning disable AOAI001
+      options.SetNewMaxCompletionTokensPropertyEnabled(true);
+#pragma warning restore AOAI001
 
       var response = await _chat.CompleteChatAsync(messages, options, ct);
       var content = response.Value?.Content?.FirstOrDefault()?.Text ?? string.Empty;
