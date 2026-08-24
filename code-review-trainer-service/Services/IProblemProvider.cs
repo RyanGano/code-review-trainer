@@ -9,5 +9,6 @@ public interface IProblemProvider
   int Count { get; }
   string GetProblemByIndex(int index);
   string GetPurposeByIndex(int index);
+  StoredReview? GetReviewByIndex(int index);
   CodeReviewProblem GetRandomProblemWithId();
 }
