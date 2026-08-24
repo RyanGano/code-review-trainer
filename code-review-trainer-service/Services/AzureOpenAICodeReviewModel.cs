@@ -228,55 +228,14 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
 
     var summary = el.TryGetProperty("summary", out var sum) ? sum.GetString() ?? string.Empty : string.Empty;
 
-    // Allow model to explicitly signal spelling problems with a boolean flag
-    bool modelIndicatedSpelling = false;
-
-    // Conservative fallback heuristics: prefer an explicit boolean from the model.
-    // If the model did not provide the flag, count spelling/typo cues across
-    // summary, raw JSON and matched points and only set the flag when multiple
-    // cues appear (threshold=2) to avoid false positives.
-    string[] spellingKeywords = ["spelling", "spelling error", "misspell", "misspelled", "typo", "typos", "misspelling"];
-    bool modelProvidedSpellingFlag = el.TryGetProperty("spellingProblemsDetected", out var sp) && sp.ValueKind == JsonValueKind.True;
-    if (modelProvidedSpellingFlag)
-    {
-      modelIndicatedSpelling = true;
-    }
-    else
-    {
-      int matchCount = 0;
-      string Norm(string s) => (s ?? string.Empty).ToLowerInvariant();
-
-      // count occurrences helper
-      int CountOccurrences(string haystack, string needle)
-      {
-        if (string.IsNullOrEmpty(haystack) || string.IsNullOrEmpty(needle)) return 0;
-        int count = 0;
-        int idx = 0;
-        while ((idx = haystack.IndexOf(needle, idx, StringComparison.Ordinal)) >= 0)
-        {
-          count++;
-          idx += needle.Length;
-        }
-        return count;
-      }
-
-      var normSummary = Norm(summary);
-      var normRaw = Norm(raw);
-      foreach (var kw in spellingKeywords)
-      {
-        matchCount += CountOccurrences(normSummary, kw);
-        matchCount += CountOccurrences(normRaw, kw);
-      }
-
-      foreach (var mpt in matched)
-      {
-        var combined = Norm(mpt.Excerpt) + " " + Norm(mpt.Accuracy);
-        foreach (var kw in spellingKeywords) matchCount += CountOccurrences(combined, kw);
-      }
-
-      // Require at least two mentions to reduce false positives
-      if (matchCount >= 2) modelIndicatedSpelling = true;
-    }
+    // Both flags are required by the strict response schema, so they are always present and are
+    // taken at face value. The keyword heuristics that used to second-guess them predate structured
+    // outputs and were actively wrong: the bonus was withdrawn whenever the summary contained words
+    // like "missed" or "not", which paragraph 1 is required to contain whenever the developer missed
+    // an issue, and the spelling fallback counted cue words across both the summary and the raw JSON
+    // that contains it, so a single "watch for typos" counted twice and tripped its threshold of two.
+    bool spellingProblemsDetected = el.TryGetProperty("spellingProblemsDetected", out var sp) && sp.ValueKind == JsonValueKind.True;
+    bool awardedReviewBonus = el.TryGetProperty("reviewQualityBonusGranted", out var rqb) && rqb.ValueKind == JsonValueKind.True;
 
     // Possible total is fixed by the stored review.
     int possibleTotal = stored.PossibleScore;
@@ -305,73 +264,6 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
       }
     }
 
-    // Extra/penalty rules not directly represented by matched items: prefer explicit model flag, then summary cues
-    bool awardedReviewBonus = false;
-    // Detect presence of the required reviewQualityBonusGranted field
-    bool modelProvidedBonusField = el.TryGetProperty("reviewQualityBonusGranted", out _);
-    if (!modelProvidedBonusField)
-    {
-      _logger.LogWarning("Model output missing required 'reviewQualityBonusGranted' boolean. Falling back to summary heuristics. Raw: {Raw}", raw);
-    }
-    // First, prefer a machine-readable boolean flag from the model output
-    if (modelProvidedBonusField && el.TryGetProperty("reviewQualityBonusGranted", out var rqb) && rqb.ValueKind == JsonValueKind.True)
-    {
-      // Respect the explicit flag in the model output when the summary also contains positive signals
-      // (clear/actionable mentions, or positive adjectives). Only ignore when there are negative cues
-      // and no positive indicators.
-      var sForFlag = summary.ToLowerInvariant();
-      string[] negationKeywordsForFlag = ["lack", "lacks", "missing", "missed", "no", "not", "doesn't", "didn't", "without", "low", "poor", "insufficient"];
-      bool hasNegationForFlag = negationKeywordsForFlag.Any(k => sForFlag.Contains(k));
-
-      string[] positiveIndicators = ["clear and actionable", "clear, actionable", "actionable feedback", "actionable", "good", "well"];
-      bool hasPositiveIndicator = positiveIndicators.Any(p => sForFlag.Contains(p));
-
-      if (!hasNegationForFlag || hasPositiveIndicator)
-      {
-        awardedReviewBonus = true;
-      }
-      else
-      {
-        _logger.LogInformation("Ignoring reviewQualityBonusGranted=true because summary contains negation cues and no positive indicators: {Summary}", summary);
-      }
-    }
-
-    // Then inspect the summary for an explicit human-readable phrase or fallback keywords
-    if (!string.IsNullOrWhiteSpace(summary))
-    {
-      var s = summary.ToLowerInvariant();
-
-      // Last-resort fallback: keyword-based detection of clarity/actionability.
-      // Only award if the summary indicates positive clarity/actionability (no nearby negation cues).
-      if (!awardedReviewBonus)
-      {
-        string[] negationKeywords = ["lack", "lacks", "missing", "missed", "no", "not", "doesn't", "didn't", "without", "low", "poor", "insufficient"];
-        bool hasNegation = negationKeywords.Any(k => s.Contains(k));
-        string[] positiveActionablePhrases = ["clear and actionable", "clear, actionable", "actionable guidance", "actionable suggestions", "actionable items", "actionable feedback", "actionable"];
-        bool hasActionable = positiveActionablePhrases.Any(p => s.Contains(p));
-        if (hasActionable && !hasNegation)
-        {
-          awardedReviewBonus = true;
-        }
-      }
-
-      // Final permissive check: if summary mentions both 'clear' and 'actionable' (not necessarily as a phrase)
-      // and we haven't awarded the bonus yet, grant it unless there are negation cues.
-      if (!awardedReviewBonus)
-      {
-        bool mentionsClear = s.Contains("clear");
-        bool mentionsActionable = s.Contains("actionable");
-        string[] negationKeywords = ["lack", "lacks", "missing", "missed", "no", "not", "doesn't", "didn't", "without", "low", "poor", "insufficient"];
-        bool hasNegation = negationKeywords.Any(k => s.Contains(k));
-        // If the summary explicitly says 'Overall, ...' along with clear+actionable, honor the positive signal
-        if (mentionsClear && mentionsActionable && (!hasNegation || s.Contains("overall")))
-        {
-          awardedReviewBonus = true;
-          _logger.LogInformation("Awarding review quality bonus based on permissive check (clear+actionable) for summary: {Summary}", summary);
-        }
-      }
-    }
-
     possibleTotal = Math.Max(0, possibleTotal);
     userTotal = Math.Max(0, userTotal);
 
@@ -388,7 +280,7 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
       stored.RecommendedCode,
       IsFallback: false,
       Error: null,
-      SpellingProblemsDetected: modelIndicatedSpelling,
+      SpellingProblemsDetected: spellingProblemsDetected,
       ReviewQualityBonusGranted: awardedReviewBonus,
       UserScore: userTotal,
       PossibleScore: possibleTotal,
