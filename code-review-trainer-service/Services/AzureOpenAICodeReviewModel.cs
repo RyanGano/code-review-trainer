@@ -21,6 +21,14 @@ public class AzureOpenAICodeReviewModel(ChatClient chat, ILogger<AzureOpenAICode
   private readonly AzureOpenAISettings _options = options.Value;
 
   /// <summary>
+  /// Cap on the developer's review text. Kept in step with MAX_REVIEW_LENGTH in the web app, which
+  /// enforces the same limit in the textarea, so in practice this only fires for a client that
+  /// bypasses the UI. If it does fire, the model is told the text was cut rather than being left to
+  /// grade the missing tail as points the developer never made.
+  /// </summary>
+  private const int MaxUserReviewChars = 5000;
+
+  /// <summary>
   /// Strict schema for the grading response. Structured outputs guarantee the model returns
   /// parseable JSON in this exact shape rather than relying on the prompt being obeyed.
   /// </summary>
@@ -401,7 +409,7 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
     // appear in ordinary review prose - and the strict response schema already makes it
     // impossible for injected text to change the shape of what comes back.
     var truncatedCode = req.Code ?? string.Empty;
-    var truncatedReview = Truncate(req.UserReview ?? string.Empty, 2500);
+    var truncatedReview = Truncate(req.UserReview ?? string.Empty, MaxUserReviewChars);
 
     var language = "csharp";
     if (req.ProblemId.StartsWith("js_", StringComparison.OrdinalIgnoreCase))
@@ -476,7 +484,10 @@ Return ONLY RAW JSON (no markdown fences) matching schema: {schema}";
     return sb.ToString().TrimEnd();
   }
 
-  private static string Truncate(string s, int max) => s.Length <= max ? s : s[..max] + "\n/* truncated */";
+  private static string Truncate(string s, int max) =>
+    s.Length <= max
+      ? s
+      : s[..max] + "\n[NOTE: this review was longer than the allowed length and was cut off here. Do not treat points the developer may have made past this point as missing.]";
 
   /// <summary>
   /// When the model call fails we still know the issues, the score and the verdict, so the user

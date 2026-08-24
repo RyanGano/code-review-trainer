@@ -112,7 +112,7 @@ const CodeReviewPractice = () => {
   // Detect dark mode
   const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-  const MAX_REVIEW_LENGTH = 2500;
+  const MAX_REVIEW_LENGTH = 5000;
   const WARNING_THRESHOLD = 2200;
 
   // Helper to acquire API token with interactive fallback
