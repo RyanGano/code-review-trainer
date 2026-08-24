@@ -42,7 +42,8 @@ interface CodeReviewModelResult {
   userScore?: number;
   possibleScore?: number;
   reviewQualityBonusGranted?: boolean;
-  isShippableAsIs?: boolean;
+  // The reference review's verdict for this problem, stored with the example.
+  reviewStatus?: "Approve" | "Reject";
 }
 
 interface CodeReviewTest {
@@ -616,8 +617,9 @@ const CodeReviewPractice = () => {
                   </div>
                 )}
                 {userDecision !== null &&
-                  submissionResult.isShippableAsIs !== undefined &&
-                  userDecision === submissionResult.isShippableAsIs && (
+                  submissionResult.reviewStatus !== undefined &&
+                  userDecision ===
+                    (submissionResult.reviewStatus === "Approve") && (
                     <div
                       className="judgment-badge"
                       title={

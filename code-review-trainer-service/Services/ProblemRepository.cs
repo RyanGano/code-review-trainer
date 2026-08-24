@@ -2,16 +2,21 @@ using code_review_trainer_service.CodeReviewProblems;
 
 namespace code_review_trainer_service.Services;
 
+/// <summary>
+/// Everything the service knows about a single problem, including the reference review.
+/// </summary>
+public record ProblemDetails(string Id, string Code, string Purpose, Language Language, StoredReview Review);
+
 public interface IProblemRepository
 {
-  (string Id, string Code, string Purpose, Language Language)? Get(string id);
+  ProblemDetails? Get(string id);
 }
 
 public class ProblemRepository(IEnumerable<IProblemProvider> providers) : IProblemRepository
 {
   private readonly IEnumerable<IProblemProvider> _providers = providers;
 
-  public (string Id, string Code, string Purpose, Language Language)? Get(string id)
+  public ProblemDetails? Get(string id)
   {
     if (string.IsNullOrWhiteSpace(id)) return null;
 
@@ -43,6 +48,15 @@ public class ProblemRepository(IEnumerable<IProblemProvider> providers) : IProbl
     var provider = _providers.FirstOrDefault(p => p.Language == language && p.Difficulty == difficulty);
     if (provider is null) return null;
     if (index < 0 || index >= provider.Count) return null;
-    return (id, provider.GetProblemByIndex(index), provider.GetPurposeByIndex(index), language.Value);
+
+    var review = provider.GetReviewByIndex(index);
+    if (review is null) return null;
+
+    return new ProblemDetails(
+      id,
+      provider.GetProblemByIndex(index),
+      provider.GetPurposeByIndex(index),
+      language.Value,
+      review);
   }
 }

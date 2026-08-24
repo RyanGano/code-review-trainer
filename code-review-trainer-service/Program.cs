@@ -79,6 +79,12 @@ builder.Services.AddAuthorization(o =>
 });
 builder.Services.AddCodeReviewServices(builder.Configuration);
 
+// Serialize enums (notably ReviewStatus) as their names so clients see "Approve"/"Reject".
+builder.Services.ConfigureHttpJsonOptions(o =>
+{
+    o.SerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+});
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -166,8 +172,13 @@ app.MapPost("/tests/{id}", async (string id, ReviewSubmission submission, IProbl
     {
         return Results.NotFound(new { error = "Problem not found" });
     }
-    var (probId, code, purpose, language) = problem.Value;
-    var result = await model.ReviewAsync(new CodeReviewRequest(probId, code, submission.review, purpose, submission.isShippableAsIs));
+    var result = await model.ReviewAsync(new CodeReviewRequest(
+        problem.Id,
+        problem.Code,
+        submission.review,
+        problem.Purpose,
+        problem.Review,
+        submission.isShippableAsIs));
     return Results.Ok(result);
 })
 .WithName("SubmitReview")
@@ -184,7 +195,7 @@ app.MapPost("/tests/{id}/explain", async (string id, ExplainRequest body, IProbl
     {
         return Results.NotFound(new { error = "Problem not found" });
     }
-    var (probId, code, purpose, language) = problem.Value;
+    var (code, language) = (problem.Code, problem.Language);
 
     // If ChatClient or configuration missing, return fallback placeholder
     var aiSettings = options?.Value;

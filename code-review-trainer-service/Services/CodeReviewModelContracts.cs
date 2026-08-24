@@ -1,6 +1,18 @@
+using code_review_trainer_service.CodeReviewProblems;
+
 namespace code_review_trainer_service.Services;
 
-public record CodeReviewRequest(string ProblemId, string Code, string UserReview, string PatchPurpose, bool? UserShippabilityAssessment = null);
+/// <summary>
+/// A grading request. <paramref name="Review"/> is the stored reference review for the problem;
+/// the model grades the user's write-up against it instead of reviewing the code itself.
+/// </summary>
+public record CodeReviewRequest(
+    string ProblemId,
+    string Code,
+    string UserReview,
+    string PatchPurpose,
+    StoredReview Review,
+    bool? UserShippabilityAssessment = null);
 
 public record CodeReviewIssue(
     string Id,
@@ -31,7 +43,7 @@ public record CodeReviewModelResult(
     bool ReviewQualityBonusGranted,
     int UserScore,
     int PossibleScore,
-    bool IsShippableAsIs
+    ReviewStatus ReviewStatus
 );
 
 public interface ICodeReviewModel

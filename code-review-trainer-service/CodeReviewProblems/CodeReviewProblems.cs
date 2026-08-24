@@ -54,11 +54,18 @@ public abstract class CodeReviewProblems : Services.IProblemProvider
     return Problems[index].Purpose ?? string.Empty;
   }
 
+  public StoredReview? GetReviewByIndex(int index)
+  {
+    if (index < 0 || index >= Problems.Length) return null;
+    return Problems[index].Review;
+  }
+
   // IProblemProvider implementation
   DifficultyLevel Services.IProblemProvider.Difficulty => Difficulty;
   Language Services.IProblemProvider.Language => Language;
   int Services.IProblemProvider.Count => Count;
   string Services.IProblemProvider.GetProblemByIndex(int index) => GetProblemByIndex(index);
   string Services.IProblemProvider.GetPurposeByIndex(int index) => GetPurposeByIndex(index);
+  StoredReview? Services.IProblemProvider.GetReviewByIndex(int index) => GetReviewByIndex(index);
   CodeReviewProblem Services.IProblemProvider.GetRandomProblemWithId() => GetRandomProblemWithId();
 }
