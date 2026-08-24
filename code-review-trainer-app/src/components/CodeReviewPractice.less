@@ -675,6 +675,78 @@
   display: inline;
 }
 
+.review-point {
+  border-left: 3px solid var(--color-gray-300);
+  padding: var(--spacing-xs) 0 var(--spacing-xs) var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+  list-style: none;
+}
+
+.review-point-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--spacing-xs);
+  justify-content: space-between;
+}
+
+.review-point-excerpt {
+  flex: 1 1 60%;
+}
+
+.review-point-verdict {
+  flex: 0 0 auto;
+  font-size: 0.8rem;
+  font-weight: var(--font-weight-bold);
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.review-point-comment {
+  margin: var(--spacing-xs) 0 0;
+  font-size: 0.9rem;
+}
+
+.review-point-issues {
+  margin: var(--spacing-xs) 0 0;
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.review-point.point-correct {
+  border-left-color: #2f855a;
+}
+.review-point.point-correct .review-point-verdict {
+  background: #e6f4ea;
+  color: #1e4620;
+}
+
+.review-point.point-partial {
+  border-left-color: #b7791f;
+}
+.review-point.point-partial .review-point-verdict {
+  background: #fdf6e3;
+  color: #6b4b0e;
+}
+
+// A fair observation that carries no points: neutral, never styled as an error.
+.review-point.point-unlisted {
+  border-left-color: #3182ce;
+}
+.review-point.point-unlisted .review-point-verdict {
+  background: #e6f0fa;
+  color: #1a4971;
+}
+
+.review-point.point-incorrect {
+  border-left-color: #c53030;
+}
+.review-point.point-incorrect .review-point-verdict {
+  background: #fdeaea;
+  color: #742a2a;
+}
+
 .score-row {
   display: inline-flex;
   align-items: center;
