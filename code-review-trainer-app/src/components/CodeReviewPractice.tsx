@@ -72,6 +72,8 @@ interface CodeReviewModelResult {
   reviewQualityBonusGranted?: boolean;
   // The reference review's verdict for this problem, stored with the example.
   reviewStatus?: "Approve" | "Reject";
+  // Whether the ship/no-ship call agreed with the reference verdict, decided by the server.
+  shippabilityAssessmentCorrect?: boolean | null;
 }
 
 interface CodeReviewTest {
@@ -644,24 +646,21 @@ const CodeReviewPractice = () => {
                     <span className="negative-text">Has spelling errors</span>
                   </div>
                 )}
-                {userDecision !== null &&
-                  submissionResult.reviewStatus !== undefined &&
-                  userDecision ===
-                    (submissionResult.reviewStatus === "Approve") && (
-                    <div
-                      className="judgment-badge"
-                      title={
-                        userDecision
-                          ? "Your approval matches the AI's assessment! Great judgment!"
-                          : "Your rejection matches the AI's assessment! Great judgment!"
-                      }
-                      aria-label={"Judgment match badge"}
-                      role="img"
-                    >
-                      <span className="judgment-symbol">🎯</span>
-                      <span className="judgment-text">Judgment Match</span>
-                    </div>
-                  )}
+                {submissionResult.shippabilityAssessmentCorrect === true && (
+                  <div
+                    className="judgment-badge"
+                    title={
+                      userDecision
+                        ? "Your approval matches the reference verdict! Great judgment!"
+                        : "Your rejection matches the reference verdict! Great judgment!"
+                    }
+                    aria-label={"Judgment match badge"}
+                    role="img"
+                  >
+                    <span className="judgment-symbol">🎯</span>
+                    <span className="judgment-text">Judgment Match</span>
+                  </div>
+                )}
               </div>
               {submissionResult.summary && (
                 <div>

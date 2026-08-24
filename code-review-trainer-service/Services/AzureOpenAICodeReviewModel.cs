@@ -289,7 +289,8 @@ Write the summary to the developer, in second person. Do not restate the boolean
       ReviewQualityBonusGranted: awardedReviewBonus,
       UserScore: userTotal,
       PossibleScore: possibleTotal,
-      ReviewStatus: stored.Status);
+      ReviewStatus: stored.Status,
+      ShippabilityAssessmentCorrect: ShippabilityAssessmentCorrect(request));
   }
 
   private const int CorrectAccuracy = 0;
@@ -308,6 +309,16 @@ Write the summary to the developer, in second person. Do not restate the boolean
     "partial" => PartialAccuracy,
     _ => UnscoredAccuracy
   };
+
+  /// <summary>
+  /// Compares the developer's ship/no-ship call against the stored verdict. Null when they made no
+  /// call. This is settled from the request and the stored review, so it holds even when the model
+  /// call falls back.
+  /// </summary>
+  private static bool? ShippabilityAssessmentCorrect(CodeReviewRequest request) =>
+    request.UserShippabilityAssessment is bool called
+      ? called == (request.Review.Status == ReviewStatus.Approve)
+      : null;
 
   private static IReadOnlyList<CodeReviewIssue> ToCodeReviewIssues(StoredReview review) =>
     review.Issues
@@ -418,7 +429,8 @@ Do NOT review the patch yourself. Grade only what the developer wrote.";
       ReviewQualityBonusGranted: false,
       UserScore: 0,
       PossibleScore: request.Review.PossibleScore,
-      ReviewStatus: request.Review.Status
+      ReviewStatus: request.Review.Status,
+      ShippabilityAssessmentCorrect: ShippabilityAssessmentCorrect(request)
     );
   }
 

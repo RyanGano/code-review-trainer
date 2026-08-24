@@ -51,7 +51,13 @@ public record CodeReviewModelResult(
     bool ReviewQualityBonusGranted,
     int UserScore,
     int PossibleScore,
-    ReviewStatus ReviewStatus
+    ReviewStatus ReviewStatus,
+    /// <summary>
+    /// Whether the developer's own ship/no-ship call agreed with the reference verdict, or null if
+    /// they did not make one. Decided here rather than in the client, which only knows what it just
+    /// submitted and loses it on reload.
+    /// </summary>
+    bool? ShippabilityAssessmentCorrect
 );
 
 public interface ICodeReviewModel
