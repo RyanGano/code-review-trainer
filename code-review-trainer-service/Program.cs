@@ -184,10 +184,9 @@ app.MapPost("/tests/{id}", async (string id, ReviewSubmission submission, IProbl
 .WithName("SubmitReview")
 .RequireAuthorization();
 
-// Explain an individual item from a review result. For now this returns a static placeholder
-// In future this can delegate to the AI/model to generate a contextual explanation.
-// Explain an individual item from a review result. Accepts a JSON body with the item's full text
-// (title, category/severity, and explanation). Example field name: "itemText".
+// Explain one issue from a review result in more depth. The issue is identified by its stored id,
+// so the model is given the reference review's own wording, category and severity rather than
+// re-deriving them from a string the client assembled.
 app.MapPost("/tests/{id}/explain", async (string id, ExplainRequest body, IProblemRepository repo, ChatClient? chat, IOptions<AzureOpenAISettings> options) =>
 {
     var problem = repo.Get(id);
@@ -195,23 +194,25 @@ app.MapPost("/tests/{id}/explain", async (string id, ExplainRequest body, IProbl
     {
         return Results.NotFound(new { error = "Problem not found" });
     }
-    var (code, language) = (problem.Code, problem.Language);
 
-    // If ChatClient or configuration missing, return fallback placeholder
+    // Prefer the stored issue; fall back to the client-supplied text for older clients.
+    var issue = string.IsNullOrWhiteSpace(body.IssueId)
+        ? null
+        : problem.Review.Issues.FirstOrDefault(i => string.Equals(i.Id, body.IssueId, StringComparison.OrdinalIgnoreCase));
+
+    if (issue is null && string.IsNullOrWhiteSpace(body.ItemText))
+    {
+        return Results.BadRequest(new { error = "Provide either issueId or itemText" });
+    }
+
     var aiSettings = options?.Value;
     if (chat is null || aiSettings is null || !aiSettings.IsConfigured)
     {
-        var fallback = "Explanation goes here";
-        return Results.Ok(new { explanation = fallback });
+        // Without a model we can still return the reference explanation we already hold.
+        return Results.Ok(new { explanation = issue?.Explanation ?? "Explanation goes here", examples = string.Empty });
     }
 
-    // Build prompt using original code and item text. Include the full original code.
-    string codeText = code ?? string.Empty;
-
-    var system = new SystemChatMessage("You are a helpful, patient senior engineer. Return ONLY valid JSON (no markdown, no backticks, no commentary) using the schema: { \"explanation\": string, \"examples\": string (optional) }.");
-
-    // Determine fence language for syntax highlighting based on problem language.
-    var codeFenceLanguage = language switch
+    var codeFenceLanguage = problem.Language switch
     {
         Language.CSharp => "csharp",
         Language.JavaScript => "javascript",
@@ -219,65 +220,91 @@ app.MapPost("/tests/{id}/explain", async (string id, ExplainRequest body, IProbl
         _ => "csharp"
     };
 
-    var userBuilder = $@"You recently reviewed this code and gave this feedback:
-{body.ItemText}
+    var issueContext = issue is not null
+        ? $"""
+          Title: {issue.Title}
+          Category: {issue.Category}
+          Severity: {issue.Severity}
+          Why it matters: {issue.Explanation}
+          """
+        : body.ItemText;
 
-Here is the original code:
+    var system = new SystemChatMessage(
+        "You are a patient senior engineer explaining a code review finding to the developer who wrote the patch. " +
+        "The finding is established and correct - your job is to make it land, not to re-litigate whether it is real. " +
+        "Write to the developer in second person, plainly, without restating the finding verbatim.");
+
+    var userBuilder = $@"A code review of this patch raised the following issue:
+
+{issueContext}
+
+Here is the patch it was raised against:
 ```{codeFenceLanguage}
-{codeText}
+{problem.Code}
 ```
 
-Please do the following:
-1) Explain your feedback clearly and simply so the developer can fully understand the implications.
-2) If the issue relates to bounds checking, provide example input values that produce bad output and show the bad output.
-3) If the issue is a code-style or formatting issue, provide concrete guidance or examples in the examples field.
-4) Re-evaluate your original review item and note any uncertainty or mistakes.
+The patch was intended to: {problem.Purpose}
 
-Return ONLY a single JSON object matching the schema: {{ ""explanation"": string, ""examples"": string }}. Do NOT include any markdown or extra text.";
+In ""explanation"", explain what actually goes wrong and why it matters, concretely enough that the developer can find it in the code above and fix it.
 
-    List<ChatMessage> messages =
-    [
-        system,
-        new UserChatMessage(userBuilder)
-    ];
+In ""examples"", show it concretely when that helps: for a bounds or input-handling issue give specific input values and the wrong output or exception they produce; for a correctness issue walk through the case that breaks; for a style or structure issue show the before and after. Use a fenced {codeFenceLanguage} block for code. Leave it empty if a worked example would add nothing.";
+
+    List<ChatMessage> messages = [system, new UserChatMessage(userBuilder)];
 
     try
     {
-        var explainOptions = new ChatCompletionOptions { MaxOutputTokenCount = 1200 };
+        var explainOptions = new ChatCompletionOptions
+        {
+            MaxOutputTokenCount = 4000,
+            // Same reasoning as the grading call: a strict schema beats asking for JSON politely.
+            ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
+                "code_review_explanation",
+                BinaryData.FromString("""
+                {
+                  "type": "object",
+                  "properties": {
+                    "explanation": { "type": "string" },
+                    "examples": { "type": "string" }
+                  },
+                  "required": ["explanation", "examples"],
+                  "additionalProperties": false
+                }
+                """),
+                jsonSchemaIsStrict: true)
+        };
 #pragma warning disable AOAI001
         explainOptions.SetNewMaxCompletionTokensPropertyEnabled(true);
 #pragma warning restore AOAI001
+
         var resp = await chat.CompleteChatAsync(messages, explainOptions);
         var text = resp.Value?.Content?.FirstOrDefault()?.Text ?? string.Empty;
 
-        // Try to extract a JSON object from the model's response
         int first = text.IndexOf('{');
         int last = text.LastIndexOf('}');
         if (first >= 0 && last > first)
         {
-            var candidate = text[first..(last + 1)].Trim();
             try
             {
-                var doc = JsonDocument.Parse(candidate);
-                var root = doc.RootElement;
-                var explanationStr = root.TryGetProperty("explanation", out var exEl) ? exEl.GetString() ?? string.Empty : string.Empty;
-                var examplesStr = root.TryGetProperty("examples", out var exsEl) ? exsEl.GetString() ?? string.Empty : string.Empty;
-                return Results.Ok(new { explanation = explanationStr, examples = examplesStr });
+                var root = JsonDocument.Parse(text[first..(last + 1)]).RootElement;
+                return Results.Ok(new
+                {
+                    explanation = root.TryGetProperty("explanation", out var exEl) ? exEl.GetString() ?? string.Empty : string.Empty,
+                    examples = root.TryGetProperty("examples", out var exsEl) ? exsEl.GetString() ?? string.Empty : string.Empty
+                });
             }
-            catch (Exception parseEx)
+            catch (JsonException parseEx)
             {
-                Console.WriteLine($"Failed to parse JSON from model: {parseEx.Message}");
-                // fall through to return raw text explanation
+                app.Logger.LogWarning(parseEx, "Explain: could not parse model JSON for issue {IssueId} of {ProblemId}", body.IssueId, id);
             }
         }
 
-        // If parsing failed, return the raw text as explanation in the structured form
+        // Structured outputs make this unreachable in practice; return the text rather than nothing.
         return Results.Ok(new { explanation = text, examples = string.Empty });
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Explain call failed: {ex.Message}");
-        return Results.Ok(new { explanation = "Explanation goes here", examples = string.Empty });
+        app.Logger.LogError(ex, "Explain call failed for issue {IssueId} of {ProblemId}", body.IssueId, id);
+        return Results.Ok(new { explanation = issue?.Explanation ?? "Explanation goes here", examples = string.Empty });
     }
 })
 .WithName("ExplainItem")
@@ -287,4 +314,8 @@ Return ONLY a single JSON object matching the schema: {{ ""explanation"": string
 app.Run();
 
 public record ReviewSubmission(string review, bool? isShippableAsIs = null);
-public record ExplainRequest(string ItemText);
+/// <summary>
+/// Identifies the review item to explain. IssueId is preferred - the server then uses the stored
+/// reference wording. ItemText is kept for clients that still assemble the text themselves.
+/// </summary>
+public record ExplainRequest(string? IssueId = null, string? ItemText = null);
