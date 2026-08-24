@@ -23,10 +23,18 @@ public record CodeReviewIssue(
     int PossibleScore
 );
 
+/// <summary>
+/// One point the developer made, as the grader read it.
+/// </summary>
+/// <param name="Excerpt">The developer's own words, so they can see what was graded.</param>
+/// <param name="MatchedIssueIds">Reference issue ids this point refers to; empty when it matches none.</param>
+/// <param name="Accuracy">correct, partial, valid_but_unlisted or incorrect.</param>
+/// <param name="Comment">One sentence to the developer explaining the rating.</param>
 public record CodeReviewMatchedUserPoint(
     string Excerpt,
     string[] MatchedIssueIds,
-    string Accuracy
+    string Accuracy,
+    string Comment
 );
 
 public record CodeReviewModelResult(

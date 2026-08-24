@@ -21,11 +21,39 @@ interface CodeReviewIssue {
   explanation?: string;
 }
 
+type ReviewPointAccuracy =
+  | "correct"
+  | "partial"
+  | "valid_but_unlisted"
+  | "incorrect";
+
 interface CodeReviewMatchedUserPoint {
   excerpt: string;
   accuracy?: string;
   matchedIssueIds?: string[];
+  // One sentence from the grader explaining the rating, addressed to the reviewer.
+  comment?: string;
 }
+
+// How each rating is presented. "valid_but_unlisted" scores nothing but is a fair observation,
+// so it reads as neutral rather than as a mistake.
+const ACCURACY_PRESENTATION: Record<
+  ReviewPointAccuracy,
+  { label: string; className: string }
+> = {
+  correct: { label: "Found it", className: "point-correct" },
+  partial: { label: "Partly there", className: "point-partial" },
+  valid_but_unlisted: {
+    label: "Fair point, not scored",
+    className: "point-unlisted",
+  },
+  incorrect: { label: "Not quite", className: "point-incorrect" },
+};
+
+const presentAccuracy = (accuracy?: string) =>
+  ACCURACY_PRESENTATION[
+    (accuracy ?? "").trim().toLowerCase() as ReviewPointAccuracy
+  ] ?? { label: accuracy ?? "Unrated", className: "point-incorrect" };
 
 interface CodeReviewModelResult {
   problemId?: string;
@@ -832,15 +860,37 @@ const CodeReviewPractice = () => {
               {submissionResult.matchedUserPoints &&
                 submissionResult.matchedUserPoints.length > 0 && (
                   <div className="matched-section">
-                    <h5>Your Points Matched</h5>
+                    <h5>Your Points</h5>
                     <ul>
                       {submissionResult.matchedUserPoints.map(
-                        (p: CodeReviewMatchedUserPoint, idx: number) => (
-                          <li key={idx}>
-                            <em>{p.excerpt}</em> → {p.accuracy} (Matches:{" "}
-                            {p.matchedIssueIds?.join(", ") || "—"})
-                          </li>
-                        )
+                        (p: CodeReviewMatchedUserPoint, idx: number) => {
+                          const { label, className } = presentAccuracy(
+                            p.accuracy
+                          );
+                          return (
+                            <li key={idx} className={`review-point ${className}`}>
+                              <div className="review-point-header">
+                                <em className="review-point-excerpt">
+                                  {p.excerpt}
+                                </em>
+                                <span className="review-point-verdict">
+                                  {label}
+                                </span>
+                              </div>
+                              {p.comment && (
+                                <p className="review-point-comment">
+                                  {p.comment}
+                                </p>
+                              )}
+                              {p.matchedIssueIds &&
+                                p.matchedIssueIds.length > 0 && (
+                                  <p className="review-point-issues">
+                                    Matches: {p.matchedIssueIds.join(", ")}
+                                  </p>
+                                )}
+                            </li>
+                          );
+                        }
                       )}
                     </ul>
                   </div>
