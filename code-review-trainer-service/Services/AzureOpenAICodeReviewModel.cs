@@ -241,26 +241,25 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
     int possibleTotal = stored.PossibleScore;
     int userTotal = 0;
 
-    // For each matched user point, award the possibleScore for matched issues only once per issue.
+    // Score each reference issue at most once, at the best accuracy any of the developer's points
+    // achieved for it. A "partial" hit - the right area without the defect, or the symptom without
+    // the cause - earns half the issue's points rounded up, so a vague gesture no longer scores the
+    // same as a precise catch. "incorrect" earns nothing.
     var awardedIssueIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-    foreach (var m in matched)
+    foreach (var m in matched.OrderBy(m => AccuracyRank(m.Accuracy)))
     {
-      // Skip matches with low accuracy or empty matched IDs
-      var accuracyNormalized = (m.Accuracy ?? string.Empty).ToLowerInvariant();
+      var rank = AccuracyRank(m.Accuracy);
+      if (rank > PartialAccuracy) continue;
+
       foreach (var mid in m.MatchedIssueIds ?? [])
       {
-        if (string.IsNullOrWhiteSpace(mid)) continue;
-        if (awardedIssueIds.Contains(mid)) continue;
         var issue = issuesList.FirstOrDefault(i => string.Equals(i.Id, mid, StringComparison.OrdinalIgnoreCase));
         if (issue is null) continue;
+        if (!awardedIssueIds.Add(issue.Id)) continue;
 
-        // Determine award: only award if accuracy is not explicitly 'incorrect' or 'false'
-        bool award = !accuracyNormalized.Contains("incorrect") && !accuracyNormalized.Contains("false") && !accuracyNormalized.Contains("no");
-        if (award)
-        {
-          userTotal += issue.PossibleScore;
-          awardedIssueIds.Add(mid);
-        }
+        userTotal += rank == PartialAccuracy
+          ? (issue.PossibleScore + 1) / 2
+          : issue.PossibleScore;
       }
     }
 
@@ -286,6 +285,22 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
       PossibleScore: possibleTotal,
       ReviewStatus: stored.Status);
   }
+
+  private const int CorrectAccuracy = 0;
+  private const int PartialAccuracy = 1;
+  private const int IncorrectAccuracy = 2;
+
+  /// <summary>
+  /// Orders the schema's accuracy values best-first, so an issue several points touch on is scored
+  /// at the best of them. Anything unrecognised is treated as incorrect rather than silently
+  /// scoring full marks.
+  /// </summary>
+  private static int AccuracyRank(string? accuracy) => (accuracy ?? string.Empty).Trim().ToLowerInvariant() switch
+  {
+    "correct" => CorrectAccuracy,
+    "partial" => PartialAccuracy,
+    _ => IncorrectAccuracy
+  };
 
   private static IReadOnlyList<CodeReviewIssue> ToCodeReviewIssues(StoredReview review) =>
     review.Issues
