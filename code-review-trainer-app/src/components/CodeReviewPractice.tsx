@@ -720,9 +720,6 @@ const CodeReviewPractice = () => {
                                   }));
                                   try {
                                     const accessToken = await acquireApiToken();
-                                    const itemText = `${i.title || i.id} [${
-                                      i.category
-                                    }/${i.severity}] – ${i.explanation || ""}`;
                                     const resp = await fetch(
                                       `${apiConfig.webApi}tests/${currentTest.id}/explain`,
                                       {
@@ -731,7 +728,11 @@ const CodeReviewPractice = () => {
                                           Authorization: `Bearer ${accessToken}`,
                                           "Content-Type": "application/json",
                                         },
-                                        body: JSON.stringify({ itemText }),
+                                        // The server looks the issue up in the stored
+                                        // reference review, so it needs only the id.
+                                        body: JSON.stringify({
+                                          issueId: i.id,
+                                        }),
                                       }
                                     );
                                     if (!resp.ok) {
