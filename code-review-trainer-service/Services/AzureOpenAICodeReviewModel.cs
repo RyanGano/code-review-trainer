@@ -53,7 +53,6 @@ public class AzureOpenAICodeReviewModel(ChatClient chat, ILogger<AzureOpenAICode
               "additionalProperties": false
             }
           },
-          "missedCriticalIssueIds": { "type": "array", "items": { "type": "string" } },
           "reviewQualityBonusGranted": { "type": "boolean" },
           "spellingProblemsDetected": { "type": "boolean" },
           "summary": { "type": "string" }
@@ -61,7 +60,6 @@ public class AzureOpenAICodeReviewModel(ChatClient chat, ILogger<AzureOpenAICode
         "required": [
           "problemId",
           "matchedUserPoints",
-          "missedCriticalIssueIds",
           "reviewQualityBonusGranted",
           "spellingProblemsDetected",
           "summary"
@@ -97,9 +95,10 @@ Your tasks:
 1. For each distinct point the developer made, decide which reference issue ids (if any) it refers to, and record it in ""matchedUserPoints"" with a short excerpt of their own words.
    - Set ""accuracy"" to ""correct"" when the point clearly identifies the issue, ""partial"" when it gestures at it without the substance, and ""incorrect"" when the point is wrong or refers to nothing in the reference review.
    - A point that matches nothing gets an empty ""matchedIssueIds"" array; still record it so the developer sees it was read.
-2. Populate ""missedCriticalIssueIds"" with the ids of reference issues the developer did NOT mention in any reasonable form.
-3. Judge the quality of the write-up itself (clarity, specificity, actionability) and whether it contains multiple spelling/typo problems.
-4. Write the coaching summary.
+2. Judge the quality of the write-up itself (clarity, specificity, actionability) and whether it contains multiple spelling/typo problems.
+3. Write the coaching summary.
+
+Which reference issues were MISSED is worked out from your matches, not reported by you: any issue no point of theirs matched counts as missed. So check every point against every reference issue before you settle on its matches - an issue you fail to match is an issue the developer is told they missed.
 
 BE GENEROUS ABOUT WORDING - credit the developer when they describe an issue differently than the reference does:
 - Input validation can be phrased as: 'add validation', 'check for null', 'validate parameters', 'don't allow negative numbers', etc.
@@ -217,15 +216,6 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
       }
     }
 
-    List<string> missed = [];
-    if (el.TryGetProperty("missedCriticalIssueIds", out var mc) && mc.ValueKind == JsonValueKind.Array)
-    {
-      // Only stored issue ids are meaningful here; drop anything the model invented.
-      missed.AddRange(mc.EnumerateArray()
-                        .Select(AsFlexibleString)
-                        .Where(id => issuesList.Any(i => string.Equals(i.Id, id, StringComparison.OrdinalIgnoreCase))));
-    }
-
     var summary = el.TryGetProperty("summary", out var sum) ? sum.GetString() ?? string.Empty : string.Empty;
 
     // Both flags are required by the strict response schema, so they are always present and are
@@ -262,6 +252,14 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
           : issue.PossibleScore;
       }
     }
+
+    // Derived, not taken from the model: an issue is missed exactly when nothing the developer
+    // wrote earned points for it. Reading missedCriticalIssueIds from the response let the model
+    // report the same issue as both matched and missed, or omit an issue from both lists entirely,
+    // with nothing reconciling the score against the "you missed these" list the user is shown.
+    var missed = issuesList.Where(i => !awardedIssueIds.Contains(i.Id))
+                           .Select(i => i.Id)
+                           .ToList();
 
     possibleTotal = Math.Max(0, possibleTotal);
     userTotal = Math.Max(0, userTotal);
@@ -329,7 +327,7 @@ Paragraph 2 MUST start with ""How you can improve:"" OR (if near-perfect) ""How 
     }
 
     // Escape braces by doubling for string interpolation
-    var schema = "{{ problemId, matchedUserPoints:[{{excerpt,matchedIssueIds,accuracy}}], missedCriticalIssueIds:[], reviewQualityBonusGranted, spellingProblemsDetected, summary }}";
+    var schema = "{{ problemId, matchedUserPoints:[{{excerpt,matchedIssueIds,accuracy}}], reviewQualityBonusGranted, spellingProblemsDetected, summary }}";
 
     var userShippabilityText = req.UserShippabilityAssessment.HasValue
         ? (req.UserShippabilityAssessment.Value ? "User believes this code is ready to ship as-is (APPROVE)" : "User believes this code needs changes (REJECT)")
@@ -365,9 +363,8 @@ User's Shippability Assessment:
 
 Grade this developer's review against the reference review above:
 1. Map each point the developer made onto reference issue ids in ""matchedUserPoints"" (empty ""matchedIssueIds"" when the point matches nothing).
-2. List the ids of reference issues they did not mention in ""missedCriticalIssueIds"".
-3. Set ""reviewQualityBonusGranted"" and ""spellingProblemsDetected"".
-4. Write the two-paragraph ""summary"", including whether their ship/no-ship call matches the reference verdict.
+2. Set ""reviewQualityBonusGranted"" and ""spellingProblemsDetected"".
+3. Write the two-paragraph ""summary"", including whether their ship/no-ship call matches the reference verdict.
 
 Do NOT review the patch yourself and do NOT report issues that are absent from the reference list.
 
