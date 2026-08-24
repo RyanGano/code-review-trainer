@@ -209,7 +209,14 @@ app.MapPost("/tests/{id}/explain", async (string id, ExplainRequest body, IProbl
     if (chat is null || aiSettings is null || !aiSettings.IsConfigured)
     {
         // Without a model we can still return the reference explanation we already hold.
-        return Results.Ok(new { explanation = issue?.Explanation ?? "Explanation goes here", examples = string.Empty });
+        if (!string.IsNullOrWhiteSpace(issue?.Explanation))
+        {
+            return Results.Ok(new { explanation = issue!.Explanation, examples = string.Empty });
+        }
+
+        return Results.Json(
+            new { error = "No explanation is available for this item." },
+            statusCode: StatusCodes.Status503ServiceUnavailable);
     }
 
     var codeFenceLanguage = problem.Language switch
@@ -251,33 +258,14 @@ In ""examples"", show it concretely when that helps: for a bounds or input-handl
 
     List<ChatMessage> messages = [system, new UserChatMessage(userBuilder)];
 
-    try
+    // Returns null when the model gave us nothing usable, so the caller can retry rather than
+    // hand the client an explanation that is really an empty string.
+    static object? TryReadExplanation(string text)
     {
-        var explainOptions = new ChatCompletionOptions
+        if (string.IsNullOrWhiteSpace(text))
         {
-            MaxOutputTokenCount = 4000,
-            // Same reasoning as the grading call: a strict schema beats asking for JSON politely.
-            ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
-                "code_review_explanation",
-                BinaryData.FromString("""
-                {
-                  "type": "object",
-                  "properties": {
-                    "explanation": { "type": "string" },
-                    "examples": { "type": "string" }
-                  },
-                  "required": ["explanation", "examples"],
-                  "additionalProperties": false
-                }
-                """),
-                jsonSchemaIsStrict: true)
-        };
-#pragma warning disable AOAI001
-        explainOptions.SetNewMaxCompletionTokensPropertyEnabled(true);
-#pragma warning restore AOAI001
-
-        var resp = await chat.CompleteChatAsync(messages, explainOptions);
-        var text = resp.Value?.Content?.FirstOrDefault()?.Text ?? string.Empty;
+            return null;
+        }
 
         int first = text.IndexOf('{');
         int last = text.LastIndexOf('}');
@@ -286,26 +274,83 @@ In ""examples"", show it concretely when that helps: for a bounds or input-handl
             try
             {
                 var root = JsonDocument.Parse(text[first..(last + 1)]).RootElement;
-                return Results.Ok(new
-                {
-                    explanation = root.TryGetProperty("explanation", out var exEl) ? exEl.GetString() ?? string.Empty : string.Empty,
-                    examples = root.TryGetProperty("examples", out var exsEl) ? exsEl.GetString() ?? string.Empty : string.Empty
-                });
+                var explanation = root.TryGetProperty("explanation", out var exEl) ? exEl.GetString() ?? string.Empty : string.Empty;
+                var examples = root.TryGetProperty("examples", out var exsEl) ? exsEl.GetString() ?? string.Empty : string.Empty;
+                return string.IsNullOrWhiteSpace(explanation)
+                    ? null
+                    : new { explanation, examples };
             }
-            catch (JsonException parseEx)
+            catch (JsonException)
             {
-                app.Logger.LogWarning(parseEx, "Explain: could not parse model JSON for issue {IssueId} of {ProblemId}", body.IssueId, id);
+                return null;
             }
         }
 
         // Structured outputs make this unreachable in practice; return the text rather than nothing.
-        return Results.Ok(new { explanation = text, examples = string.Empty });
+        return new { explanation = text, examples = string.Empty };
     }
-    catch (Exception ex)
+
+    var explainOptions = new ChatCompletionOptions
     {
-        app.Logger.LogError(ex, "Explain call failed for issue {IssueId} of {ProblemId}", body.IssueId, id);
-        return Results.Ok(new { explanation = issue?.Explanation ?? "Explanation goes here", examples = string.Empty });
+        // Reasoning models spend part of this budget on hidden reasoning before emitting any
+        // visible text, so leave headroom well above the size of the JSON we want back. Too
+        // small a budget comes back as a completion with no content at all.
+        MaxOutputTokenCount = 6000,
+        // Same reasoning as the grading call: a strict schema beats asking for JSON politely.
+        ResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
+            "code_review_explanation",
+            BinaryData.FromString("""
+            {
+              "type": "object",
+              "properties": {
+                "explanation": { "type": "string" },
+                "examples": { "type": "string" }
+              },
+              "required": ["explanation", "examples"],
+              "additionalProperties": false
+            }
+            """),
+            jsonSchemaIsStrict: true)
+    };
+#pragma warning disable AOAI001
+    explainOptions.SetNewMaxCompletionTokensPropertyEnabled(true);
+#pragma warning restore AOAI001
+
+    // The call intermittently comes back with no content at all. One retry turns most of those
+    // into a real explanation; two attempts is the cap so a failing model cannot stall the request.
+    const int maxAttempts = 2;
+    for (var attempt = 1; attempt <= maxAttempts; attempt++)
+    {
+        try
+        {
+            var resp = await chat.CompleteChatAsync(messages, explainOptions);
+            var explanation = TryReadExplanation(resp.Value?.Content?.FirstOrDefault()?.Text ?? string.Empty);
+            if (explanation is not null)
+            {
+                return Results.Ok(explanation);
+            }
+
+            app.Logger.LogWarning(
+                "Explain: attempt {Attempt}/{MaxAttempts} returned no usable explanation for issue {IssueId} of {ProblemId} (finish reason {FinishReason})",
+                attempt, maxAttempts, body.IssueId, id, resp.Value?.FinishReason);
+        }
+        catch (Exception ex)
+        {
+            app.Logger.LogError(ex, "Explain: attempt {Attempt}/{MaxAttempts} failed for issue {IssueId} of {ProblemId}", attempt, maxAttempts, body.IssueId, id);
+        }
     }
+
+    // Every attempt came back empty. The stored reference explanation is real content, so prefer
+    // it; without one, tell the client there is no explanation instead of sending back an empty
+    // string it would render as a blank panel.
+    if (!string.IsNullOrWhiteSpace(issue?.Explanation))
+    {
+        return Results.Ok(new { explanation = issue!.Explanation, examples = string.Empty });
+    }
+
+    return Results.Json(
+        new { error = "The explanation could not be generated. Please try again." },
+        statusCode: StatusCodes.Status502BadGateway);
 })
 .WithName("ExplainItem")
 .RequireAuthorization();

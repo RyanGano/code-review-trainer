@@ -223,6 +223,7 @@ const CodeReviewPractice = () => {
       setExplanations({});
       setExplainLoading({});
       setShownExplanations({});
+      setExplainErrors({});
       setError(null);
     } catch (err) {
       console.error("Error fetching code review test:", err);
@@ -300,6 +301,7 @@ const CodeReviewPractice = () => {
       setExplanations({});
       setExplainLoading({});
       setShownExplanations({});
+      setExplainErrors({});
     } catch (error) {
       console.error("Error submitting review:", error);
       setError(error instanceof Error ? error.message : String(error));
@@ -313,6 +315,70 @@ const CodeReviewPractice = () => {
     fetchCodeReviewTest();
     setUserDecision(null);
   };
+
+  // An empty explanation is a failure, not a result: storing one would leave the UI offering to
+  // hide a panel with nothing in it. The server already retries the model call before giving up,
+  // so anything blank that reaches here is reported as a failure the user can retry.
+  const requestExplanation = useCallback(
+    async (issueId: string) => {
+      if (!currentTest) return;
+
+      setExplainErrors((prev) => ({ ...prev, [issueId]: null }));
+      setExplainLoading((prev) => ({ ...prev, [issueId]: true }));
+      try {
+        const accessToken = await acquireApiToken();
+        const resp = await fetch(
+          `${apiConfig.webApi}tests/${currentTest.id}/explain`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+            // The server looks the issue up in the stored reference review, so it
+            // needs only the id.
+            body: JSON.stringify({ issueId }),
+          }
+        );
+
+        const data = await resp.json().catch(() => null);
+
+        if (!resp.ok) {
+          throw new Error(
+            (typeof data?.error === "string" && data.error) ||
+              `The server could not explain this (HTTP ${resp.status}).`
+          );
+        }
+
+        const parsed: ExplainResponse =
+          typeof data === "string"
+            ? { explanation: data }
+            : {
+                explanation: data?.explanation || data?.Explanation || "",
+                examples: data?.examples || data?.Examples || "",
+              };
+
+        if (!parsed.explanation.trim()) {
+          throw new Error("No explanation came back for this issue.");
+        }
+
+        setExplanations((prev) => ({ ...prev, [issueId]: parsed }));
+        setShownExplanations((prev) => ({ ...prev, [issueId]: true }));
+      } catch (err) {
+        console.error("Explain error:", err);
+        setExplainErrors((prev) => ({
+          ...prev,
+          [issueId]:
+            err instanceof Error && err.message
+              ? err.message
+              : "No explanation is available right now.",
+        }));
+      } finally {
+        setExplainLoading((prev) => ({ ...prev, [issueId]: false }));
+      }
+    },
+    [currentTest, acquireApiToken]
+  );
 
   // Displayed possible score reflects AI-detected items when available
   // (so the UI shows the per-issue totals like 10). If issues aren't present,
@@ -694,11 +760,10 @@ const CodeReviewPractice = () => {
                                   explainLoading[i.id] ? "disabled" : ""
                                 }`}
                                 disabled={!!explainLoading[i.id]}
-                                onClick={async () => {
-                                  if (!currentTest) return;
+                                onClick={() => {
                                   if (explainLoading[i.id]) return;
 
-                                  // If explanation already exists, toggle visibility only
+                                  // Already fetched: this is only a show/hide toggle.
                                   if (explanations[i.id]) {
                                     setShownExplanations((prev) => ({
                                       ...prev,
@@ -707,89 +772,7 @@ const CodeReviewPractice = () => {
                                     return;
                                   }
 
-                                  // Otherwise, fetch explanation from server
-                                  setError(null);
-                                  // clear any prior per-issue explain error and mark loading
-                                  setExplainErrors((prev) => ({
-                                    ...prev,
-                                    [i.id]: null,
-                                  }));
-                                  setExplainLoading((prev) => ({
-                                    ...prev,
-                                    [i.id]: true,
-                                  }));
-                                  try {
-                                    const accessToken = await acquireApiToken();
-                                    const resp = await fetch(
-                                      `${apiConfig.webApi}tests/${currentTest.id}/explain`,
-                                      {
-                                        method: "POST",
-                                        headers: {
-                                          Authorization: `Bearer ${accessToken}`,
-                                          "Content-Type": "application/json",
-                                        },
-                                        // The server looks the issue up in the stored
-                                        // reference review, so it needs only the id.
-                                        body: JSON.stringify({
-                                          issueId: i.id,
-                                        }),
-                                      }
-                                    );
-                                    if (!resp.ok) {
-                                      throw new Error(
-                                        `HTTP error! status: ${resp.status}`
-                                      );
-                                    }
-                                    const data = await resp.json();
-                                    let parsed: ExplainResponse;
-                                    if (!data) {
-                                      parsed = { explanation: "" };
-                                    } else if (typeof data === "string") {
-                                      parsed = { explanation: data };
-                                    } else if (typeof data === "object") {
-                                      parsed = {
-                                        explanation:
-                                          data.explanation ||
-                                          data.Explanation ||
-                                          "",
-                                        examples:
-                                          data.examples || data.Examples || "",
-                                      };
-                                    } else {
-                                      parsed = { explanation: String(data) };
-                                    }
-                                    setExplanations((prev) => ({
-                                      ...prev,
-                                      [i.id]: parsed,
-                                    }));
-                                    // clear any per-issue explain error on success
-                                    setExplainErrors((prev) => ({
-                                      ...prev,
-                                      [i.id]: null,
-                                    }));
-                                    // make it visible immediately after fetch
-                                    setShownExplanations((prev) => ({
-                                      ...prev,
-                                      [i.id]: true,
-                                    }));
-                                  } catch (err) {
-                                    console.error("Explain error:", err);
-                                    // keep a short, local UI message and surface full details in the global error area
-                                    setExplainErrors((prev) => ({
-                                      ...prev,
-                                      [i.id]: "Error getting explanation",
-                                    }));
-                                    setError(
-                                      err instanceof Error
-                                        ? err.message
-                                        : String(err)
-                                    );
-                                  } finally {
-                                    setExplainLoading((prev) => ({
-                                      ...prev,
-                                      [i.id]: false,
-                                    }));
-                                  }
+                                  requestExplanation(i.id);
                                 }}
                               >
                                 {explanations[i.id] ? (
@@ -802,6 +785,8 @@ const CodeReviewPractice = () => {
                                   <>
                                     Explaining… <span className="spinner" />
                                   </>
+                                ) : explainErrors[i.id] ? (
+                                  "Try again"
                                 ) : (
                                   "Explain this"
                                 )}
