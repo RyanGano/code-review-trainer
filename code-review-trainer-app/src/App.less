@@ -1,7 +1,12 @@
 @import './design-system.less';
 
 #root {
+  width: 100%;
   max-width: 1600px;
+  // #root is a flex child of body: without min-width it refuses to shrink below
+  // the width of its widest content and pushes the whole page sideways.
+  min-width: 0;
+  box-sizing: border-box;
   margin: 0 auto;
   padding: 4rem 2rem 2rem;
   text-align: center;
@@ -188,7 +193,11 @@
   }
 
   #root {
-    padding: 4rem var(--spacing-lg) var(--spacing-lg);
+    padding: 3.5rem var(--spacing-md) var(--spacing-md);
+  }
+
+  .app-header {
+    padding: var(--spacing-md);
   }
 
   .app-header .auth-controls button {

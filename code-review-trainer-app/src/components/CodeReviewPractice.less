@@ -93,8 +93,10 @@
 .code-viewer-container {
   .code-container();
   padding: var(--spacing-sm);
+  max-width: 100%;
 
   .cm-editor {
+    max-width: 100%;
     text-align: left;
   }
 
@@ -110,6 +112,7 @@
 
 .patch-controls {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--spacing-xs);
   align-items: center;
   margin: var(--spacing-xs) 0 var(--spacing-sm);
@@ -218,6 +221,7 @@
 
 .submit-buttons {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--spacing-lg);
   justify-content: center;
 }
@@ -406,6 +410,8 @@
 .explanation-examples pre {
   margin: var(--spacing-sm) 0 0;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  overflow-x: auto;
   font-family: monospace;
   font-size: var(--font-size-xs);
 }
@@ -606,6 +612,7 @@
 .merge-editors {
   display: flex;
   gap: var(--spacing-sm);
+  max-width: 100%;
 }
 
 /* Stacked variant for Top & Bottom view */
@@ -628,7 +635,7 @@
   max-height: 100%;
 }
 
-.editor-pane { flex: 1; min-width: 600px; }
+.editor-pane { flex: 1 1 0; min-width: 0; overflow: hidden; }
 .pane-title { font-weight: var(--font-weight-bold); margin-bottom: var(--spacing-xs); }
 
 .merge-unified { grid-column: 1 / span 3; margin-top: var(--spacing-sm); }
@@ -748,7 +755,8 @@
 }
 
 .score-row {
-  display: inline-flex;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--spacing-xs);
 }
@@ -1079,7 +1087,15 @@
 // Small screen responsive styles
 @media (max-width: 768px) {
   .code-review-practice {
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm);
+  }
+
+  .practice-header .header-controls {
+    justify-content: center;
+  }
+
+  .common-selection {
+    flex-wrap: wrap;
   }
 
   .review-textarea {
@@ -1091,19 +1107,34 @@
   }
 
   .submit-button {
-    width: auto;
+    flex: 1 1 10rem;
     max-width: none;
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  // Two panes side by side leave no usable width on a phone, so stack them.
+  .merge-editors {
+    flex-direction: column;
+  }
+
+  .editor-pane {
+    max-height: 60vh;
   }
 
   .submission-result {
-    overflow-x: hidden;
+    padding: var(--spacing-md);
     word-wrap: break-word;
     hyphens: auto;
 
     .summary-block {
+      padding: var(--spacing-sm) var(--spacing-md);
       word-wrap: break-word;
       overflow-wrap: break-word;
       white-space: pre-wrap;
+    }
+
+    ul {
+      padding-left: var(--spacing-lg);
     }
 
     ul, li {
@@ -1112,8 +1143,7 @@
     }
   }
 
-  * {
-    max-width: 100%;
-    box-sizing: border-box;
+  .explanation-block.open {
+    padding-left: var(--spacing-sm);
   }
 }
