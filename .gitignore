@@ -428,3 +428,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Junction into the private app-private-data repo: this skill names the Azure resource
+# group and deployments. Git walks through junctions, so this line is what keeps it out.
+.claude/skills/update-model/
