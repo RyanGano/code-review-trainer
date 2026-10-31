@@ -149,7 +149,7 @@ curl -w "Status: %{http_code}" http://localhost:5137/user
 - Runs on Windows (windows-latest)
 - Uses .NET 8.x
 - Build timeout: Set to 10+ minutes for safety
-- Deploys to Azure Web App
+- Deploys to Azure Web App on pushes to `main`; pull requests that touch the service build and publish it without deploying
 
 ### Frontend Pipeline (.github/workflows/publish-frontend.yml)
 
@@ -172,8 +172,11 @@ curl -w "Status: %{http_code}" http://localhost:5137/user
   - `appsettings.json` - Configuration with Azure Key Vault integration
 - **Endpoints**:
   - `GET /` - Health check (public)
-  - `GET /user` - User info (requires auth)
+  - `GET /user` - User info (requires auth; mapped in Development only)
   - `GET /tests/?level={Easy|Medium}` - Get code review problems (requires auth)
+  - `POST /tests/{id}` - Grade a review (requires auth; review capped at 8000 characters; per-user hourly rate limit)
+  - `POST /tests/{id}/explain` - Explain one issue by `issueId` (requires auth; per-user hourly rate limit)
+- **Limits**: request bodies are capped at 64 KB, and the model-backed endpoints are rate limited per user plus a service-wide daily ceiling (`Services/RequestLimits.cs`, overridable under `RateLimiting` in configuration). Over the limit returns 429.
 
 ### Frontend (code-review-trainer-app)
 

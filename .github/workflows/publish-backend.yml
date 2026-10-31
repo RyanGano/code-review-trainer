@@ -7,6 +7,15 @@ on:
   push:
     branches:
       - main
+  # Pull requests build and publish the service so a change is compiled before it merges.
+  # They never deploy: the deploy job runs only for pushes and manual runs.
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "code-review-trainer-service/**"
+      - "code-review-trainer.sln"
+      - ".github/workflows/publish-backend.yml"
   workflow_dispatch:
 
 # Least privilege by default; jobs opt into more only if they need it.
@@ -39,12 +48,14 @@ jobs:
         run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
 
       - name: Upload artifact for deployment job
+        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v7
         with:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
 
   deploy:
+    if: github.event_name != 'pull_request'
     runs-on: windows-latest
     needs: build
 
