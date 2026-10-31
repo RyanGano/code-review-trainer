@@ -9,6 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Prerelease on purpose: the only GA release (2.1.0) is capped at service API version
+         2024-10-21; newer API versions are only in the prereleases. Move to GA when one ships. -->
     <PackageReference Include="Azure.AI.OpenAI" Version="2.9.0-beta.1" />
     <PackageReference Include="Azure.Core" Version="1.61.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.10" />
