@@ -292,7 +292,12 @@ const CodeReviewPractice = () => {
       );
 
       if (!submitResponse.ok) {
-        throw new Error(`HTTP error! status: ${submitResponse.status}`);
+        // Prefer the server's own message (for example a rate limit or a size limit).
+        const data = await submitResponse.json().catch(() => null);
+        throw new Error(
+          (typeof data?.error === "string" && data.error) ||
+            `HTTP error! status: ${submitResponse.status}`
+        );
       }
 
       const result = await submitResponse.json();

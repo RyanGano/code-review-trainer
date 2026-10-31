@@ -61,7 +61,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             OnAuthenticationFailed = ctx =>
             {
-                Console.WriteLine($"[Auth] Failed: {ctx.Exception.GetType().Name} - {ctx.Exception.Message}");
+                // Log only the failure type; the exception message can carry token details.
+                var logger = ctx.HttpContext.RequestServices
+                    .GetRequiredService<ILoggerFactory>()
+                    .CreateLogger("Authentication");
+                logger.LogInformation("Bearer token rejected: {FailureType}", ctx.Exception.GetType().Name);
                 return Task.CompletedTask;
             }
         };
@@ -78,6 +82,12 @@ builder.Services.AddAuthorization(o =>
         .Build();
 });
 builder.Services.AddCodeReviewServices(builder.Configuration);
+builder.Services.AddApiRateLimiting(builder.Configuration);
+
+// Cap request bodies for every endpoint. Both servers are configured because the service may be
+// hosted by Kestrel directly or in-process behind IIS.
+builder.WebHost.ConfigureKestrel(o => o.Limits.MaxRequestBodySize = RequestLimits.MaxRequestBodyBytes);
+builder.Services.Configure<IISServerOptions>(o => o.MaxRequestBodySize = RequestLimits.MaxRequestBodyBytes);
 
 // Serialize enums (notably ReviewStatus) as their names so clients see "Approve"/"Reject".
 builder.Services.ConfigureHttpJsonOptions(o =>
@@ -118,19 +128,25 @@ var app = builder.Build();
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
+// After authentication, so per-user limits can partition on the signed-in user.
+app.UseRateLimiter();
 
 app.MapMethods("/", ["GET", "HEAD"], () => "I'm ALIVE!");
 
-app.MapGet("/user", (HttpContext context) =>
+// Token inspection is a local debugging aid only.
+if (app.Environment.IsDevelopment())
 {
-    var user = context.User;
-    return new
+    app.MapGet("/user", (HttpContext context) =>
     {
-        Name = user.Identity?.Name,
-        IsAuthenticated = user.Identity?.IsAuthenticated ?? false,
-        Claims = user.Claims.Select(c => new { c.Type, c.Value }).ToList()
-    };
-}).RequireAuthorization();
+        var user = context.User;
+        return new
+        {
+            Name = user.Identity?.Name,
+            IsAuthenticated = user.Identity?.IsAuthenticated ?? false,
+            Claims = user.Claims.Select(c => new { c.Type, c.Value }).ToList()
+        };
+    }).RequireAuthorization();
+}
 
 app.MapGet("/tests/", (DifficultyLevel? level, Language language) =>
 {
@@ -167,6 +183,16 @@ app.MapGet("/tests/", (DifficultyLevel? level, Language language) =>
 
 app.MapPost("/tests/{id}", async (string id, ReviewSubmission submission, IProblemRepository repo, ICodeReviewModel model) =>
 {
+    if (string.IsNullOrWhiteSpace(submission.review))
+    {
+        return Results.BadRequest(new { error = "A review is required." });
+    }
+
+    if (submission.review.Length > RequestLimits.MaxReviewLength)
+    {
+        return Results.BadRequest(new { error = $"Reviews are limited to {RequestLimits.MaxReviewLength} characters." });
+    }
+
     var problem = repo.Get(id);
     if (problem is null)
     {
@@ -182,36 +208,39 @@ app.MapPost("/tests/{id}", async (string id, ReviewSubmission submission, IProbl
     return Results.Ok(result);
 })
 .WithName("SubmitReview")
-.RequireAuthorization();
+.RequireAuthorization()
+.RequireModelRateLimiting(RequestLimits.ReviewPolicy);
 
 // Explain one issue from a review result in more depth. The issue is identified by its stored id,
 // so the model is given the reference review's own wording, category and severity rather than
 // re-deriving them from a string the client assembled.
 app.MapPost("/tests/{id}/explain", async (string id, ExplainRequest body, IProblemRepository repo, ChatClient? chat, IOptions<AzureOpenAISettings> options) =>
 {
+    if (string.IsNullOrWhiteSpace(body.IssueId) || body.IssueId.Length > RequestLimits.MaxIssueIdLength)
+    {
+        return Results.BadRequest(new { error = "Provide the issueId of an issue from the review." });
+    }
+
     var problem = repo.Get(id);
     if (problem is null)
     {
         return Results.NotFound(new { error = "Problem not found" });
     }
 
-    // Prefer the stored issue; fall back to the client-supplied text for older clients.
-    var issue = string.IsNullOrWhiteSpace(body.IssueId)
-        ? null
-        : problem.Review.Issues.FirstOrDefault(i => string.Equals(i.Id, body.IssueId, StringComparison.OrdinalIgnoreCase));
-
-    if (issue is null && string.IsNullOrWhiteSpace(body.ItemText))
+    // Only issues from the stored reference review can be explained.
+    var issue = problem.Review.Issues.FirstOrDefault(i => string.Equals(i.Id, body.IssueId, StringComparison.OrdinalIgnoreCase));
+    if (issue is null)
     {
-        return Results.BadRequest(new { error = "Provide either issueId or itemText" });
+        return Results.NotFound(new { error = "Issue not found" });
     }
 
     var aiSettings = options?.Value;
     if (chat is null || aiSettings is null || !aiSettings.IsConfigured)
     {
         // Without a model we can still return the reference explanation we already hold.
-        if (!string.IsNullOrWhiteSpace(issue?.Explanation))
+        if (!string.IsNullOrWhiteSpace(issue.Explanation))
         {
-            return Results.Ok(new { explanation = issue!.Explanation, examples = string.Empty });
+            return Results.Ok(new { explanation = issue.Explanation, examples = string.Empty });
         }
 
         return Results.Json(
@@ -227,14 +256,12 @@ app.MapPost("/tests/{id}/explain", async (string id, ExplainRequest body, IProbl
         _ => "csharp"
     };
 
-    var issueContext = issue is not null
-        ? $"""
-          Title: {issue.Title}
-          Category: {issue.Category}
-          Severity: {issue.Severity}
-          Why it matters: {issue.Explanation}
-          """
-        : body.ItemText;
+    var issueContext = $"""
+        Title: {issue.Title}
+        Category: {issue.Category}
+        Severity: {issue.Severity}
+        Why it matters: {issue.Explanation}
+        """;
 
     var system = new SystemChatMessage(
         "You are a patient senior engineer explaining a code review finding to the developer who wrote the patch. " +
@@ -343,9 +370,9 @@ In ""examples"", show it concretely when that helps: for a bounds or input-handl
     // Every attempt came back empty. The stored reference explanation is real content, so prefer
     // it; without one, tell the client there is no explanation instead of sending back an empty
     // string it would render as a blank panel.
-    if (!string.IsNullOrWhiteSpace(issue?.Explanation))
+    if (!string.IsNullOrWhiteSpace(issue.Explanation))
     {
-        return Results.Ok(new { explanation = issue!.Explanation, examples = string.Empty });
+        return Results.Ok(new { explanation = issue.Explanation, examples = string.Empty });
     }
 
     return Results.Json(
@@ -353,14 +380,14 @@ In ""examples"", show it concretely when that helps: for a bounds or input-handl
         statusCode: StatusCodes.Status502BadGateway);
 })
 .WithName("ExplainItem")
-.RequireAuthorization();
+.RequireAuthorization()
+.RequireModelRateLimiting(RequestLimits.ExplainPolicy);
 
 
 app.Run();
 
 public record ReviewSubmission(string review, bool? isShippableAsIs = null);
 /// <summary>
-/// Identifies the review item to explain. IssueId is preferred - the server then uses the stored
-/// reference wording. ItemText is kept for clients that still assemble the text themselves.
+/// Identifies the review item to explain by the id of an issue in the stored reference review.
 /// </summary>
-public record ExplainRequest(string? IssueId = null, string? ItemText = null);
+public record ExplainRequest(string? IssueId = null);
