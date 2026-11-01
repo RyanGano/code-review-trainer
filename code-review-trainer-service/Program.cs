@@ -133,20 +133,26 @@ app.UseRateLimiter();
 
 app.MapMethods("/", ["GET", "HEAD"], () => "I'm ALIVE!");
 
-// Token inspection is a local debugging aid only.
-if (app.Environment.IsDevelopment())
+// The web app calls this right after sign-in to confirm its token is accepted (it only checks for success).
+// The full claim list is a local debugging aid and is returned only in Development.
+app.MapGet("/user", (HttpContext context) =>
 {
-    app.MapGet("/user", (HttpContext context) =>
+    var user = context.User;
+    var name = user.Identity?.Name;
+    var isAuthenticated = user.Identity?.IsAuthenticated ?? false;
+
+    if (!app.Environment.IsDevelopment())
     {
-        var user = context.User;
-        return new
-        {
-            Name = user.Identity?.Name,
-            IsAuthenticated = user.Identity?.IsAuthenticated ?? false,
-            Claims = user.Claims.Select(c => new { c.Type, c.Value }).ToList()
-        };
-    }).RequireAuthorization();
-}
+        return Results.Ok(new { Name = name, IsAuthenticated = isAuthenticated });
+    }
+
+    return Results.Ok(new
+    {
+        Name = name,
+        IsAuthenticated = isAuthenticated,
+        Claims = user.Claims.Select(c => new { c.Type, c.Value }).ToList()
+    });
+}).RequireAuthorization();
 
 app.MapGet("/tests/", (DifficultyLevel? level, Language language) =>
 {
