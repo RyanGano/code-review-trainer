@@ -1,4 +1,5 @@
 import { useMsal } from "@azure/msal-react";
+import { redirectBridgeUri } from "../authConfig";
 import "./shared.less";
 
 const SignOutButton = () => {
@@ -7,7 +8,7 @@ const SignOutButton = () => {
   const handleLogout = (logoutType: string) => {
     if (logoutType === "popup") {
       instance.logoutPopup({
-        postLogoutRedirectUri: window.location.origin,
+        postLogoutRedirectUri: redirectBridgeUri,
         mainWindowRedirectUri: window.location.origin,
       });
     } else if (logoutType === "redirect") {
