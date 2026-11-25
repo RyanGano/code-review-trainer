@@ -13,11 +13,18 @@ on:
 permissions:
   contents: read
 
-# Serialise runs per ref. cancel-in-progress is deliberately false: this
-# workflow deploys to Azure Static Web Apps (and closes preview environments),
-# and cancelling mid-deploy can leave an environment stranded.
+# Serialise PR runs per PR number and push runs per ref. cancel-in-progress is
+# deliberately false: this workflow deploys to Azure Static Web Apps (and closes
+# preview environments), and cancelling mid-deploy can leave an environment
+# stranded.
+#
+# PR events must not share a group with pushes. When a PR merges, its
+# pull_request `closed` run reports github.ref as the base branch
+# (refs/heads/main), not refs/pull/N/merge. It arrives about a second after
+# the push to main, and a group holds only one pending run, so the close run
+# replaced the pending main deploy and the live site stayed one merge behind.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || github.ref }}
   cancel-in-progress: false
 
 jobs:
